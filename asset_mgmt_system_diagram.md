@@ -40,12 +40,12 @@ flowchart TB
 
   subgraph EXTERNAL["社外接続（外部金融インフラ）"]
     direction TB
-    BROKER["ブローカー/取引所<br/>東証 arrowhead"]
+    BROKER["ブローカー/取引所（複数・競合含む）<br/>野村證券/SMBC日興/大和/外資系<br/>→ 東証 arrowhead<br/>※最良執行で分散発注"]
     CUST["信託銀行/カストディ<br/>三菱UFJ信託/State Street/BNY"]
     SETTLE["国内決済<br/>JASDEC・ほふり/JSCC/日銀ネット"]
     DATA["市場データベンダー<br/>Bloomberg/LSEG/QUICK"]
     INDEX["指数提供<br/>MSCI/FTSE/TOPIX"]
-    DIST["販売会社<br/>銀行/証券/ネット証券"]
+    DIST["販売会社（複数・競合含む）<br/>野村證券/SMBC日興/銀行/ネット証券"]
     REG["規制当局<br/>金融庁/投信協会"]
     PROXY["議決権行使<br/>ISS/Glass Lewis"]
   end
@@ -78,6 +78,11 @@ flowchart TB
 - 🔴 **NAV（基準価額計算）**＝生命線。停止＝取引停止、改ざん＝全投資家に不当価格
 - 🟠 **社外接続**：FIX（発注）/ SWIFT（決済）/ CTM・ALERT（照合）/ データ・指数 / 販売会社 / 規制 / 議決権
 - 🩷 **横断セキュリティ基盤**：IAM・PAM / ゼロトラスト / EDR / SIEM・SOC / DLP / BCP
+
+## 取引先の広がり（競合含む）
+- NAMは**最良執行義務**と**独立性（運用と販売の分離）**から、発注も販売も**野村グループ内に偏らせず競合にも分散**する。
+- ブローカー＝**野村證券だけでなくSMBC日興・大和・外資系**にも分散発注。販売会社にも**SMBC日興等の競合**が含まれ得る。
+- → 外部接続先が**多数・競合含む**＝**攻撃面が広くサプライチェーン管理が重要**。
 
 ## 主要な接続プロトコル
 - **FIX** … EMS/OMS → ブローカー/取引所（発注・約定）

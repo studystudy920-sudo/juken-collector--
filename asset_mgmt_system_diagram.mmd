@@ -34,12 +34,12 @@ flowchart TB
 
   subgraph EXTERNAL["社外接続（外部金融インフラ）"]
     direction TB
-    BROKER["ブローカー/取引所<br/>東証 arrowhead"]
+    BROKER["ブローカー/取引所（複数・競合含む）<br/>野村證券/SMBC日興/大和/外資系<br/>→ 東証 arrowhead<br/>※最良執行で分散発注"]
     CUST["信託銀行/カストディ<br/>三菱UFJ信託/State Street/BNY"]
     SETTLE["国内決済<br/>JASDEC・ほふり/JSCC/日銀ネット"]
     DATA["市場データベンダー<br/>Bloomberg/LSEG/QUICK"]
     INDEX["指数提供<br/>MSCI/FTSE/TOPIX"]
-    DIST["販売会社<br/>銀行/証券/ネット証券"]
+    DIST["販売会社（複数・競合含む）<br/>野村證券/SMBC日興/銀行/ネット証券"]
     REG["規制当局<br/>金融庁/投信協会"]
     PROXY["議決権行使<br/>ISS/Glass Lewis"]
   end

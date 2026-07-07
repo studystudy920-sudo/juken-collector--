@@ -1,0 +1,19 @@
+# 過去問PDF収集の起点URL（1行1URL, #はコメント）
+# 各大学が公式に公開している過去問ページ。スクリプトがここからPDFリンクを辿って取得する。
+# ※登録・ログインが必要な大学（東洋/近畿の過去年度/日大パスナビ等）は自動取得の対象外。
+
+# --- 私立（問題本文まで公式公開・登録不要の傾向）---
+https://www.nyusi.kansai-u.ac.jp/admission/general/past-exam/
+https://www.waseda.jp/inst/admission/undergraduate/past-test/
+https://www.senshu-u.ac.jp/admission/sitemap/sm_kakomon.html
+https://www.kwansei.ac.jp/admissions/guideline/general_pastexam.html
+
+# --- 国公立 ---
+https://www.u-tokyo.ac.jp/ja/admissions/undergraduate/e01_04.html
+https://www.kyoto-u.ac.jp/ja/admissions/undergrad/past-eq
+https://www.osaka-u.ac.jp/ja/admissions/faculty/general/pastexam-answer
+https://www.nagoya-u.ac.jp/admissions/exam/data/answer/index.html
+https://admissions.isct.ac.jp/ja/013/undergraduate/examination-questions
+https://juken.hit-u.ac.jp/admission/info/ito.html
+https://www.hiroshima-u.ac.jp/nyushi/gakubu/kakomon/koukai
+https://www.omu.ac.jp/admissions/ug/exam_info/past-eq/

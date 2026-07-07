@@ -1,0 +1,9 @@
+# 取得したPDF実体はリポジトリに含めない（再配布防止・個人利用のため）
+downloads/
+*.pdf
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

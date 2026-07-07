@@ -1,0 +1,392 @@
+<meta charset="utf-8">
+<title>SC予想 セキュリティマネジメント・法規 デッキ</title>
+<style>
+  :root{
+    --navy:#16233f; --navy2:#243a63; --ink:#1c2534; --sub:#5b6b82;
+    --line:#d7dfea; --bg:#eef2f7; --card:#ffffff;
+    --teal:#0e7490; --tealbg:#e0f2f6;
+    --violet:#6d28d9; --violetbg:#efe7fc;
+    --amber:#b45309; --amberbg:#fdf1dd;
+    --red:#c1272d; --redbg:#fce8e8;
+    --green:#15803d; --greenbg:#e4f3e9;
+    --shadow:0 6px 22px rgba(20,35,64,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;padding:26px 0 60px}
+  .deck{display:flex;flex-direction:column;align-items:center;gap:26px}
+  .slide{position:relative;width:1120px;aspect-ratio:16/9;background:var(--card);
+    border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
+    padding:38px 44px 54px;display:flex;flex-direction:column}
+  .slide.pad-tight{padding:30px 40px 50px}
+  /* header band */
+  .hbar{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:16px;
+    border-bottom:3px solid var(--navy)}
+  .hbar .ic{font-size:26px;line-height:1}
+  .hbar h2{margin:0;font-size:23px;font-weight:800;color:var(--navy);letter-spacing:.2px}
+  .hbar .sub{margin:2px 0 0;font-size:13px;color:var(--sub);font-weight:600}
+  .hbar .badge{margin-left:auto;background:var(--navy);color:#fff;font-size:12px;font-weight:800;
+    padding:5px 12px;border-radius:999px;letter-spacing:1px}
+  .foot{position:absolute;left:44px;right:44px;bottom:16px;display:flex;justify-content:space-between;
+    font-size:11px;color:#93a2b8;border-top:1px solid var(--line);padding-top:8px}
+  .foot b{color:var(--navy);font-weight:800}
+  /* cover */
+  .cover{background:linear-gradient(135deg,#16233f 0%,#243a63 55%,#3a2b63 100%);color:#fff;justify-content:center}
+  .cover .kicker{font-size:14px;letter-spacing:3px;color:#a9c4ff;font-weight:700;text-transform:uppercase}
+  .cover h1{font-size:44px;margin:14px 0 8px;font-weight:900;line-height:1.15}
+  .cover .lead{font-size:17px;color:#d7e2f5;max-width:760px}
+  .cover .deckno{position:absolute;top:34px;right:44px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 16px;font-weight:800;font-size:14px}
+  .qprev{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:26px}
+  .qprev .qc{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:12px;
+    padding:12px 12px 14px}
+  .qprev .qn{font-size:12px;font-weight:800;color:#a9c4ff}
+  .qprev .qt{font-size:13px;font-weight:700;margin:5px 0 8px;color:#fff;line-height:1.3}
+  .qprev .qtag{font-size:11px;color:#ffd7a1;font-weight:700}
+  .cover .meta{margin-top:26px;font-size:13px;color:#b9c6de;display:flex;gap:22px;flex-wrap:wrap}
+  .cover .note{margin-top:10px;font-size:11.5px;color:#8ea2c4}
+  /* flow map */
+  .flow{display:flex;align-items:stretch;gap:6px;margin-top:6px}
+  .fnode{flex:1;background:var(--tealbg);border:1px solid #bfe0e8;border-radius:12px;padding:12px 12px 14px;display:flex;flex-direction:column}
+  .fnode .fq{font-size:12px;font-weight:900;color:var(--teal)}
+  .fnode .fh{font-size:14px;font-weight:800;margin:4px 0 6px;color:var(--ink)}
+  .fnode .fd{font-size:11.5px;color:#40566f;flex:1}
+  .fnode .fp{margin-top:8px;font-size:10.5px;color:var(--teal);border-top:1px dashed #a9d2dc;padding-top:6px}
+  .farrow{display:flex;align-items:center;color:#8fb7c2;font-size:22px;font-weight:900}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .step{border-radius:12px;padding:12px 14px;border-left:6px solid}
+  .step.s1{background:var(--violetbg);border-color:var(--violet)}
+  .step.s2{background:var(--tealbg);border-color:var(--teal)}
+  .step.s3{background:var(--amberbg);border-color:var(--amber)}
+  .step .sk{font-size:12px;font-weight:900}
+  .step.s1 .sk{color:var(--violet)} .step.s2 .sk{color:var(--teal)} .step.s3 .sk{color:var(--amber)}
+  .step .st{font-size:13px;color:#33465e;margin-top:4px}
+  /* generic tables */
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:4px}
+  th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+  th{background:var(--navy);color:#fff;font-weight:800;font-size:12px}
+  tbody tr:nth-child(even){background:#f6f9fc}
+  .cmp th:first-child{background:var(--navy2)}
+  .cmp td:first-child{background:#eef2f7;font-weight:800;color:var(--navy);text-align:center;width:19%}
+  .cmp .good{background:var(--greenbg)} .cmp .bad{background:var(--redbg)}
+  .cmp thead th.g{background:var(--green)} .cmp thead th.b{background:var(--red)}
+  /* glossary */
+  .gloss{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:4px}
+  .gi{border:1px solid var(--line);border-left:5px solid var(--violet);border-radius:8px;padding:9px 12px;background:#fff}
+  .gi .gt{font-size:13px;font-weight:800;color:var(--navy)}
+  .gi .ge{font-size:11px;color:var(--sub);font-weight:600}
+  .gi .gd{font-size:11.5px;color:#3c4d63;margin-top:4px}
+  .gi .gr{font-size:10.5px;color:var(--teal);margin-top:5px;font-weight:700}
+  /* tips */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px}
+  .panel{border-radius:12px;padding:14px 16px}
+  .panel.ok{background:var(--greenbg);border:1px solid #bfe0c9}
+  .panel.warn{background:var(--redbg);border:1px solid #f0c9c9}
+  .panel h3{margin:0 0 8px;font-size:15px;font-weight:900}
+  .panel.ok h3{color:var(--green)} .panel.warn h3{color:var(--red)}
+  .panel ol,.panel ul{margin:0;padding-left:20px}
+  .panel li{font-size:12.5px;margin-bottom:7px;color:#33465e}
+  /* question slide */
+  .qhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .qhead .qbig{background:var(--violet);color:#fff;font-weight:900;font-size:14px;border-radius:8px;padding:5px 11px}
+  .qhead .season{font-size:11px;font-weight:800;color:#fff;background:var(--teal);border-radius:999px;padding:3px 10px}
+  .qhead .freq{margin-left:auto;font-size:12px;font-weight:800;color:var(--amber)}
+  .qbody{font-size:14px;font-weight:700;color:var(--ink);background:#f4f7fb;border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin-bottom:10px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin-bottom:12px}
+  .opt{font-size:12px;color:#3c4d63;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .opt.correct{background:var(--greenbg);border-color:#8fc7a0;font-weight:700;color:#14532d}
+  .opt .ol{font-weight:900;color:var(--navy);margin-right:5px}
+  .opt.correct .ol{color:var(--green)}
+  .sru{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .sc{border-radius:11px;padding:11px 13px;border-top:5px solid}
+  .sc.sky{background:#e8f1fb;border-color:#2f6fb3}
+  .sc.rain{background:var(--amberbg);border-color:var(--amber)}
+  .sc.umb{background:var(--greenbg);border-color:var(--green)}
+  .sc .sh{font-size:12.5px;font-weight:900;display:flex;align-items:center;gap:6px}
+  .sc.sky .sh{color:#2f6fb3} .sc.rain .sh{color:var(--amber)} .sc.umb .sh{color:var(--green)}
+  .sc .sb{font-size:11.5px;color:#33465e;margin-top:6px}
+  .ansrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ansrow .ab{background:var(--green);color:#fff;font-weight:900;font-size:13px;border-radius:8px;padding:4px 12px}
+  .ansrow .at{font-size:12.5px;color:var(--sub);font-weight:700}
+  .memo{margin-top:10px;background:#f0edf9;border-left:5px solid var(--violet);border-radius:8px;
+    padding:8px 12px;font-size:11.5px;color:#3a2b63}
+  .memo b{color:var(--violet)}
+  /* heatmap */
+  .heat{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:6px;margin-top:6px;font-size:12px}
+  .heat .hc{padding:9px 10px;border-radius:7px;text-align:center;font-weight:700}
+  .heat .rowh{background:#eef2f7;text-align:left;font-weight:800;color:var(--navy)}
+  .heat .colh{background:var(--navy);color:#fff;text-align:center;font-weight:800}
+  .h3lv{background:var(--red);color:#fff} .h2lv{background:var(--amber);color:#fff} .h1lv{background:var(--greenbg);color:#14532d}
+  .summary-note{margin-top:14px;font-size:12.5px;color:#33465e;background:var(--tealbg);border-radius:10px;padding:12px 14px;border:1px solid #bfe0e8}
+  .summary-note b{color:var(--teal)}
+  .disc{font-size:10.5px;color:#93a2b8;margin-top:auto}
+  @media print{body{background:#fff;padding:0}
+    .slide{box-shadow:none;border:1px solid #ccc;border-radius:0;page-break-after:always;width:100%;margin:0}
+    .deck{gap:0}}
+</style>
+
+<div class="deck">
+
+<!-- 1. COVER -->
+<section class="slide cover">
+  <div class="deckno">SC 予想デッキ 06 / 07</div>
+  <div class="kicker">SC Exam Prep — Predicted 2026</div>
+  <h1>セキュリティマネジメント・法規</h1>
+  <div class="lead">ISMS／リスク評価／個人情報保護法／サプライチェーン・SBOM。JIS Q 27000の用語定義から改正個情法、SBOM／SLSAまで、午前II・午後の双方で狙われる論点を5問で体系学習する。</div>
+  <div class="qprev">
+    <div class="qc"><div class="qn">Q1 · JIS Q 27000</div><div class="qt">リスク対応の定義</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q2 · リスク管理</div><div class="qt">残留リスクの概念</div><div class="qtag">頻出 ★★☆</div></div>
+    <div class="qc"><div class="qn">Q3 · 改正個情法</div><div class="qt">漏えい報告の義務化</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q4 · SBOM</div><div class="qt">SPDX／CycloneDX</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q5 · サプライチェーン</div><div class="qt">SLSA と完全性確保</div><div class="qtag">頻出 ★★☆</div></div>
+  </div>
+  <div class="meta"><span>📚 基礎概念 5枚</span><span>📝 問題演習 5問</span><span>🎯 統合サマリー</span><span>🗓 2026 春・秋 想定</span></div>
+  <div class="note">※ 過去問傾向(令和3〜7年)と最新動向をもとにAIが作成した予想問題です。実際の試験問題ではありません。最終確認を推奨します。</div>
+</section>
+
+<!-- 2. LEARNING MAP -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🗺️</span><div><h2>学習マップ — 5問の相互関係</h2><div class="sub">「管理プロセス」→「法規制」→「サプライチェーン技術」で切り分ける学習動線</div></div><span class="badge">MAP</span></div>
+  <div class="flow">
+    <div class="fnode"><div class="fq">Q1</div><div class="fh">リスク対応</div><div class="fd">回避・低減・移転・保有の選択肢。特定/分析/評価(アセスメント)と対比する用語問題</div><div class="fp">JIS Q 27000 / 定義</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q2</div><div class="fh">残留リスク</div><div class="fd">対応後に残るリスク。受容にはリスクオーナーの承認。固有/二次リスク・選好と区別</div><div class="fp">リスク管理 / 承認</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q3</div><div class="fh">改正個情法</div><div class="fd">漏えい等報告・本人通知の義務化。要配慮個人情報・仮名加工情報・越境移転</div><div class="fp">個情法 / 2022施行</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q4</div><div class="fh">SBOM</div><div class="fd">構成部品表。SPDX/CycloneDXで版数・依存を可視化し脆弱性影響を即特定</div><div class="fp">サプライチェーン / 部品表</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q5</div><div class="fh">完全性確保</div><div class="fd">SLSAで来歴保証、cosign/Sigstoreで署名検証。typosquatting・推移的依存に注意</div><div class="fp">SLSA / 来歴</div></div>
+  </div>
+  <div class="steps">
+    <div class="step s1"><div class="sk">STEP 1 ｜ WHY</div><div class="st">ISMSのリスクマネジメント用語と法規制の全体像(なぜ管理・報告が要るか)を理解する</div></div>
+    <div class="step s2"><div class="sk">STEP 2 ｜ HOW</div><div class="st">5問で「どの用語・どの制度か」を判別し、似た概念のひっかけ選択肢を切る</div></div>
+    <div class="step s3"><div class="sk">STEP 3 ｜ WHAT</div><div class="st">空-雨-傘で対策(一元管理・SBOM整備・要配慮情報の同意・来歴検証)へ落とす</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>2 / 14</span></div>
+</section>
+
+<!-- 3. CONCEPT 1: 全体像マップ -->
+<section class="slide">
+  <div class="hbar"><span class="ic">①</span><div><h2>基礎概念 — 分野の全体像マップ</h2><div class="sub">「マネジメント／法規制／サプライチェーン」の3層で本デッキ5問を配置</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:22%">層 / 領域</th><th>プロセス・仕組み</th><th>主なキーワード</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:800;color:var(--navy)">リスクマネジメント</td><td style="background:var(--violetbg)"><b>Q1</b> リスクアセスメント(特定・分析・評価)→<b>リスク対応</b>(回避/低減/移転/保有)</td><td>JIS Q 27000／PDCA／リスク基準</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">リスクの状態</td><td style="background:var(--tealbg)"><b>Q2</b> 固有リスク→対応→<b>残留リスク</b>(リスクオーナー承認)</td><td>二次リスク／リスク選好／受容</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">法規制・コンプラ</td><td style="background:var(--amberbg)"><b>Q3</b> 改正個人情報保護法(2022全面施行)。漏えい報告・本人通知の義務化</td><td>要配慮個人情報／仮名加工情報／越境移転</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">サプライチェーン</td><td style="background:var(--redbg)"><b>Q4</b> SBOM(部品表) ／ <b>Q5</b> SLSA・cosignによる完全性確保</td><td>SPDX／CycloneDX／来歴／署名検証</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>核心:</b> この分野は「①組織のリスクをどう回すか(ISMSプロセス・用語)」「②法令上どこまで義務か(個情法)」「③外部部品の弱点をどう管理するか(SBOM・SLSA)」の3層で切り分ける。用語の定義取り違えと、制度の適用範囲の勘違いが4択の失点源となる。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>3 / 14</span></div>
+</section>
+
+<!-- 4. CONCEPT 2: 混同比較表 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">②</span><div><h2>基礎概念 — 混同しやすい概念 比較表</h2><div class="sub">似て見えるが「定義・タイミング・対象」が異なる5ペア</div></div><span class="badge">CONCEPT</span></div>
+  <table class="cmp">
+    <thead><tr><th>対象概念</th><th class="g">🟢 概念A</th><th class="b">🔴 概念B（混同パターン）</th></tr></thead>
+    <tbody>
+      <tr><td>プロセスの位置</td><td class="good">リスク対応：リスクを<b>修正</b>するプロセス(回避・低減・移転・保有)</td><td class="bad">リスクアセスメント：<b>特定・分析・評価</b>の3工程。対応の前段</td></tr>
+      <tr><td>リスクの状態</td><td class="good">残留リスク：<b>対応後</b>に残るリスク。受容はリスクオーナー承認</td><td class="bad">固有リスク：<b>管理策適用前</b>のリスク／二次リスク=対応策が生む新リスク</td></tr>
+      <tr><td>加工情報</td><td class="good">要配慮個人情報：取得に原則<b>本人の事前同意</b>が必要。オプトアウト提供不可</td><td class="bad">仮名加工情報：原則<b>第三者提供禁止</b>(委託・承継・共同利用を除く)</td></tr>
+      <tr><td>SBOMフォーマット</td><td class="good">SPDX：ISO/IEC 5962。<b>ライセンス管理</b>に強い</td><td class="bad">CycloneDX：OWASP発。<b>脆弱性・サプライチェーンセキュリティ</b>に強い</td></tr>
+      <tr><td>サプライ攻撃</td><td class="good">typosquatting：正規名に<b>酷似した名称</b>の悪意パッケージで誤インストール誘発</td><td class="bad">署名鍵・アカウント侵害：正規の<b>鍵/アカウントを窃取</b>し改ざん版を公開</td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>4 / 14</span></div>
+</section>
+
+<!-- 5. CONCEPT 3: 用語集 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">③</span><div><h2>基礎概念 — 必須用語集</h2><div class="sub">マネジメント・法規5問を解く8用語</div></div><span class="badge">CONCEPT</span></div>
+  <div class="gloss">
+    <div class="gi"><div class="gt">リスク対応 <span class="ge">Risk Treatment</span></div><div class="gd">リスクを修正するプロセス。回避・除去・低減(起こりやすさ/結果の変更)・共有(移転)・保有(受容)の選択肢を選定・実施する。</div><div class="gr">🔖 JIS Q 27000:2019</div></div>
+    <div class="gi"><div class="gt">残留リスク <span class="ge">Residual Risk</span></div><div class="gd">リスク対応後になお残るリスク。その受容にはリスクオーナー(リスク所有者)の承認が必要。</div><div class="gr">🔖 リスク管理</div></div>
+    <div class="gi"><div class="gt">要配慮個人情報</div><div class="gd">人種・信条・病歴・健康情報等、不当な差別・偏見が生じ得る記述を含む個人情報。取得に原則本人の事前同意が必要。</div><div class="gr">🔖 個人情報保護法</div></div>
+    <div class="gi"><div class="gt">仮名加工情報</div><div class="gd">他情報と照合しない限り特定個人を識別できないよう加工した情報。原則、第三者提供は禁止。</div><div class="gr">🔖 個人情報保護法</div></div>
+    <div class="gi"><div class="gt">SBOM <span class="ge">部品表</span></div><div class="gd">ソフトウェアの構成部品(名称・版数・依存関係)を機械可読に一覧化。脆弱性公表時の影響範囲特定を迅速化。</div><div class="gr">🔖 SPDX / CycloneDX</div></div>
+    <div class="gi"><div class="gt">SLSA</div><div class="gd">Supply-chain Levels for Software Artifacts。ビルドの改ざん耐性・来歴(プロベナンス)の保証度合いをレベル化する枠組み。</div><div class="gr">🔖 サプライチェーン完全性</div></div>
+    <div class="gi"><div class="gt">cosign / Sigstore</div><div class="gd">配布物・コンテナイメージ等への電子署名と検証を行う仕組み。成果物の真正性・完全性を担保する。</div><div class="gr">🔖 署名・検証</div></div>
+    <div class="gi"><div class="gt">推移的依存 <span class="ge">Transitive Dependency</span></div><div class="gd">直接依存が更に依存する間接的な依存。脆弱性の影響評価では直接依存だけでなく推移的依存も対象とする。</div><div class="gr">🔖 依存関係管理</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>5 / 14</span></div>
+</section>
+
+<!-- 6. CONCEPT 4: 規格・規制マトリクス -->
+<section class="slide">
+  <div class="hbar"><span class="ic">④</span><div><h2>基礎概念 — 規格・フレームワーク／規制マトリクス</h2><div class="sub">「用語規格／部品表／完全性FW／法令」を混同しない</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:22%">名称</th><th style="width:22%">種別</th><th>要点（試験での問われ方）</th></tr></thead>
+    <tbody>
+      <tr><td><b>JIS Q 27000</b></td><td>用語規格(ISMS)</td><td>リスク特定/分析/評価/対応、残留リスク等の<b>定義</b>を規定。<b>Q1・Q2の根拠</b>。</td></tr>
+      <tr><td>JIS Q 27001</td><td>ISMS要求事項</td><td>ISMS構築・運用・認証の要求事項。PDCAでリスクを継続管理。</td></tr>
+      <tr><td><b>個人情報保護法</b></td><td>国内法(2022全面施行)</td><td>漏えい等報告・本人通知の義務化、要配慮個人情報、仮名加工情報。<b>Q3の根拠</b>。</td></tr>
+      <tr><td><b>SPDX / CycloneDX</b></td><td>SBOM標準フォーマット</td><td>SPDX=ISO/IEC 5962・ライセンス管理、CycloneDX=OWASP・脆弱性用途。<b>Q4</b>。</td></tr>
+      <tr><td><b>SLSA</b></td><td>完全性フレームワーク</td><td>ビルド来歴の保証度合いをレベル化。改ざん耐性を段階的に要求。<b>Q5の正解</b>。</td></tr>
+      <tr><td>NIST SSDF (SP800-218)</td><td>セキュア開発FW</td><td>開発ライフサイクル全体の実践事項。SBOM・来歴管理の上位文脈。</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>💡 頻出の軸:</b> 「用語定義=JIS Q 27000」「ISMS認証=27001」「個人データの取扱い=個情法」「部品可視化=SBOM(SPDX/CycloneDX)」「ビルド来歴保証=SLSA」。この対応の取り違えが4択のひっかけの定番。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>6 / 14</span></div>
+</section>
+
+<!-- 7. TIPS -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🎯</span><div><h2>試験のコツ ＆ 頻出ひっかけ</h2><div class="sub">Exam Strategy &amp; Common Pitfalls</div></div><span class="badge">TIPS</span></div>
+  <div class="twocol">
+    <div class="panel ok"><h3>✅ 解くコツ</h3><ol>
+      <li>用語問題は<b>プロセスの位置</b>で切る。対応=修正、アセスメント=特定/分析/評価。</li>
+      <li>残留リスクは「<b>対応後</b>に残る＋オーナー承認」がセット。固有/二次リスクと区別。</li>
+      <li>個情法は<b>要配慮=取得に事前同意／仮名加工=第三者提供原則禁止</b>を丸暗記。</li>
+      <li>SBOMは「<b>版数・依存を可視化し影響範囲を即特定</b>」が主目的。SLSAは来歴保証。</li>
+    </ol></div>
+    <div class="panel warn"><h3>⚠️ よくあるひっかけ</h3><ul>
+      <li>漏えい報告は「人数によらず対象になる類型(要配慮・不正目的等)」がある。1,000人超だけではない。</li>
+      <li>SBOMを「<b>動的監視(EDR)</b>」やバイナリのハッシュのみと説明する選択肢は誤り。</li>
+      <li>typosquattingを「<b>署名鍵の窃取</b>」と説明するのは別攻撃との混同。</li>
+      <li>脆弱性評価で「直接依存だけ確認、推移的依存は不要」は<b>誤り</b>。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>合言葉:</b> 「定義(プロセスの位置)×制度(適用範囲)×技術(SBOM・来歴)」で分類 → 対策は「<b>一元管理・可視化・事前同意・来歴/署名検証・推移的依存まで評価</b>」の語彙に集約される。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>7 / 14</span></div>
+</section>
+
+<!-- 8. Q1 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q1 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">リスク対応 ・ JIS Q 27000:2019</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">JIS Q 27000:2019(情報セキュリティマネジメントシステム-用語)における「リスク対応」の説明として,適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>リスクの重大性を評価するために,算定されたリスクを与えられたリスク基準と比較するプロセス</div>
+    <div class="opt"><span class="ol">イ</span>リスクを発見,認識及び記述するプロセスであり,リスク源,事象,それらの原因及び起こり得る結果の特定を含む</div>
+    <div class="opt correct"><span class="ol">ウ</span>リスクを修正するプロセスであり,リスクの回避,低減,共有(移転)及び保有(受容)などの選択肢を含む</div>
+    <div class="opt"><span class="ol">エ</span>リスクの特質を理解し,リスクレベルを決定するプロセス</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ウ</span><span class="at">ア=リスク評価／イ=リスク特定／エ=リスク分析(いずれもリスクアセスメントの構成要素)</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">リスク対応(risk treatment)は「リスクを修正するプロセス」と定義される。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">回避・除去・低減・共有(移転)・保有(受容)の選択肢を選定・実施する段階。アセスメントの後工程。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">用語は「特定→分析→評価(=アセスメント)」と「対応(=修正)」を明確に分けて暗記する。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>8 / 14</span></div>
+</section>
+
+<!-- 9. Q2 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q2 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">残留リスク ・ リスクマネジメント</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">組織が受容できないと判断したリスクについて,追加の管理策を導入した後になお残るリスクを表す用語はどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>固有リスク</div>
+    <div class="opt correct"><span class="ol">イ</span>残留リスク</div>
+    <div class="opt"><span class="ol">ウ</span>二次リスク</div>
+    <div class="opt"><span class="ol">エ</span>リスク選好</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=管理策適用前のリスク／ウ=対応策自体が生む新リスク／エ=進んで受容・追求するリスクの量・種類</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">残留リスク(residual risk)はリスク対応後に残るリスクを指す。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">受容にはリスク所有者(リスクオーナー)の承認が必要。「対応後」「承認」がセットの論点。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">固有(前)／残留(後)の時間軸、二次リスク(新規発生)、リスク選好(量・種類)を4語で整理する。</div></div>
+  </div>
+  <div class="memo"><b>💼 実務メモ:</b> 残留リスクの<b>受容判断はリスクオーナーが承認</b>する点が午後でも問われやすい。「担当者が独断で受容」は誤り。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>9 / 14</span></div>
+</section>
+
+<!-- 10. Q3 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q3 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">改正個人情報保護法 ・ 2022全面施行</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">2022年4月に全面施行された改正個人情報保護法に関する記述のうち,適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt correct"><span class="ol">ア</span>一定要件を満たす漏えい等が発生した場合,個人情報保護委員会への報告及び本人への通知が原則義務化された</div>
+    <div class="opt"><span class="ol">イ</span>仮名加工情報は,他情報と照合しない限り個人を識別できない情報であり,第三者への自由な提供が認められている</div>
+    <div class="opt"><span class="ol">ウ</span>外国の第三者へ個人データを提供する場合,本人同意があれば移転先国の制度に関する情報提供は不要である</div>
+    <div class="opt"><span class="ol">エ</span>保有個人データの開示請求において,本人は書面交付のみを請求でき,電磁的記録による提供は求められない</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ア</span><span class="at">イ=仮名加工情報は原則第三者提供禁止／ウ=移転先国の制度等の情報提供が必要／エ=電磁的記録での提供も指定可</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">改正法で漏えい等報告・本人通知が法的義務化された。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">対象は要配慮情報・財産的被害のおそれ・不正目的・1,000人超。前3類型は<b>人数によらず</b>対象。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">漏えい検知時の報告フロー整備、越境移転時の情報提供、開示方法の電磁的対応を規程化する。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>10 / 14</span></div>
+</section>
+
+<!-- 11. Q4 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q4 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">SBOM ・ SPDX / CycloneDX</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">ソフトウェアの構成要素を一覧化するSBOMに関する記述のうち,適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt correct"><span class="ol">ア</span>SPDXとCycloneDXはいずれもSBOMの標準フォーマットで,CycloneDXは脆弱性やサプライチェーンのセキュリティ用途に強い</div>
+    <div class="opt"><span class="ol">イ</span>SBOMは実行時のメモリ上のプロセスを動的に監視し,不審な通信をリアルタイムで検知する仕組みである</div>
+    <div class="opt"><span class="ol">ウ</span>SBOMを整備しても,Log4jのような脆弱性が公表された際に影響を受ける製品を特定する用途には利用できない</div>
+    <div class="opt"><span class="ol">エ</span>SBOMは最終成果物のバイナリのハッシュ値のみを記録し,コンポーネントの名称・版数・依存関係は対象外である</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ア</span><span class="at">イ=EDR等の動的監視の説明で無関係／ウ=依存を辿り影響範囲を特定できる／エ=名称・版数・依存の記録が本旨</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">SBOMは部品表。SPDX(ISO/IEC 5962・ライセンス管理)とCycloneDX(OWASP発・脆弱性用途)が代表。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">主利点は、脆弱性公表時に推移的依存まで辿り影響範囲を迅速に特定できること。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">利用OSSの名称・版数・依存関係を機械可読なSBOMで一元管理し、継続的に更新する。</div></div>
+  </div>
+  <div class="memo"><b>💼 実務メモ:</b> Log4Shellのような事案で「影響製品の特定に何日もかかる」課題への直接解が<b>SBOM整備</b>。午後の空欄補充で頻出。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>11 / 14</span></div>
+</section>
+
+<!-- 12. Q5 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q5 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">サプライチェーン完全性 ・ SLSA</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">ソフトウェアサプライチェーンの完全性を確保する取組みに関する記述のうち,適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt correct"><span class="ol">ア</span>SLSAは,ビルドプロセスの改ざん耐性・来歴(プロベナンス)の保証度合いをレベルで示すフレームワークである</div>
+    <div class="opt"><span class="ol">イ</span>typosquattingは,正規パッケージの署名鍵を窃取して同一名で改ざん版を公開する攻撃を指す</div>
+    <div class="opt"><span class="ol">ウ</span>cosign(Sigstore)は,配布物への電子署名と検証を行うが,コンテナイメージには適用できない</div>
+    <div class="opt"><span class="ol">エ</span>OSSの依存ライブラリに脆弱性が発見された場合,直接依存だけを確認すれば推移的依存の影響は考慮不要である</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ア</span><span class="at">イ=typosquattingは酷似名の悪意パッケージ(鍵窃取とは別)／ウ=cosignはコンテナイメージにも署名可／エ=推移的依存も評価対象</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">SLSA(Supply-chain Levels for Software Artifacts)はビルド由来の保証度合いをレベル化する枠組み。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">来歴情報の生成・検証やビルド環境の改ざん耐性を段階的に要求する。完全性確保の共通尺度。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">来歴の生成・検証、cosign/Sigstoreによる署名検証、推移的依存を含む脆弱性評価を組み合わせる。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>12 / 14</span></div>
+</section>
+
+<!-- 13. 午後 記述 要点 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">📝</span><div><h2>午後 記述式 — シナリオ要点</h2><div class="sub">D社(医療機器メーカ)／OSS利用とサプライチェーンリスクの管理</div></div><span class="badge">記述</span></div>
+  <div class="twocol">
+    <div class="panel" style="background:#eef4fb;border:1px solid #cfe0f2"><h3 style="color:var(--navy)">🔹 シナリオ（春想定）ログOSSの重大脆弱性</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">設問1: 影響特定に3日を要した根本原因＝<b>利用OSSの名称・版数を組織で一元管理する仕組みの欠如</b>(管理体制の観点/40字)。</li>
+      <li style="font-size:12px;margin-bottom:6px">設問2: [a]＝<b>SBOM</b>。効果＝構成部品と版数が一覧化され,脆弱性公表時に影響製品を即座に特定できる(50字)。</li>
+      <li style="font-size:12px">設問3: [b]＝<b>要配慮個人情報</b>(健康情報)。相違＝取得時に原則本人の事前同意が必要。</li>
+    </ul></div>
+    <div class="panel" style="background:#f4eefb;border:1px solid #ddc9f2"><h3 style="color:var(--violet)">🔹 再発防止・OSS受入れ基準</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">設問4(セキュリティ)＝<b>既知の脆弱性・CVEの有無と対応状況</b>を確認(30字)。</li>
+      <li style="font-size:12px;margin-bottom:6px">設問4(保守性)＝<b>開発が継続され保守・更新が提供されているか</b>を確認(30字)。</li>
+      <li style="font-size:12px;margin-bottom:6px">別解＝ライセンス適合性／配布元の署名・ハッシュによる真正性確認／コミュニティの活発さ。</li>
+      <li style="font-size:12px">全体＝依存関係を継続管理するツール導入＋リスクアセスメント再実施(供給網型攻撃を踏まえ)。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>採点の分水嶺:</b> ①原因は<b>「一元管理の欠如」という組織的原因</b>(技術力不足など的外れ不可) ②SBOMの効果を<b>下線①(特定に3日)</b>と対応づけ ③要配慮個人情報の<b>通常個人情報との相違</b>(事前同意/オプトアウト不可、共通事項は不可) ④設問4は<b>セキュリティと保守性の異なる2観点</b>。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>13 / 14</span></div>
+</section>
+
+<!-- 14. 統合サマリー -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🧭</span><div><h2>統合サマリー — 頻出ヒートマップ &amp; 総括</h2><div class="sub">出題可能性 × 難易度でマネジメント・法規論点を俯瞰</div></div><span class="badge">SUMMARY</span></div>
+  <div class="heat">
+    <div class="hc colh">論点</div><div class="hc colh">出題可能性</div><div class="hc colh">難易度</div><div class="hc colh">対策語彙</div>
+    <div class="hc rowh">リスク対応/アセスメント用語(27000)</div><div class="hc h3lv">最有力</div><div class="hc h1lv">低</div><div class="hc h1lv">プロセスの位置</div>
+    <div class="hc rowh">残留リスク・リスクオーナー承認</div><div class="hc h2lv">高</div><div class="hc h2lv">中</div><div class="hc h1lv">対応後+承認</div>
+    <div class="hc rowh">改正個人情報保護法(2022)</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">報告義務+要配慮</div>
+    <div class="hc rowh">SBOM(SPDX/CycloneDX)</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">版数/依存の可視化</div>
+    <div class="hc rowh">サプライチェーン完全性(SLSA/cosign)</div><div class="hc h2lv">高</div><div class="hc h3lv">高</div><div class="hc h1lv">来歴/署名検証</div>
+  </div>
+  <div class="summary-note" style="margin-top:14px"><b>総括:</b> この分野は<b>午前IIの用語定義</b>(リスク対応・残留リスク・要配慮/仮名加工)と、<b>午後の実務シナリオ</b>(OSS管理・SBOM整備・要配慮個人情報の取扱い)の両方で狙われる。近年最重要の<b>SBOM/サプライチェーン</b>と、必ず問われる<b>改正個情法の報告義務</b>を最優先で固めること。</div>
+  <div class="disc">※本デッキはAIが過去問傾向・最新動向をもとに作成した予想問題です。正解・解説・図解は最終確認を推奨します。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — セキュリティマネジメント・法規｜予想デッキ06</span><span>14 / 14</span></div>
+</section>
+
+</div>

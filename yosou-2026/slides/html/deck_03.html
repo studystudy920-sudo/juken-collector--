@@ -1,0 +1,391 @@
+<meta charset="utf-8">
+<title>SC予想 Web/アプリケーション脆弱性 デッキ</title>
+<style>
+  :root{
+    --navy:#16233f; --navy2:#243a63; --ink:#1c2534; --sub:#5b6b82;
+    --line:#d7dfea; --bg:#eef2f7; --card:#ffffff;
+    --teal:#0e7490; --tealbg:#e0f2f6;
+    --violet:#6d28d9; --violetbg:#efe7fc;
+    --amber:#b45309; --amberbg:#fdf1dd;
+    --red:#c1272d; --redbg:#fce8e8;
+    --green:#15803d; --greenbg:#e4f3e9;
+    --shadow:0 6px 22px rgba(20,35,64,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;padding:26px 0 60px}
+  .deck{display:flex;flex-direction:column;align-items:center;gap:26px}
+  .slide{position:relative;width:1120px;aspect-ratio:16/9;background:var(--card);
+    border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
+    padding:38px 44px 54px;display:flex;flex-direction:column}
+  .slide.pad-tight{padding:30px 40px 50px}
+  /* header band */
+  .hbar{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:16px;
+    border-bottom:3px solid var(--navy)}
+  .hbar .ic{font-size:26px;line-height:1}
+  .hbar h2{margin:0;font-size:23px;font-weight:800;color:var(--navy);letter-spacing:.2px}
+  .hbar .sub{margin:2px 0 0;font-size:13px;color:var(--sub);font-weight:600}
+  .hbar .badge{margin-left:auto;background:var(--navy);color:#fff;font-size:12px;font-weight:800;
+    padding:5px 12px;border-radius:999px;letter-spacing:1px}
+  .foot{position:absolute;left:44px;right:44px;bottom:16px;display:flex;justify-content:space-between;
+    font-size:11px;color:#93a2b8;border-top:1px solid var(--line);padding-top:8px}
+  .foot b{color:var(--navy);font-weight:800}
+  /* cover */
+  .cover{background:linear-gradient(135deg,#16233f 0%,#243a63 55%,#3a2b63 100%);color:#fff;justify-content:center}
+  .cover .kicker{font-size:14px;letter-spacing:3px;color:#a9c4ff;font-weight:700;text-transform:uppercase}
+  .cover h1{font-size:44px;margin:14px 0 8px;font-weight:900;line-height:1.15}
+  .cover .lead{font-size:17px;color:#d7e2f5;max-width:760px}
+  .cover .deckno{position:absolute;top:34px;right:44px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 16px;font-weight:800;font-size:14px}
+  .qprev{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:26px}
+  .qprev .qc{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:12px;
+    padding:12px 12px 14px}
+  .qprev .qn{font-size:12px;font-weight:800;color:#a9c4ff}
+  .qprev .qt{font-size:13px;font-weight:700;margin:5px 0 8px;color:#fff;line-height:1.3}
+  .qprev .qtag{font-size:11px;color:#ffd7a1;font-weight:700}
+  .cover .meta{margin-top:26px;font-size:13px;color:#b9c6de;display:flex;gap:22px;flex-wrap:wrap}
+  .cover .note{margin-top:10px;font-size:11.5px;color:#8ea2c4}
+  /* flow map */
+  .flow{display:flex;align-items:stretch;gap:6px;margin-top:6px}
+  .fnode{flex:1;background:var(--tealbg);border:1px solid #bfe0e8;border-radius:12px;padding:12px 12px 14px;display:flex;flex-direction:column}
+  .fnode .fq{font-size:12px;font-weight:900;color:var(--teal)}
+  .fnode .fh{font-size:14px;font-weight:800;margin:4px 0 6px;color:var(--ink)}
+  .fnode .fd{font-size:11.5px;color:#40566f;flex:1}
+  .fnode .fp{margin-top:8px;font-size:10.5px;color:var(--teal);border-top:1px dashed #a9d2dc;padding-top:6px}
+  .farrow{display:flex;align-items:center;color:#8fb7c2;font-size:22px;font-weight:900}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .step{border-radius:12px;padding:12px 14px;border-left:6px solid}
+  .step.s1{background:var(--violetbg);border-color:var(--violet)}
+  .step.s2{background:var(--tealbg);border-color:var(--teal)}
+  .step.s3{background:var(--amberbg);border-color:var(--amber)}
+  .step .sk{font-size:12px;font-weight:900}
+  .step.s1 .sk{color:var(--violet)} .step.s2 .sk{color:var(--teal)} .step.s3 .sk{color:var(--amber)}
+  .step .st{font-size:13px;color:#33465e;margin-top:4px}
+  /* generic tables */
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:4px}
+  th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+  th{background:var(--navy);color:#fff;font-weight:800;font-size:12px}
+  tbody tr:nth-child(even){background:#f6f9fc}
+  .cmp th:first-child{background:var(--navy2)}
+  .cmp td:first-child{background:#eef2f7;font-weight:800;color:var(--navy);text-align:center;width:19%}
+  .cmp .good{background:var(--greenbg)} .cmp .bad{background:var(--redbg)}
+  .cmp thead th.g{background:var(--green)} .cmp thead th.b{background:var(--red)}
+  /* glossary */
+  .gloss{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:4px}
+  .gi{border:1px solid var(--line);border-left:5px solid var(--violet);border-radius:8px;padding:9px 12px;background:#fff}
+  .gi .gt{font-size:13px;font-weight:800;color:var(--navy)}
+  .gi .ge{font-size:11px;color:var(--sub);font-weight:600}
+  .gi .gd{font-size:11.5px;color:#3c4d63;margin-top:4px}
+  .gi .gr{font-size:10.5px;color:var(--teal);margin-top:5px;font-weight:700}
+  /* tips */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px}
+  .panel{border-radius:12px;padding:14px 16px}
+  .panel.ok{background:var(--greenbg);border:1px solid #bfe0c9}
+  .panel.warn{background:var(--redbg);border:1px solid #f0c9c9}
+  .panel h3{margin:0 0 8px;font-size:15px;font-weight:900}
+  .panel.ok h3{color:var(--green)} .panel.warn h3{color:var(--red)}
+  .panel ol,.panel ul{margin:0;padding-left:20px}
+  .panel li{font-size:12.5px;margin-bottom:7px;color:#33465e}
+  /* question slide */
+  .qhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .qhead .qbig{background:var(--violet);color:#fff;font-weight:900;font-size:14px;border-radius:8px;padding:5px 11px}
+  .qhead .season{font-size:11px;font-weight:800;color:#fff;background:var(--teal);border-radius:999px;padding:3px 10px}
+  .qhead .freq{margin-left:auto;font-size:12px;font-weight:800;color:var(--amber)}
+  .qbody{font-size:14px;font-weight:700;color:var(--ink);background:#f4f7fb;border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin-bottom:10px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin-bottom:12px}
+  .opt{font-size:12px;color:#3c4d63;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .opt.correct{background:var(--greenbg);border-color:#8fc7a0;font-weight:700;color:#14532d}
+  .opt .ol{font-weight:900;color:var(--navy);margin-right:5px}
+  .opt.correct .ol{color:var(--green)}
+  .sru{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .sc{border-radius:11px;padding:11px 13px;border-top:5px solid}
+  .sc.sky{background:#e8f1fb;border-color:#2f6fb3}
+  .sc.rain{background:var(--amberbg);border-color:var(--amber)}
+  .sc.umb{background:var(--greenbg);border-color:var(--green)}
+  .sc .sh{font-size:12.5px;font-weight:900;display:flex;align-items:center;gap:6px}
+  .sc.sky .sh{color:#2f6fb3} .sc.rain .sh{color:var(--amber)} .sc.umb .sh{color:var(--green)}
+  .sc .sb{font-size:11.5px;color:#33465e;margin-top:6px}
+  .ansrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ansrow .ab{background:var(--green);color:#fff;font-weight:900;font-size:13px;border-radius:8px;padding:4px 12px}
+  .ansrow .at{font-size:12.5px;color:var(--sub);font-weight:700}
+  .memo{margin-top:10px;background:#f0edf9;border-left:5px solid var(--violet);border-radius:8px;
+    padding:8px 12px;font-size:11.5px;color:#3a2b63}
+  .memo b{color:var(--violet)}
+  /* heatmap */
+  .heat{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:6px;margin-top:6px;font-size:12px}
+  .heat .hc{padding:9px 10px;border-radius:7px;text-align:center;font-weight:700}
+  .heat .rowh{background:#eef2f7;text-align:left;font-weight:800;color:var(--navy)}
+  .heat .colh{background:var(--navy);color:#fff;text-align:center;font-weight:800}
+  .h3lv{background:var(--red);color:#fff} .h2lv{background:var(--amber);color:#fff} .h1lv{background:var(--greenbg);color:#14532d}
+  .summary-note{margin-top:14px;font-size:12.5px;color:#33465e;background:var(--tealbg);border-radius:10px;padding:12px 14px;border:1px solid #bfe0e8}
+  .summary-note b{color:var(--teal)}
+  .disc{font-size:10.5px;color:#93a2b8;margin-top:auto}
+  @media print{body{background:#fff;padding:0}
+    .slide{box-shadow:none;border:1px solid #ccc;border-radius:0;page-break-after:always;width:100%;margin:0}
+    .deck{gap:0}}
+</style>
+
+<div class="deck">
+
+<!-- 1. COVER -->
+<section class="slide cover">
+  <div class="deckno">SC 予想デッキ 03 / 07</div>
+  <div class="kicker">SC Exam Prep — Predicted 2026</div>
+  <h1>Web/アプリケーション脆弱性</h1>
+  <div class="lead">OWASP／SQLi・XSS・CSRF・SSRF／セキュアコーディング。午前IIの用語判別から午後の設計・実装対策まで、頻出6論点を5問で体系学習する。</div>
+  <div class="qprev">
+    <div class="qc"><div class="qn">Q1 · SSRF</div><div class="qt">メタデータ窃取／宛先偽装</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q2 · SQLi</div><div class="qt">プレースホルダの本質</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q3 · XSS</div><div class="qt">格納型XSSの識別</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q4 · CSRF</div><div class="qt">SameSite属性の役割</div><div class="qtag">頻出 ★★☆</div></div>
+    <div class="qc"><div class="qn">Q5 · Path</div><div class="qt">ディレクトリトラバーサル</div><div class="qtag">頻出 ★★☆</div></div>
+  </div>
+  <div class="meta"><span>📚 基礎概念 5枚</span><span>📝 問題演習 5問</span><span>🎯 統合サマリー</span><span>🗓 2026 春・秋 想定</span></div>
+  <div class="note">※ 過去問傾向(令和3〜7年)と最新動向をもとにAIが作成した予想問題です。実際の試験問題ではありません。最終確認を推奨します。</div>
+</section>
+
+<!-- 2. LEARNING MAP -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🗺️</span><div><h2>学習マップ — 5問の相互関係</h2><div class="sub">「注入(インジェクション)」と「セッション・認可」の2系統で切り分ける学習動線</div></div><span class="badge">MAP</span></div>
+  <div class="flow">
+    <div class="fnode"><div class="fq">Q1</div><div class="fh">SSRF</div><div class="fd">サーバに任意宛先へ要求させ、クラウドのメタデータ(169.254.169.254)から認証情報を窃取</div><div class="fp">許可リスト＋IP検査</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q2</div><div class="fh">SQLi</div><div class="fd">入力をSQLの構文要素として解釈させる注入。プレースホルダで構文とデータを分離</div><div class="fp">バインド機構</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q3</div><div class="fh">XSS</div><div class="fd">出力に混入したスクリプトが被害者ブラウザで実行。格納型は永続化・無差別配信</div><div class="fp">出力エスケープ</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q4</div><div class="fh">CSRF</div><div class="fd">他サイト起点の状態変更要求。SameSiteでCookie自動送信を抑制、トークンで照合</div><div class="fp">トークン＋SameSite</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q5</div><div class="fh">Traversal</div><div class="fd">「../」でパス外参照。識別子化＋正規化後に基準ディレクトリ配下を検証</div><div class="fp">canonicalize</div></div>
+  </div>
+  <div class="steps">
+    <div class="step s1"><div class="sk">STEP 1 ｜ WHY</div><div class="st">OWASP Top10 の攻撃を「注入系」と「セッション・認可系」の全体像で理解する</div></div>
+    <div class="step s2"><div class="sk">STEP 2 ｜ HOW</div><div class="st">5問で「どの脆弱性か」を経路と結果から判別し、ひっかけ選択肢を切る</div></div>
+    <div class="step s3"><div class="sk">STEP 3 ｜ WHAT</div><div class="st">空-雨-傘で対策(構文分離・出力エスケープ・許可リスト・正規化検証)へ落とす</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>2 / 14</span></div>
+</section>
+
+<!-- 3. CONCEPT 1: 分類マップ -->
+<section class="slide">
+  <div class="hbar"><span class="ic">①</span><div><h2>基礎概念 — Webアプリ脆弱性 分類マップ</h2><div class="sub">攻撃の「起点」と「本質(何が壊れるか)」の2軸で本デッキ5問を配置</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:22%">系統 / 本質</th><th>注入系（構文・命令の混入）</th><th>セッション・認可系（なりすまし・越境）</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:800;color:var(--navy)">利用者入力 経由</td><td style="background:var(--violetbg)"><b>Q2</b> SQLインジェクション／<b>Q3</b> XSS(反射・DOM・格納)／OSコマンドインジェクション</td><td>セッションフィクセーション／セッションハイジャック</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">サーバ挙動 経由</td><td style="background:var(--redbg)"><b>Q1</b> SSRF(サーバに任意宛先へ要求)／<b>Q5</b> ディレクトリトラバーサル</td><td>オープンリダイレクト／認可不備(IDOR)</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">他サイト 経由</td><td>HTTPヘッダインジェクション</td><td style="background:var(--tealbg)"><b>Q4</b> CSRF／クリックジャッキング</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>核心:</b> 注入系は「<b>データが構文・命令として解釈される</b>」ことが本質で、対策は<b>構文とデータの分離/エスケープ</b>。セッション・認可系は「<b>本人性・権限の検証不足</b>」が本質で、対策は<b>トークン照合・属性・正規化検証</b>。この2系統に落とし込めば4択も午後も切れる。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>3 / 14</span></div>
+</section>
+
+<!-- 4. CONCEPT 2: 混同比較表 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">②</span><div><h2>基礎概念 — 混同しやすい概念 比較表</h2><div class="sub">似て見えるが「起点・成立条件・対策」が異なる5ペア</div></div><span class="badge">CONCEPT</span></div>
+  <table class="cmp">
+    <thead><tr><th>対象概念</th><th class="g">🟢 概念A</th><th class="b">🔴 概念B（混同パターン）</th></tr></thead>
+    <tbody>
+      <tr><td>XSSの分類</td><td class="good">格納型：スクリプトが<b>サーバ側に永続化</b>され閲覧者へ無差別配信</td><td class="bad">反射型/DOM型：<b>その要求限り</b>で応答反映(反射)、DOM操作過程で実行(DOM)</td></tr>
+      <tr><td>Cookie属性</td><td class="good">HttpOnly：<b>JSからの読取</b>を禁止しXSSでのCookie窃取を緩和</td><td class="bad">SameSite：<b>他サイト起点</b>のCookie自動送信を抑制しCSRFを緩和(Secure=HTTPS限定送信)</td></tr>
+      <tr><td>SQLi対策の本質</td><td class="good">プレースホルダ：入力を<b>データとして固定</b>し構文構造を変えない</td><td class="bad">エスケープ/危険文字除去：<b>表層的</b>で漏れ・多重表現で回避され得る</td></tr>
+      <tr><td>SSRFと類似</td><td class="good">SSRF：<b>サーバ</b>に任意宛先へ要求させる(内部・メタデータ狙い)</td><td class="bad">オープンリダイレクト：利用者<b>ブラウザ</b>を任意サイトへ誘導</td></tr>
+      <tr><td>パス系の攻撃</td><td class="good">ディレクトリトラバーサル：<b>正規化後</b>に基準配下か検証</td><td class="bad">OSコマンドインジェクション：<b>シェルを介さないAPI</b>利用で根絶</td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>4 / 14</span></div>
+</section>
+
+<!-- 5. CONCEPT 3: 用語集 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">③</span><div><h2>基礎概念 — 必須用語集</h2><div class="sub">Webアプリ脆弱性5問を解く8用語</div></div><span class="badge">CONCEPT</span></div>
+  <div class="gloss">
+    <div class="gi"><div class="gt">SSRF <span class="ge">Server-Side Request Forgery</span></div><div class="gd">サーバに任意宛先へHTTP要求を送らせる。クラウドのIMDS(169.254.169.254)から一時認証情報を窃取する経路に悪用。</div><div class="gr">🔖 OWASP Top10 A10:2021</div></div>
+    <div class="gi"><div class="gt">プレースホルダ / バインド機構 <span class="ge">Prepared Statement</span></div><div class="gd">SQLの構文構造を事前確定し、後続の入力値を常にデータとして扱う。テーブル名・列名はバインド不可で許可リスト対処。</div><div class="gr">🔖 SQLi の本質対策</div></div>
+    <div class="gi"><div class="gt">格納型XSS <span class="ge">Stored / Persistent XSS</span></div><div class="gd">スクリプトがDB・ログ等に永続化され、閲覧者へ継続的・無差別に配信・実行される。反射型・DOM型と区別。</div><div class="gr">🔖 OWASP A03:2021 Injection</div></div>
+    <div class="gi"><div class="gt">CSRF <span class="ge">Cross-Site Request Forgery</span></div><div class="gd">被害者の認証済みセッションを悪用し、他サイト起点で意図しない状態変更要求を送らせる。トークン照合が本質対策。</div><div class="gr">🔖 OWASP A01:2021 関連</div></div>
+    <div class="gi"><div class="gt">SameSite属性</div><div class="gd">クロスサイト要求へのCookie自動送信を抑制(Lax/Strict)しCSRFを緩和。トークンの代替ではなく補強。</div><div class="gr">🔖 RFC 6265bis</div></div>
+    <div class="gi"><div class="gt">HttpOnly / Secure属性</div><div class="gd">HttpOnly=JSからのCookie参照禁止(XSS窃取緩和)。Secure=HTTPS接続時のみ送信(盗聴緩和)。</div><div class="gr">🔖 RFC 6265</div></div>
+    <div class="gi"><div class="gt">ディレクトリトラバーサル <span class="ge">Path Traversal</span></div><div class="gd">「../」等でパス外を参照。ファイル名を識別子化、または正規化(canonicalize)後に基準配下を検証して根絶。</div><div class="gr">🔖 CWE-22</div></div>
+    <div class="gi"><div class="gt">IMDSv2 <span class="ge">Instance Metadata Service v2</span></div><div class="gd">セッション指向・トークン必須(PUT)・ホップ制限でSSRF単独からの認証情報窃取を困難化。v1は無効化推奨。</div><div class="gr">🔖 クラウド基盤側の緩和</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>5 / 14</span></div>
+</section>
+
+<!-- 6. CONCEPT 4: 規格・対策マトリクス -->
+<section class="slide">
+  <div class="hbar"><span class="ic">④</span><div><h2>基礎概念 — 脆弱性 × 根本対策 マトリクス</h2><div class="sub">「本質対策」と「表層策(不十分)」を取り違えない</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:22%">脆弱性(規格)</th><th style="width:30%">根本対策(正解語彙)</th><th>不十分・ひっかけ</th></tr></thead>
+    <tbody>
+      <tr><td><b>SSRF</b>(A10:2021)</td><td>宛先の許可リスト＋名前解決後IP検査(内部・リンクローカル遮断)＋リダイレクト再検証</td><td>単なるURL文字列フィルタ。IMDSv2化・権限最小化は<b>基盤側の緩和</b>で併用。</td></tr>
+      <tr><td><b>SQLi</b>(A03:2021)</td><td>プレースホルダ(バインド機構)で構文とデータを分離</td><td>危険文字のエスケープ/除去のみ、通信のTLS化(注入とは無関係)。</td></tr>
+      <tr><td><b>XSS</b>(A03:2021)</td><td>出力時のコンテキスト依存エスケープ、装飾許可は許可リスト型サニタイズ＋CSP</td><td>入力エスケープのみ、ブラックリスト方式の個別除去は回避されやすい。</td></tr>
+      <tr><td><b>CSRF</b>(A01関連)</td><td>推測困難なCSRFトークンの発行・照合＋SameSite属性で補強</td><td>Referer/Origin検証のみは限定的。SameSite単独で完全代替は不可。</td></tr>
+      <tr><td><b>Path Traversal</b>(CWE-22)</td><td>入力を識別子に限定、または正規化後に基準ディレクトリ配下を検証</td><td>「../」の単純除去。エンコード・多重表現で回避される。</td></tr>
+      <tr><td>セッション管理</td><td>ログイン直後の再発行、HttpOnly＋Secure、タイムアウト</td><td>セッションIDをURLに付与(Referer・履歴・ログで漏えい)。</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>💡 頻出の軸:</b> 「注入系は<b>構文/データ分離・出力エスケープ</b>」「セッション認可系は<b>トークン・属性・正規化検証</b>」。<b>表層策(危険文字除去・入力エスケープのみ・URL文字列フィルタ)</b>を正解に見せる4択のひっかけが定番。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>6 / 14</span></div>
+</section>
+
+<!-- 7. TIPS -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🎯</span><div><h2>試験のコツ ＆ 頻出ひっかけ</h2><div class="sub">Exam Strategy &amp; Common Pitfalls</div></div><span class="badge">TIPS</span></div>
+  <div class="twocol">
+    <div class="panel ok"><h3>✅ 解くコツ</h3><ol>
+      <li>XSSは<b>3分類で判別</b>：永続化=格納型／応答反映=反射型／DOM操作過程=DOM型。</li>
+      <li>SQLi対策の本質は「<b>入力をデータとして固定</b>し構文構造を変えない」＝プレースホルダ。</li>
+      <li>Cookie属性は役割で暗記：HttpOnly=XSS窃取緩和／SameSite=CSRF緩和／Secure=盗聴緩和。</li>
+      <li>SSRFは「<b>サーバに要求させる</b>」＋許可リスト＋<b>名前解決後IP検査</b>が正解語彙。</li>
+    </ol></div>
+    <div class="panel warn"><h3>⚠️ よくあるひっかけ</h3><ul>
+      <li>XSS対策を「<b>入力</b>エスケープ」で済ませたつもり→出力処理漏れで成立。</li>
+      <li>SSRFとオープンリダイレクトの混同：SSRFは<b>サーバ</b>、リダイレクトは<b>ブラウザ</b>が動く。</li>
+      <li>「../」の<b>単純な文字列除去</b>は多重表現・エンコードで回避され不十分。</li>
+      <li>SameSiteやReferer/Origin検証を<b>CSRFの本質対策</b>として単独で選ばせる。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>合言葉:</b> 「起点(どこから)×本質(何が壊れるか)」で分類 → 対策は「<b>構文分離・出力エスケープ・許可リスト・正規化検証・トークン照合</b>」の5語彙に集約される。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>7 / 14</span></div>
+</section>
+
+<!-- 8. Q1 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q1 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">SSRF ・ OWASP A10:2021</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">クラウド環境のインスタンスメタデータエンドポイント(例:169.254.169.254)へアプリケーションサーバから意図しないHTTPリクエストを送信させ、一時的な認証情報を窃取する攻撃の名称はどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>クリックジャッキング</div>
+    <div class="opt correct"><span class="ol">イ</span>サーバサイドリクエストフォージェリ(SSRF)</div>
+    <div class="opt"><span class="ol">ウ</span>セッションフィクセーション</div>
+    <div class="opt"><span class="ol">エ</span>ディレクトリトラバーサル</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=iframeで操作誘導／ウ=セッションID固定化／エ=パス外ファイル参照</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">サーバに任意宛先へ要求させ、リンクローカルのIMDS(169.254.169.254)から一時認証情報を取得できた。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">SSRFはメタデータサービスや内部システムへの到達経路として悪用される。窃取した認証情報でIAM権限を悪用される。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">宛先の許可リスト化、<b>名前解決後IP</b>の検査で内部・リンクローカル宛てを遮断、IMDSv2への移行。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>8 / 14</span></div>
+</section>
+
+<!-- 9. Q2 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q2 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">SQLインジェクション ・ OWASP A03:2021</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">プレースホルダ(バインド機構)を用いたSQL文の組み立てが、SQLインジェクション対策として有効である最も本質的な理由はどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>SQL文が実行前に暗号化され、通信経路上で解読されないため</div>
+    <div class="opt correct"><span class="ol">イ</span>入力値がSQL文の構文要素ではなくデータ(値)としてのみ扱われ、構文構造が変化しないため</div>
+    <div class="opt"><span class="ol">ウ</span>危険な文字列を検出した時点でDBMSがトランザクションをロールバックするため</div>
+    <div class="opt"><span class="ol">エ</span>アプリケーションからDBへの接続がTLSで保護され改ざんが検知されるため</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア・エ=通信保護でSQLi無関係／ウ=そのような自動ロールバック機構はない</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">SQL文の構文構造を事前にコンパイル確定させ、後からバインドする入力値は常にデータとして扱う。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">入力の引用符やSQL断片が構文として解釈されず注入が成立しない。アプリのエスケープ処理に依存しない点が本質。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">プレースホルダを徹底。<b>テーブル名・列名</b>など構文要素の動的指定はバインド不可のため許可リストで別途対処。</div></div>
+  </div>
+  <div class="memo"><b>💼 実務メモ:</b> 「エスケープ」ではなく<b>構文とデータの分離</b>が正解語彙。動的な識別子(列名・ソート順)を受け取る箇所だけは許可リストで固める、まで書ければ午後で加点。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>9 / 14</span></div>
+</section>
+
+<!-- 10. Q3 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q3 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">格納型XSS ・ OWASP A03:2021</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">OWASP Top 10(2021)で「Injection」に分類されるXSSのうち、格納型(蓄積型)XSSの説明として適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt correct"><span class="ol">ア</span>攻撃者が仕込んだスクリプトがDBやログなどサーバ側に永続化され、当該データを閲覧した利用者のブラウザで実行される</div>
+    <div class="opt"><span class="ol">イ</span>URLパラメタに含まれるスクリプトが応答にそのまま反映され、被害者がリンクを踏んだ際に実行される</div>
+    <div class="opt"><span class="ol">ウ</span>サーバへのスクリプト送信を伴わず、クライアント側JavaScriptが入力をDOMへ反映する過程で実行される</div>
+    <div class="opt"><span class="ol">エ</span>正規サイトを透過的なiframeで覆い、利用者の操作を誘導してクリックさせる</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ア</span><span class="at">イ=反射型XSS／ウ=DOM Based XSS／エ=クリックジャッキング</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">スクリプトがサーバ側に永続化され、閲覧者へ継続的・無差別に配信される。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">格納型は被害が広範かつ持続的。反射型(その要求限り)・DOM型(クライアント内)と成立経路が異なる。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb"><b>出力時</b>のコンテキスト依存エスケープ。装飾許可なら許可リスト型サニタイズ＋CSP＋Cookieに HttpOnly。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>10 / 14</span></div>
+</section>
+
+<!-- 11. Q4 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q4 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">CSRF ・ Cookie SameSite属性</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">Cookieに設定する属性のうち、CSRFの緩和を主目的として、他サイトを起点とするクロスサイトリクエストにCookieを送信させないよう制御する属性はどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>Secure属性</div>
+    <div class="opt"><span class="ol">イ</span>HttpOnly属性</div>
+    <div class="opt correct"><span class="ol">ウ</span>SameSite属性</div>
+    <div class="opt"><span class="ol">エ</span>Domain属性</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ウ</span><span class="at">ア=HTTPS接続時限定送信／イ=JSからの読取防止(XSS窃取緩和)／エ=送信対象ドメイン指定</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">SameSite(Lax/Strict)はクロスサイト要求へのCookie自動送信を抑制する。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">CSRFの緩和に寄与するが<b>緩和策</b>であり、CSRFトークンによる照合を代替するものではない。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">本質対策は推測困難な<b>CSRFトークン</b>の発行・照合。SameSite属性を付与して補強する。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>11 / 14</span></div>
+</section>
+
+<!-- 12. Q5 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q5 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">ディレクトリトラバーサル ・ CWE-22</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">「../」などを含む入力で公開ディレクトリ外のファイルを不正に参照される脆弱性の名称と、その根本対策として適切な組合せはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>OSコマンドインジェクション ― シェルを介さないAPIの利用</div>
+    <div class="opt correct"><span class="ol">イ</span>ディレクトリトラバーサル ― 入力を識別子に限定し、正規化後に許可ディレクトリ配下か検証する</div>
+    <div class="opt"><span class="ol">ウ</span>HTTPヘッダインジェクション ― 改行コードの除去</div>
+    <div class="opt"><span class="ol">エ</span>オープンリダイレクト ― リダイレクト先の許可リスト化</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア・ウ・エ=別脆弱性と対策の正しい組だが本設問(パス外参照)には非該当</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">パスの相対参照(../)を悪用し、基準ディレクトリ外のファイルを参照される。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">「../」の単純な文字列除去はエンコードや多重表現で回避され得るため不十分。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">ファイル名を直接受けず<b>識別子経由</b>で解決、または<b>正規化(canonicalize)</b>後に基準配下であることを検証。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>12 / 14</span></div>
+</section>
+
+<!-- 13. 午後 記述 要点 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">📝</span><div><h2>午後 記述式 — シナリオ要点</h2><div class="sub">SaaS経費精算のSSRF／掲示板の格納型XSS・CSRF</div></div><span class="badge">記述</span></div>
+  <div class="twocol">
+    <div class="panel" style="background:#eef4fb;border:1px solid #cfe0f2"><h3 style="color:var(--navy)">🔹 問1（春想定）連携先URL取得機能のSSRF</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">利用者入力URLへサーバが要求→<b>SSRF</b>。IMDS(169.254.169.254)で一時認証情報が画面表示。</li>
+      <li style="font-size:12px;margin-bottom:6px">被害＝窃取した認証情報を外部から再利用し、IAM権限でオブジェクトストレージの他利用者データを読取・改ざん・削除(横方向アクセス)。</li>
+      <li style="font-size:12px;margin-bottom:6px">入力対策＝①宛先FQDNの<b>許可リスト</b>限定 ②<b>名前解決後IP</b>検査でループバック/リンクローカル/プライベート遮断＋リダイレクト再検証。</li>
+      <li style="font-size:12px">基盤側＝<b>IMDSv2化・v1無効化</b>＋IAMロール権限最小化。</li>
+    </ul></div>
+    <div class="panel" style="background:#f4eefb;border:1px solid #ddc9f2"><h3 style="color:var(--violet)">🔹 問2（秋想定）掲示板の格納型XSS・CSRF</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">自己紹介文にHTML保存許可→<b>格納型XSS</b>。<b>onerror</b>付imgが描画時に発火し<b>document.cookie</b>を外部送信。</li>
+      <li style="font-size:12px;margin-bottom:6px">HttpOnly未設定でCookie窃取→セッション乗っ取り→なりすまし投稿。</li>
+      <li style="font-size:12px;margin-bottom:6px">装飾許可の対策＝<b>許可リスト型HTMLサニタイズ</b>(実績あるライブラリ)を出力時に実施。</li>
+      <li style="font-size:12px">CSRF根本対策＝セッション単位の推測困難な<b>トークン照合</b>＋SameSiteで補強。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>採点の分水嶺:</b> ①SSRFと明記し被害を<b>認証情報の外部再利用による横断アクセス</b>まで具体化 ②対策は「危険文字除去」でなく<b>許可リスト＋名前解決後IP検証</b> ③XSSは<b>格納型</b>＋<b>出力時サニタイズ</b>＋HttpOnly ④CSRFは<b>トークン照合</b>まで踏み込めているか。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>13 / 14</span></div>
+</section>
+
+<!-- 14. 統合サマリー -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🧭</span><div><h2>統合サマリー — 頻出ヒートマップ &amp; 総括</h2><div class="sub">出題可能性 × 難易度でWebアプリ脆弱性論点を俯瞰</div></div><span class="badge">SUMMARY</span></div>
+  <div class="heat">
+    <div class="hc colh">論点</div><div class="hc colh">出題可能性</div><div class="hc colh">難易度</div><div class="hc colh">対策語彙</div>
+    <div class="hc rowh">SSRF / メタデータ窃取</div><div class="hc h3lv">最有力</div><div class="hc h3lv">高</div><div class="hc h1lv">許可リスト＋IP検査</div>
+    <div class="hc rowh">SQLi / プレースホルダ</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">構文/データ分離</div>
+    <div class="hc rowh">XSS(格納/反射/DOM)</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">出力エスケープ</div>
+    <div class="hc rowh">CSRF / Cookie属性</div><div class="hc h2lv">高</div><div class="hc h2lv">中</div><div class="hc h1lv">トークン＋SameSite</div>
+    <div class="hc rowh">Path Traversal / セッション管理</div><div class="hc h2lv">高</div><div class="hc h1lv">低</div><div class="hc h1lv">正規化検証</div>
+  </div>
+  <div class="summary-note" style="margin-top:14px"><b>総括:</b> Webアプリ脆弱性は<b>午前IIの用語・分類判別</b>(XSS3分類・Cookie属性の役割・SSRF/リダイレクトの主体差)と、<b>午後の設計・実装対策</b>(SSRF・格納型XSS・CSRF)の両面で狙われる。近年台頭の<b>SSRF(クラウド認証情報窃取)</b>と、依然定番の<b>XSS/SQLi</b>を最優先で固め、対策は必ず<b>表層策でなく本質対策</b>の語彙で書けるようにすること。</div>
+  <div class="disc">※本デッキはAIが過去問傾向・最新動向をもとに作成した予想問題です。正解・解説・図解は最終確認を推奨します。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — Web/アプリケーション脆弱性｜予想デッキ03</span><span>14 / 14</span></div>
+</section>
+
+</div>

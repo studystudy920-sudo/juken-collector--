@@ -1,0 +1,394 @@
+<meta charset="utf-8">
+<title>SC予想 ネットワーク・クラウド・ゼロトラスト デッキ</title>
+<style>
+  :root{
+    --navy:#16233f; --navy2:#243a63; --ink:#1c2534; --sub:#5b6b82;
+    --line:#d7dfea; --bg:#eef2f7; --card:#ffffff;
+    --teal:#0e7490; --tealbg:#e0f2f6;
+    --violet:#6d28d9; --violetbg:#efe7fc;
+    --amber:#b45309; --amberbg:#fdf1dd;
+    --red:#c1272d; --redbg:#fce8e8;
+    --green:#15803d; --greenbg:#e4f3e9;
+    --shadow:0 6px 22px rgba(20,35,64,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;padding:26px 0 60px}
+  .deck{display:flex;flex-direction:column;align-items:center;gap:26px}
+  .slide{position:relative;width:1120px;aspect-ratio:16/9;background:var(--card);
+    border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
+    padding:38px 44px 54px;display:flex;flex-direction:column}
+  .slide.pad-tight{padding:30px 40px 50px}
+  /* header band */
+  .hbar{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:16px;
+    border-bottom:3px solid var(--navy)}
+  .hbar .ic{font-size:26px;line-height:1}
+  .hbar h2{margin:0;font-size:23px;font-weight:800;color:var(--navy);letter-spacing:.2px}
+  .hbar .sub{margin:2px 0 0;font-size:13px;color:var(--sub);font-weight:600}
+  .hbar .badge{margin-left:auto;background:var(--navy);color:#fff;font-size:12px;font-weight:800;
+    padding:5px 12px;border-radius:999px;letter-spacing:1px}
+  .foot{position:absolute;left:44px;right:44px;bottom:16px;display:flex;justify-content:space-between;
+    font-size:11px;color:#93a2b8;border-top:1px solid var(--line);padding-top:8px}
+  .foot b{color:var(--navy);font-weight:800}
+  /* cover */
+  .cover{background:linear-gradient(135deg,#16233f 0%,#243a63 55%,#3a2b63 100%);color:#fff;justify-content:center}
+  .cover .kicker{font-size:14px;letter-spacing:3px;color:#a9c4ff;font-weight:700;text-transform:uppercase}
+  .cover h1{font-size:44px;margin:14px 0 8px;font-weight:900;line-height:1.15}
+  .cover .lead{font-size:17px;color:#d7e2f5;max-width:760px}
+  .cover .deckno{position:absolute;top:34px;right:44px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 16px;font-weight:800;font-size:14px}
+  .qprev{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:26px}
+  .qprev .qc{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:12px;
+    padding:12px 12px 14px}
+  .qprev .qn{font-size:12px;font-weight:800;color:#a9c4ff}
+  .qprev .qt{font-size:13px;font-weight:700;margin:5px 0 8px;color:#fff;line-height:1.3}
+  .qprev .qtag{font-size:11px;color:#ffd7a1;font-weight:700}
+  .cover .meta{margin-top:26px;font-size:13px;color:#b9c6de;display:flex;gap:22px;flex-wrap:wrap}
+  .cover .note{margin-top:10px;font-size:11.5px;color:#8ea2c4}
+  /* flow map */
+  .flow{display:flex;align-items:stretch;gap:6px;margin-top:6px}
+  .fnode{flex:1;background:var(--tealbg);border:1px solid #bfe0e8;border-radius:12px;padding:12px 12px 14px;display:flex;flex-direction:column}
+  .fnode .fq{font-size:12px;font-weight:900;color:var(--teal)}
+  .fnode .fh{font-size:14px;font-weight:800;margin:4px 0 6px;color:var(--ink)}
+  .fnode .fd{font-size:11.5px;color:#40566f;flex:1}
+  .fnode .fp{margin-top:8px;font-size:10.5px;color:var(--teal);border-top:1px dashed #a9d2dc;padding-top:6px}
+  .farrow{display:flex;align-items:center;color:#8fb7c2;font-size:22px;font-weight:900}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .step{border-radius:12px;padding:12px 14px;border-left:6px solid}
+  .step.s1{background:var(--violetbg);border-color:var(--violet)}
+  .step.s2{background:var(--tealbg);border-color:var(--teal)}
+  .step.s3{background:var(--amberbg);border-color:var(--amber)}
+  .step .sk{font-size:12px;font-weight:900}
+  .step.s1 .sk{color:var(--violet)} .step.s2 .sk{color:var(--teal)} .step.s3 .sk{color:var(--amber)}
+  .step .st{font-size:13px;color:#33465e;margin-top:4px}
+  /* generic tables */
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:4px}
+  th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+  th{background:var(--navy);color:#fff;font-weight:800;font-size:12px}
+  tbody tr:nth-child(even){background:#f6f9fc}
+  .cmp th:first-child{background:var(--navy2)}
+  .cmp td:first-child{background:#eef2f7;font-weight:800;color:var(--navy);text-align:center;width:19%}
+  .cmp .good{background:var(--greenbg)} .cmp .bad{background:var(--redbg)}
+  .cmp thead th.g{background:var(--green)} .cmp thead th.b{background:var(--red)}
+  /* glossary */
+  .gloss{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:4px}
+  .gi{border:1px solid var(--line);border-left:5px solid var(--violet);border-radius:8px;padding:9px 12px;background:#fff}
+  .gi .gt{font-size:13px;font-weight:800;color:var(--navy)}
+  .gi .ge{font-size:11px;color:var(--sub);font-weight:600}
+  .gi .gd{font-size:11.5px;color:#3c4d63;margin-top:4px}
+  .gi .gr{font-size:10.5px;color:var(--teal);margin-top:5px;font-weight:700}
+  /* tips */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px}
+  .panel{border-radius:12px;padding:14px 16px}
+  .panel.ok{background:var(--greenbg);border:1px solid #bfe0c9}
+  .panel.warn{background:var(--redbg);border:1px solid #f0c9c9}
+  .panel h3{margin:0 0 8px;font-size:15px;font-weight:900}
+  .panel.ok h3{color:var(--green)} .panel.warn h3{color:var(--red)}
+  .panel ol,.panel ul{margin:0;padding-left:20px}
+  .panel li{font-size:12.5px;margin-bottom:7px;color:#33465e}
+  /* question slide */
+  .qhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .qhead .qbig{background:var(--violet);color:#fff;font-weight:900;font-size:14px;border-radius:8px;padding:5px 11px}
+  .qhead .season{font-size:11px;font-weight:800;color:#fff;background:var(--teal);border-radius:999px;padding:3px 10px}
+  .qhead .freq{margin-left:auto;font-size:12px;font-weight:800;color:var(--amber)}
+  .qbody{font-size:14px;font-weight:700;color:var(--ink);background:#f4f7fb;border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin-bottom:10px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin-bottom:12px}
+  .opt{font-size:12px;color:#3c4d63;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .opt.correct{background:var(--greenbg);border-color:#8fc7a0;font-weight:700;color:#14532d}
+  .opt .ol{font-weight:900;color:var(--navy);margin-right:5px}
+  .opt.correct .ol{color:var(--green)}
+  .sru{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .sc{border-radius:11px;padding:11px 13px;border-top:5px solid}
+  .sc.sky{background:#e8f1fb;border-color:#2f6fb3}
+  .sc.rain{background:var(--amberbg);border-color:var(--amber)}
+  .sc.umb{background:var(--greenbg);border-color:var(--green)}
+  .sc .sh{font-size:12.5px;font-weight:900;display:flex;align-items:center;gap:6px}
+  .sc.sky .sh{color:#2f6fb3} .sc.rain .sh{color:var(--amber)} .sc.umb .sh{color:var(--green)}
+  .sc .sb{font-size:11.5px;color:#33465e;margin-top:6px}
+  .ansrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ansrow .ab{background:var(--green);color:#fff;font-weight:900;font-size:13px;border-radius:8px;padding:4px 12px}
+  .ansrow .at{font-size:12.5px;color:var(--sub);font-weight:700}
+  .memo{margin-top:10px;background:#f0edf9;border-left:5px solid var(--violet);border-radius:8px;
+    padding:8px 12px;font-size:11.5px;color:#3a2b63}
+  .memo b{color:var(--violet)}
+  /* heatmap */
+  .heat{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:6px;margin-top:6px;font-size:12px}
+  .heat .hc{padding:9px 10px;border-radius:7px;text-align:center;font-weight:700}
+  .heat .rowh{background:#eef2f7;text-align:left;font-weight:800;color:var(--navy)}
+  .heat .colh{background:var(--navy);color:#fff;text-align:center;font-weight:800}
+  .h3lv{background:var(--red);color:#fff} .h2lv{background:var(--amber);color:#fff} .h1lv{background:var(--greenbg);color:#14532d}
+  .summary-note{margin-top:14px;font-size:12.5px;color:#33465e;background:var(--tealbg);border-radius:10px;padding:12px 14px;border:1px solid #bfe0e8}
+  .summary-note b{color:var(--teal)}
+  .disc{font-size:10.5px;color:#93a2b8;margin-top:auto}
+  @media print{body{background:#fff;padding:0}
+    .slide{box-shadow:none;border:1px solid #ccc;border-radius:0;page-break-after:always;width:100%;margin:0}
+    .deck{gap:0}}
+</style>
+
+<div class="deck">
+
+<!-- 1. COVER -->
+<section class="slide cover">
+  <div class="deckno">SC 予想デッキ 02 / 07</div>
+  <div class="kicker">SC Exam Prep — Predicted 2026</div>
+  <h1>ネットワーク・クラウド・ゼロトラスト</h1>
+  <div class="lead">SASE/SSE／ZTNA／DMARC／DNSSEC／mTLS／PKCE。境界防御から「常に検証」へ移る時代の、アクセス統制・ドメイン認証・相互認証を代表5問で体系学習する。</div>
+  <div class="qprev">
+    <div class="qc"><div class="qn">Q1 · SSE</div><div class="qt">SASEからSSEを切り出す</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q2 · ZTNA</div><div class="qt">VPN代替・アプリ単位認可</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q3 · DMARC</div><div class="qt">送信ドメイン認証の本質</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q4 · DNSSEC</div><div class="qt">完全性・出自認証(非暗号化)</div><div class="qtag">頻出 ★★☆</div></div>
+    <div class="qc"><div class="qn">Q5 · mTLS</div><div class="qt">相互TLS・証明書バウンド</div><div class="qtag">頻出 ★★☆</div></div>
+  </div>
+  <div class="meta"><span>📚 基礎概念 5枚</span><span>📝 問題演習 5問</span><span>🎯 統合サマリー</span><span>🗓 2026 春・秋 想定</span></div>
+  <div class="note">※ 過去問傾向(令和3〜7年)と最新動向をもとにAIが作成した予想問題です。実際の試験問題ではありません。最終確認を推奨します。</div>
+</section>
+
+<!-- 2. LEARNING MAP -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🗺️</span><div><h2>学習マップ — 5問の相互関係</h2><div class="sub">「アクセス経路の統制」→「通信・ドメインの真正性」で切り分ける学習動線</div></div><span class="badge">MAP</span></div>
+  <div class="flow">
+    <div class="fnode"><div class="fq">Q1</div><div class="fh">SSE</div><div class="fd">SASE=SD-WAN(NW)+SSE(セキュリティ)。SWG/CASB/ZTNAをクラウドで統合</div><div class="fp">クラウド境界 / 定義問題</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q2</div><div class="fh">ZTNA</div><div class="fd">VPNの過剰な信頼を排し、アプリ単位で認可・所在を秘匿</div><div class="fp">ゼロトラスト / 最小権限</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q3</div><div class="fh">DMARC</div><div class="fd">SPF/DKIM＋アライメント検証。none→quarantine→reject</div><div class="fp">ドメイン認証 / なりすまし</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q4</div><div class="fh">DNSSEC</div><div class="fd">RRSIG署名と信頼の連鎖で完全性・出自認証。暗号化はしない</div><div class="fp">DNS / 完全性≠機密性</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q5</div><div class="fh">mTLS</div><div class="fd">双方が証明書提示で相互認証。証明書バウンドトークンで盗用防止</div><div class="fp">サービス間通信 / RFC8705</div></div>
+  </div>
+  <div class="steps">
+    <div class="step s1"><div class="sk">STEP 1 ｜ WHY</div><div class="st">境界型(VPN)からゼロトラスト(SASE/SSE/ZTNA)へ移る全体像を理解する</div></div>
+    <div class="step s2"><div class="sk">STEP 2 ｜ HOW</div><div class="st">5問で「どの統制層・どの真正性」かを判別し、役割取り違えの選択肢を切る</div></div>
+    <div class="step s3"><div class="sk">STEP 3 ｜ WHAT</div><div class="st">空-雨-傘で対策(アプリ単位認可・段階運用・署名検証・相互認証)へ落とす</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>2 / 14</span></div>
+</section>
+
+<!-- 3. CONCEPT 1: 分類マップ -->
+<section class="slide">
+  <div class="hbar"><span class="ic">①</span><div><h2>基礎概念 — 領域の全体像マップ</h2><div class="sub">「何を統制するか(層)」×「何を守るか(目的)」で本デッキ5問を配置</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:20%">統制の層</th><th>アクセス経路の統制</th><th>通信・データの真正性</th><th>担う主な技術 / 本デッキ</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:800;color:var(--navy)">クラウドエッジ</td><td style="background:var(--tealbg)"><b>Q1</b> SSE=SWG/CASB/ZTNA/FWaaSをクラウド統合</td><td>TLSインスペクション／クラウド利用可視化</td><td>SASE / SSE / CASB</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">アクセス認可</td><td style="background:var(--violetbg)"><b>Q2</b> ZTNA=アプリ単位で認可・所在秘匿</td><td>都度の端末/利用者評価(PDP/PEP)</td><td>ZTNA / NIST SP 800-207</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">メール / ドメイン</td><td>受信側でのなりすまし拒否ポリシー適用</td><td style="background:var(--amberbg)"><b>Q3</b> SPF+DKIM+DMARC(アライメント)</td><td>SPF / DKIM / DMARC / BIMI</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">名前解決 / 経路</td><td>権威応答の受け入れ可否</td><td style="background:var(--redbg)"><b>Q4</b> DNSSEC=完全性・出自認証(非暗号化)</td><td>DNSSEC / DoH / DoT</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">サービス間通信</td><td>相互に相手を認証してから接続</td><td style="background:var(--greenbg)"><b>Q5</b> mTLS=双方向証明書認証＋証明書バウンド</td><td>mTLS / PKCE / OAuth 2.0</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>核心:</b> この分野は「①どの層で統制するか(クラウドエッジ／認可／ドメイン／名前解決／サービス間)」と「②何を守るか(アクセス範囲の最小化／真正性・完全性／機密性)」の2軸で整理できる。<b>完全性・出自認証(DNSSEC・DKIM)</b>と<b>機密性・暗号化(DoH/DoT・TLS)</b>を混同しないことが最大の分岐点。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>3 / 14</span></div>
+</section>
+
+<!-- 4. CONCEPT 2: 混同比較表 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">②</span><div><h2>基礎概念 — 混同しやすい概念 比較表</h2><div class="sub">似て見えるが「役割・検証対象・保証する性質」が異なる5ペア</div></div><span class="badge">CONCEPT</span></div>
+  <table class="cmp">
+    <thead><tr><th>対象概念</th><th class="g">🟢 概念A</th><th class="b">🔴 概念B（混同パターン）</th></tr></thead>
+    <tbody>
+      <tr><td>SASE と SSE</td><td class="good">SASE：<b>SD-WAN(NW)＋SSE(セキュリティ)</b>を統合したフレームワーク</td><td class="bad">SSE：SASEから<b>NW機能を除いたセキュリティ機能群</b>(SWG/CASB/ZTNA/FWaaS)</td></tr>
+      <tr><td>ZTNA と VPN</td><td class="good">ZTNA：<b>アプリ単位</b>で許可し、認可外アプリの<b>所在を秘匿</b></td><td class="bad">VPN：接続端末を暗黙に信頼し<b>セグメント全体</b>へ到達=横展開を助長</td></tr>
+      <tr><td>SPF と DKIM</td><td class="good">DKIM：秘密鍵署名を公開鍵で検証し<b>改ざん検知＋d=ドメイン正当性</b>(IP非依存)</td><td class="bad">SPF：<b>エンベロープFrom＋送信元IP</b>を検証。ヘッダFrom詐称は防げない</td></tr>
+      <tr><td>DNSSEC と DoH/DoT</td><td class="good">DNSSEC：署名で<b>完全性・出自認証</b>。キャッシュポイズニング緩和</td><td class="bad">DoH/DoT：通信路の<b>機密性(暗号化)</b>。完全性・出自認証は担わない</td></tr>
+      <tr><td>PDP と PEP</td><td class="good">PDP：ポリシー<b>決定</b>点。端末/利用者状態を評価し認可を判断</td><td class="bad">PEP：ポリシー<b>実施</b>点。PDPの決定に従い接続を強制する地点</td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>4 / 14</span></div>
+</section>
+
+<!-- 5. CONCEPT 3: 用語集 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">③</span><div><h2>基礎概念 — 必須用語集</h2><div class="sub">ネットワーク・クラウド・ゼロトラスト5問を解く8用語</div></div><span class="badge">CONCEPT</span></div>
+  <div class="gloss">
+    <div class="gi"><div class="gt">SASE <span class="ge">Secure Access Service Edge</span></div><div class="gd">SD-WAN等のNW機能とSSEのセキュリティ機能をクラウドで一体提供する枠組み。SASE≒SD-WAN＋SSE。</div><div class="gr">🔖 Gartner 提唱</div></div>
+    <div class="gi"><div class="gt">SSE <span class="ge">Security Service Edge</span></div><div class="gd">SASEからNW機能を除いた概念。SWG・CASB・ZTNA・FWaaS等をクラウドで統合提供。</div><div class="gr">🔖 Q1 の正解</div></div>
+    <div class="gi"><div class="gt">ZTNA <span class="ge">Zero Trust Network Access</span></div><div class="gd">最小権限でアプリ単位にアクセス許可し、ブローカ経由で認可外アプリの所在を秘匿。VPN代替。</div><div class="gr">🔖 NIST SP 800-207</div></div>
+    <div class="gi"><div class="gt">CASB <span class="ge">Cloud Access Security Broker</span></div><div class="gd">クラウド利用を可視化・制御。シャドーIT検出、未承認サービスへの持出し検知・遮断。</div><div class="gr">🔖 SSE 構成要素</div></div>
+    <div class="gi"><div class="gt">DMARC</div><div class="gd">SPF/DKIMの成功＋ヘッダFromとのアライメント検証。none/quarantine/rejectを段階適用、rua/rufで可視化。</div><div class="gr">🔖 RFC 7489</div></div>
+    <div class="gi"><div class="gt">DNSSEC</div><div class="gd">RRSIG署名とDS/DNSKEYの信頼の連鎖で応答の完全性・出自認証を提供。暗号化は行わない。</div><div class="gr">🔖 RFC 4033〜4035</div></div>
+    <div class="gi"><div class="gt">mTLS <span class="ge">Mutual TLS</span></div><div class="gd">クライアント/サーバ双方が証明書を提示して相互認証。証明書バウンドトークンで盗用を抑止。</div><div class="gr">🔖 RFC 8705 (OAuth mTLS)</div></div>
+    <div class="gi"><div class="gt">PKCE <span class="ge">Proof Key for Code Exchange</span></div><div class="gd">code_verifierとcode_challenge(S256)で正規クライアントのみトークン交換可能に。認可コード横取り対策。</div><div class="gr">🔖 RFC 7636</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>5 / 14</span></div>
+</section>
+
+<!-- 6. CONCEPT 4: フレームワーク/規格マトリクス -->
+<section class="slide">
+  <div class="hbar"><span class="ic">④</span><div><h2>基礎概念 — 規格・RFCマトリクス</h2><div class="sub">「どの規格が何を保証するか」を取り違えない</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:18%">名称</th><th style="width:20%">根拠 / 種別</th><th>要点（試験での問われ方）</th></tr></thead>
+    <tbody>
+      <tr><td><b>SASE / SSE</b></td><td>Gartner 提唱</td><td>SASE=NW＋セキュリティ。SSEはセキュリティ機能のみ(SWG/CASB/ZTNA/FWaaS)。<b>Q1</b>。</td></tr>
+      <tr><td><b>ZTNA</b></td><td>NIST SP 800-207</td><td>ゼロトラストの原則「常に検証」。アプリ単位認可、PDP/PEPでポリシー決定・実施。<b>Q2</b>。</td></tr>
+      <tr><td>SPF</td><td>RFC 7208</td><td>エンベロープFromと送信元IPを検証。ヘッダFrom詐称は防げない=DMARCのひっかけ。</td></tr>
+      <tr><td>DKIM</td><td>RFC 6376</td><td>秘密鍵署名・公開鍵検証で改ざん検知とd=ドメイン正当性を保証(IP非依存)。</td></tr>
+      <tr><td><b>DMARC</b></td><td>RFC 7489</td><td>SPF/DKIM＋アライメント。none→quarantine→reject。rua/rufで実態把握。<b>Q3</b>。</td></tr>
+      <tr><td><b>DNSSEC</b></td><td>RFC 4033〜4035</td><td>完全性・出自認証(署名)。機密性は非対象=DoH/DoTと役割区別。<b>Q4</b>。</td></tr>
+      <tr><td><b>mTLS / PKCE</b></td><td>RFC 8705 / 7636</td><td>mTLS=相互認証＋証明書バウンドトークン(<b>Q5</b>)。PKCE=認可コード横取り対策。</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>💡 頻出の軸:</b> 「アクセス統制=SASE/SSE/ZTNA」「送信ドメイン認証=SPF/DKIM/DMARC」「DNSの完全性=DNSSEC・機密性=DoH/DoT」「相互認証・認可保護=mTLS/PKCE」。この役割取り違えが4択ひっかけの定番。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>6 / 14</span></div>
+</section>
+
+<!-- 7. TIPS -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🎯</span><div><h2>試験のコツ ＆ 頻出ひっかけ</h2><div class="sub">Exam Strategy &amp; Common Pitfalls</div></div><span class="badge">TIPS</span></div>
+  <div class="twocol">
+    <div class="panel ok"><h3>✅ 解くコツ</h3><ol>
+      <li>クラウド境界は<b>包含関係で暗記</b>：SASE⊃SSE⊃{SWG・CASB・ZTNA・FWaaS}。</li>
+      <li>ゼロトラストは「<b>常に検証</b>」。「一度信頼したら再認証省略」「セグメント全体到達」は必ず誤り。</li>
+      <li>送信ドメイン認証は3点セット：<b>SPF=IP／DKIM=署名／DMARC=アライメント＋ポリシー</b>。</li>
+      <li>DNSSECは<b>完全性・出自認証</b>のみ。暗号化(機密性)はDoH/DoTと言い切る。</li>
+    </ol></div>
+    <div class="panel warn"><h3>⚠️ よくあるひっかけ</h3><ul>
+      <li>SSEに「SD-WAN(NW機能)」を含める→それはSASE。CSPM/CNAPP/XDRはクラウド資産側で別概念。</li>
+      <li>「SPFで検証しているから安心」→ヘッダFrom詐称は防げない(アライメント欠如)。</li>
+      <li>「DNSSECで通信が暗号化される」は誤り。逆にDoHに「署名検証」を混ぜるのも誤り。</li>
+      <li>DMARCをいきなり<b>reject</b>で開始→正規メール誤ブロック。まず<b>none</b>で監視が定石。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>合言葉:</b> 「どの層(クラウド／認可／ドメイン／DNS／サービス間)×何を守る(範囲最小化／真正性／機密性)」で分類 → 対策は「<b>アプリ単位認可・段階運用・署名検証・相互認証・最小権限</b>」に集約される。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>7 / 14</span></div>
+</section>
+
+<!-- 8. Q1 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q1 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">SSE ・ SASE / クラウド境界</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">SASE(Secure Access Service Edge)の構成要素のうち、SASEからSD-WANなどのネットワーク機能を除き、SWG・CASB・ZTNAといったセキュリティ機能群だけを指す概念はどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>CNAPP</div>
+    <div class="opt"><span class="ol">イ</span>CSPM</div>
+    <div class="opt correct"><span class="ol">ウ</span>SSE</div>
+    <div class="opt"><span class="ol">エ</span>XDR</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ウ</span><span class="at">ア=クラウドネイティブ保護基盤／イ=設定ミス検出のポスチャ管理／エ=多層検知・対応(EDR拡張)</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">SASE ≒ SD-WAN(ネットワーク機能)＋SSE(セキュリティ機能)という関係で捉えられる。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">SSEはSWG/CASB/ZTNA/FWaaS等をクラウドで統合提供する概念。CSPM/CNAPP/XDRはアクセス経路上のエッジではなく別概念。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">アクセス経路のセキュリティはSSEに集約し、クラウド資産側の保護(CSPM/CNAPP)や検知(XDR)と役割分担する。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>8 / 14</span></div>
+</section>
+
+<!-- 9. Q2 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q2 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">ZTNA ・ ゼロトラスト</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">VPNの代替として用いられるZTNA(Zero Trust Network Access)の特徴として、最も適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>認証済み端末に対して社内ネットワークセグメント全体への到達性を付与する</div>
+    <div class="opt correct"><span class="ol">イ</span>アプリケーション単位でアクセスを許可し、認可されていないアプリの存在自体を秘匿する</div>
+    <div class="opt"><span class="ol">ウ</span>送信元IPをACLに登録した端末だけを常時信頼し、以後の再認証を省略する</div>
+    <div class="opt"><span class="ol">エ</span>拠点間をIPsecトンネルで接続し、境界ファイアウォールで一括制御する</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=VPNの過剰な信頼範囲／ウ=「常に検証」に反する／エ=従来の境界型NW</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">ZTNAは最小権限に基づきアプリ単位でアクセスを許可し、ブローカを介した接続を行う。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">認可外アプリの所在(IP/ポート)を外部から秘匿。「一度信頼で再認証省略」はゼロトラスト原則(never trust, always verify)に反する。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">セグメント全体を露出させず攻撃対象領域を縮小。都度、端末・利用者状態を評価(PDP)して認可する。</div></div>
+  </div>
+  <div class="memo"><b>💼 実務メモ:</b> 午後で頻出の「VPNの横展開(ラテラルムーブメント)を助長する理由」は<b>暗黙の信頼＋内部通信を都度検証しない</b>こと。ZTNA移行の効果=攻撃対象領域の縮小と紐づけて記述できるか。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>9 / 14</span></div>
+</section>
+
+<!-- 10. Q3 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q3 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">DMARC ・ 送信ドメイン認証</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">送信ドメイン認証に関する記述のうち、DMARCの説明として適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>許可メールサーバのIPをDNSのTXTに登録し、エンベロープFromの正当性を検証する</div>
+    <div class="opt"><span class="ol">イ</span>送信側が秘密鍵で署名し、受信側がDNS公開の公開鍵で改ざんを検知する</div>
+    <div class="opt correct"><span class="ol">ウ</span>SPF/DKIMの成功に加え、認証済みドメインとヘッダFromの一致(アライメント)を検証しnone/quarantine/rejectを適用する</div>
+    <div class="opt"><span class="ol">エ</span>quarantine以上で運用するドメインに対し、メールクライアント上でブランドロゴを表示する</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ウ</span><span class="at">ア=SPF／イ=DKIM／エ=BIMI(DMARC enforcementが前提)</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">DMARCはSPF/DKIMいずれかの認証成功に加え、認証済みドメインとヘッダFromのアライメントを要求する。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">SPFはエンベロープFrom、DKIMはd=ドメインとの一致。ヘッダFrom詐称を封じる点が本質。SPF/DKIM単体との違い。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">rua/rufレポートで送信実態を可視化しつつ、ポリシーをnone→quarantine→rejectと段階適用する。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>10 / 14</span></div>
+</section>
+
+<!-- 11. Q4 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q4 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">DNSSEC ・ 完全性・出自認証</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">権威DNSサーバの応答の完全性・出自を公開鍵署名で検証する技術と、その技術が担わない役割に関する記述として、最も適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt correct"><span class="ol">ア</span>DNSSECはRRSIG署名とDS/DNSKEYの信頼の連鎖で完全性・出自認証を保証するが、通信路の暗号化は行わない</div>
+    <div class="opt"><span class="ol">イ</span>DNSSECはクエリ・応答の全体をTLSで暗号化し、経路上の盗聴を防止する</div>
+    <div class="opt"><span class="ol">ウ</span>DoHはリソースレコードに署名を付与し、キャッシュポイズニングを署名検証で防ぐ</div>
+    <div class="opt"><span class="ol">エ</span>DNSSECはカミンスキー攻撃の緩和に無効であり、権威応答の真正性は保証しない</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ア</span><span class="at">イ=DNSSECは暗号化しない／ウ=署名はDNSSECの役割／エ=カミンスキー攻撃緩和に有効</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">DNSSECはRRSIG署名と、親ゾーンDSから子ゾーンDNSKEYへ至る信頼の連鎖を用いる。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">応答の完全性・出自認証(データ由来認証)を提供し、キャッシュポイズニング/カミンスキー攻撃の緩和に有効。ただしレコードは平文=機密性は非対象。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">通信路の暗号化(機密性)はDoH/DoTの役割。完全性はDNSSEC、機密性はDoH/DoTと役割分担する。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>11 / 14</span></div>
+</section>
+
+<!-- 12. Q5 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q5 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">mTLS ・ サービス間通信 / RFC 8705</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">ゼロトラストアーキテクチャ(NIST SP 800-207)やAPIのサービス間通信で用いられるmTLS(相互TLS)の説明として適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>サーバ証明書のみを検証し、クライアントはパスワードで認証する片方向TLSである</div>
+    <div class="opt correct"><span class="ol">イ</span>クライアントとサーバの双方が証明書を提示して相互認証し、証明書にバインドしたトークン発行にも利用される</div>
+    <div class="opt"><span class="ol">ウ</span>TLSハンドシェイクを省略し、事前共有鍵のみで通信を高速化する方式である</div>
+    <div class="opt"><span class="ol">エ</span>クライアント証明書の代わりにSPFレコードで送信元の正当性を検証する方式である</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=通常のサーバ認証型(片方向)TLS／ウ・エ=mTLSと無関係</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">mTLSはサーバ・クライアント双方が証明書を提示して相互認証を行うTLSである。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">ゼロトラストのサービス間通信やAPI保護に用いる。OAuth 2.0のmTLS(RFC 8705)は発行トークンをクライアント証明書に紐づける。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">証明書バウンドトークンにより、トークンが盗まれても対応する証明書がなければ悪用できず、盗用を防止する。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>12 / 14</span></div>
+</section>
+
+<!-- 13. 午後 記述 要点 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">📝</span><div><h2>午後 記述式 — シナリオ要点</h2><div class="sub">ゼロトラスト移行・SASE/SSE導入／メールセキュリティ・DNS運用</div></div><span class="badge">記述</span></div>
+  <div class="twocol">
+    <div class="panel" style="background:#eef4fb;border:1px solid #cfe0f2"><h3 style="color:var(--navy)">🔹 問1（秋想定）ZT移行とSSE導入(S社)</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">全社VPNの横展開の原因＝<b>接続端末を暗黙に信頼し内部通信を都度検証しない</b>信頼モデル。</li>
+      <li style="font-size:12px;margin-bottom:6px">ZTNA置換の効果＝<b>アプリ単位許可</b>でセグメント全体を露出させず、<b>攻撃対象領域を縮小</b>。</li>
+      <li style="font-size:12px;margin-bottom:6px">SaaS可視化・シャドーIT統制を担うのは<b>CASB</b>(未承認サービスへの持出し検知・遮断)。</li>
+      <li style="font-size:12px">認可を判断する論理コンポーネント＝<b>PDP(ポリシー決定点)</b>。PEPと取り違えない。</li>
+    </ul></div>
+    <div class="panel" style="background:#f4eefb;border:1px solid #ddc9f2"><h3 style="color:var(--violet)">🔹 問2（春想定）メール認証とDNS運用(F社)</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">SPFのみで防げない理由＝検証対象は<b>エンベロープFrom＋IP</b>、<b>ヘッダFrom詐称</b>は検知不可。</li>
+      <li style="font-size:12px;margin-bottom:6px">DKIM導入で可能に＝①<b>署名によるヘッダ/本文の改ざん検知</b>②<b>d=ドメインの正当性(IP非依存)</b>。</li>
+      <li style="font-size:12px;margin-bottom:6px">DMARCは<b>none(監視)から開始</b>＝設定漏れ・正規転送の誤ブロックを回避しつつ実態把握。</li>
+      <li style="font-size:12px">送信実態の把握＝<b>rua(集計レポート)</b>を活用(rufも可)。BIMI等の無関係機能は誤り。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>採点の分水嶺:</b> ①VPNは「暗黙の信頼・都度検証しない」と本質を突く ②ZTNAは「<b>アプリ単位＋セグメント非露出</b>」の2点 ③CASBと<b>PDP</b>を正しく指名 ④SPFの検証対象と<b>アライメント</b>の前提 ⑤DMARCは<b>noneが監視モード</b>である運用理由まで踏み込めているか。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>13 / 14</span></div>
+</section>
+
+<!-- 14. 統合サマリー -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🧭</span><div><h2>統合サマリー — 頻出ヒートマップ &amp; 総括</h2><div class="sub">出題可能性 × 難易度でネットワーク・クラウド・ゼロトラスト論点を俯瞰</div></div><span class="badge">SUMMARY</span></div>
+  <div class="heat">
+    <div class="hc colh">論点</div><div class="hc colh">出題可能性</div><div class="hc colh">難易度</div><div class="hc colh">対策・キーワード</div>
+    <div class="hc rowh">SASE / SSE (クラウド境界)</div><div class="hc h3lv">最有力</div><div class="hc h1lv">低</div><div class="hc h1lv">包含関係で暗記</div>
+    <div class="hc rowh">ZTNA / ゼロトラスト</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">アプリ単位認可/PDP</div>
+    <div class="hc rowh">DMARC / SPF / DKIM</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">アライメント/段階運用</div>
+    <div class="hc rowh">DNSSEC (完全性≠機密性)</div><div class="hc h2lv">高</div><div class="hc h2lv">中</div><div class="hc h1lv">署名検証/DoH区別</div>
+    <div class="hc rowh">mTLS / PKCE (認証・認可保護)</div><div class="hc h2lv">高</div><div class="hc h3lv">高</div><div class="hc h1lv">相互認証/証明書バウンド</div>
+  </div>
+  <div class="summary-note" style="margin-top:14px"><b>総括:</b> この分野は<b>午前IIの概念定義</b>(SSE・ZTNA・DMARC・DNSSEC・mTLS)と、<b>午後の実務シナリオ</b>(VPN→ゼロトラスト移行、なりすまし対策)の両輪で狙われる。役割の取り違え(SASE⊃SSE、完全性≠機密性、SPF≠アライメント、PDP≠PEP)を潰し、対策語彙「<b>アプリ単位認可・段階運用・署名検証・相互認証・最小権限</b>」を確実に書けるようにすること。</div>
+  <div class="disc">※本デッキはAIが過去問傾向・最新動向をもとに作成した予想問題です。正解・解説・図解は最終確認を推奨します。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — ネットワーク・クラウド・ゼロトラスト｜予想デッキ02</span><span>14 / 14</span></div>
+</section>
+
+</div>

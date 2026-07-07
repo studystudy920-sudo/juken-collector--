@@ -1,0 +1,394 @@
+<meta charset="utf-8">
+<title>SC予想 マルウェア・攻撃手法・インシデント対応 デッキ</title>
+<style>
+  :root{
+    --navy:#16233f; --navy2:#243a63; --ink:#1c2534; --sub:#5b6b82;
+    --line:#d7dfea; --bg:#eef2f7; --card:#ffffff;
+    --teal:#0e7490; --tealbg:#e0f2f6;
+    --violet:#6d28d9; --violetbg:#efe7fc;
+    --amber:#b45309; --amberbg:#fdf1dd;
+    --red:#c1272d; --redbg:#fce8e8;
+    --green:#15803d; --greenbg:#e4f3e9;
+    --shadow:0 6px 22px rgba(20,35,64,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;padding:26px 0 60px}
+  .deck{display:flex;flex-direction:column;align-items:center;gap:26px}
+  .slide{position:relative;width:1120px;aspect-ratio:16/9;background:var(--card);
+    border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
+    padding:38px 44px 54px;display:flex;flex-direction:column}
+  .slide.pad-tight{padding:30px 40px 50px}
+  /* header band */
+  .hbar{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:16px;
+    border-bottom:3px solid var(--navy)}
+  .hbar .ic{font-size:26px;line-height:1}
+  .hbar h2{margin:0;font-size:23px;font-weight:800;color:var(--navy);letter-spacing:.2px}
+  .hbar .sub{margin:2px 0 0;font-size:13px;color:var(--sub);font-weight:600}
+  .hbar .badge{margin-left:auto;background:var(--navy);color:#fff;font-size:12px;font-weight:800;
+    padding:5px 12px;border-radius:999px;letter-spacing:1px}
+  .foot{position:absolute;left:44px;right:44px;bottom:16px;display:flex;justify-content:space-between;
+    font-size:11px;color:#93a2b8;border-top:1px solid var(--line);padding-top:8px}
+  .foot b{color:var(--navy);font-weight:800}
+  /* cover */
+  .cover{background:linear-gradient(135deg,#16233f 0%,#243a63 55%,#3a2b63 100%);color:#fff;justify-content:center}
+  .cover .kicker{font-size:14px;letter-spacing:3px;color:#a9c4ff;font-weight:700;text-transform:uppercase}
+  .cover h1{font-size:44px;margin:14px 0 8px;font-weight:900;line-height:1.15}
+  .cover .lead{font-size:17px;color:#d7e2f5;max-width:760px}
+  .cover .deckno{position:absolute;top:34px;right:44px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 16px;font-weight:800;font-size:14px}
+  .qprev{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:26px}
+  .qprev .qc{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:12px;
+    padding:12px 12px 14px}
+  .qprev .qn{font-size:12px;font-weight:800;color:#a9c4ff}
+  .qprev .qt{font-size:13px;font-weight:700;margin:5px 0 8px;color:#fff;line-height:1.3}
+  .qprev .qtag{font-size:11px;color:#ffd7a1;font-weight:700}
+  .cover .meta{margin-top:26px;font-size:13px;color:#b9c6de;display:flex;gap:22px;flex-wrap:wrap}
+  .cover .note{margin-top:10px;font-size:11.5px;color:#8ea2c4}
+  /* flow map */
+  .flow{display:flex;align-items:stretch;gap:6px;margin-top:6px}
+  .fnode{flex:1;background:var(--tealbg);border:1px solid #bfe0e8;border-radius:12px;padding:12px 12px 14px;display:flex;flex-direction:column}
+  .fnode .fq{font-size:12px;font-weight:900;color:var(--teal)}
+  .fnode .fh{font-size:14px;font-weight:800;margin:4px 0 6px;color:var(--ink)}
+  .fnode .fd{font-size:11.5px;color:#40566f;flex:1}
+  .fnode .fp{margin-top:8px;font-size:10.5px;color:var(--teal);border-top:1px dashed #a9d2dc;padding-top:6px}
+  .farrow{display:flex;align-items:center;color:#8fb7c2;font-size:22px;font-weight:900}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .step{border-radius:12px;padding:12px 14px;border-left:6px solid}
+  .step.s1{background:var(--violetbg);border-color:var(--violet)}
+  .step.s2{background:var(--tealbg);border-color:var(--teal)}
+  .step.s3{background:var(--amberbg);border-color:var(--amber)}
+  .step .sk{font-size:12px;font-weight:900}
+  .step.s1 .sk{color:var(--violet)} .step.s2 .sk{color:var(--teal)} .step.s3 .sk{color:var(--amber)}
+  .step .st{font-size:13px;color:#33465e;margin-top:4px}
+  /* generic tables */
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:4px}
+  th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+  th{background:var(--navy);color:#fff;font-weight:800;font-size:12px}
+  tbody tr:nth-child(even){background:#f6f9fc}
+  .cmp th:first-child{background:var(--navy2)}
+  .cmp td:first-child{background:#eef2f7;font-weight:800;color:var(--navy);text-align:center;width:19%}
+  .cmp .good{background:var(--greenbg)} .cmp .bad{background:var(--redbg)}
+  .cmp thead th.g{background:var(--green)} .cmp thead th.b{background:var(--red)}
+  /* glossary */
+  .gloss{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:4px}
+  .gi{border:1px solid var(--line);border-left:5px solid var(--violet);border-radius:8px;padding:9px 12px;background:#fff}
+  .gi .gt{font-size:13px;font-weight:800;color:var(--navy)}
+  .gi .ge{font-size:11px;color:var(--sub);font-weight:600}
+  .gi .gd{font-size:11.5px;color:#3c4d63;margin-top:4px}
+  .gi .gr{font-size:10.5px;color:var(--teal);margin-top:5px;font-weight:700}
+  /* tips */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px}
+  .panel{border-radius:12px;padding:14px 16px}
+  .panel.ok{background:var(--greenbg);border:1px solid #bfe0c9}
+  .panel.warn{background:var(--redbg);border:1px solid #f0c9c9}
+  .panel h3{margin:0 0 8px;font-size:15px;font-weight:900}
+  .panel.ok h3{color:var(--green)} .panel.warn h3{color:var(--red)}
+  .panel ol,.panel ul{margin:0;padding-left:20px}
+  .panel li{font-size:12.5px;margin-bottom:7px;color:#33465e}
+  /* question slide */
+  .qhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .qhead .qbig{background:var(--violet);color:#fff;font-weight:900;font-size:14px;border-radius:8px;padding:5px 11px}
+  .qhead .season{font-size:11px;font-weight:800;color:#fff;background:var(--teal);border-radius:999px;padding:3px 10px}
+  .qhead .freq{margin-left:auto;font-size:12px;font-weight:800;color:var(--amber)}
+  .qbody{font-size:14px;font-weight:700;color:var(--ink);background:#f4f7fb;border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin-bottom:10px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin-bottom:12px}
+  .opt{font-size:12px;color:#3c4d63;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .opt.correct{background:var(--greenbg);border-color:#8fc7a0;font-weight:700;color:#14532d}
+  .opt .ol{font-weight:900;color:var(--navy);margin-right:5px}
+  .opt.correct .ol{color:var(--green)}
+  .sru{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .sc{border-radius:11px;padding:11px 13px;border-top:5px solid}
+  .sc.sky{background:#e8f1fb;border-color:#2f6fb3}
+  .sc.rain{background:var(--amberbg);border-color:var(--amber)}
+  .sc.umb{background:var(--greenbg);border-color:var(--green)}
+  .sc .sh{font-size:12.5px;font-weight:900;display:flex;align-items:center;gap:6px}
+  .sc.sky .sh{color:#2f6fb3} .sc.rain .sh{color:var(--amber)} .sc.umb .sh{color:var(--green)}
+  .sc .sb{font-size:11.5px;color:#33465e;margin-top:6px}
+  .ansrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ansrow .ab{background:var(--green);color:#fff;font-weight:900;font-size:13px;border-radius:8px;padding:4px 12px}
+  .ansrow .at{font-size:12.5px;color:var(--sub);font-weight:700}
+  .memo{margin-top:10px;background:#f0edf9;border-left:5px solid var(--violet);border-radius:8px;
+    padding:8px 12px;font-size:11.5px;color:#3a2b63}
+  .memo b{color:var(--violet)}
+  /* heatmap */
+  .heat{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:6px;margin-top:6px;font-size:12px}
+  .heat .hc{padding:9px 10px;border-radius:7px;text-align:center;font-weight:700}
+  .heat .rowh{background:#eef2f7;text-align:left;font-weight:800;color:var(--navy)}
+  .heat .colh{background:var(--navy);color:#fff;text-align:center;font-weight:800}
+  .h3lv{background:var(--red);color:#fff} .h2lv{background:var(--amber);color:#fff} .h1lv{background:var(--greenbg);color:#14532d}
+  .summary-note{margin-top:14px;font-size:12.5px;color:#33465e;background:var(--tealbg);border-radius:10px;padding:12px 14px;border:1px solid #bfe0e8}
+  .summary-note b{color:var(--teal)}
+  .disc{font-size:10.5px;color:#93a2b8;margin-top:auto}
+  @media print{body{background:#fff;padding:0}
+    .slide{box-shadow:none;border:1px solid #ccc;border-radius:0;page-break-after:always;width:100%;margin:0}
+    .deck{gap:0}}
+</style>
+
+<div class="deck">
+
+<!-- 1. COVER -->
+<section class="slide cover">
+  <div class="deckno">SC 予想デッキ 05 / 07</div>
+  <div class="kicker">SC Exam Prep — Predicted 2026</div>
+  <h1>マルウェア・攻撃手法・インシデント対応</h1>
+  <div class="lead">MITRE ATT&amp;CK／ランサムウェア／EDR/XDR/MDR／フォレンジック。侵入から横展開・被害・検知・証拠保全までの「攻防のライフサイクル」を5問で体系学習する。</div>
+  <div class="qprev">
+    <div class="qc"><div class="qn">Q1 · Framework</div><div class="qt">MITRE ATT&amp;CK の TTP 3階層</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q2 · Ransomware</div><div class="qt">イミュータブルバックアップ運用</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q3 · Detection</div><div class="qt">EDR / XDR / MDR の違い</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q4 · Forensics</div><div class="qt">揮発性の順序(Order of Volatility)</div><div class="qtag">頻出 ★★☆</div></div>
+    <div class="qc"><div class="qn">Q5 · Lateral</div><div class="qt">Pass the Hash による横展開</div><div class="qtag">頻出 ★★☆</div></div>
+  </div>
+  <div class="meta"><span>📚 基礎概念 5枚</span><span>📝 問題演習 5問</span><span>🎯 統合サマリー</span><span>🗓 2026 春・秋 想定</span></div>
+  <div class="note">※ 過去問傾向(令和3〜7年)と最新動向をもとにAIが作成した予想問題です。実際の試験問題ではありません。最終確認を推奨します。</div>
+</section>
+
+<!-- 2. LEARNING MAP -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🗺️</span><div><h2>学習マップ — 5問の相互関係</h2><div class="sub">「共通言語 → 侵入・横展開 → 被害 → 検知 → 証拠保全」の攻防ライフサイクル</div></div><span class="badge">MAP</span></div>
+  <div class="flow">
+    <div class="fnode"><div class="fq">Q1</div><div class="fh">ATT&amp;CK</div><div class="fd">攻撃者の振る舞いを Tactics/Techniques/Procedures で体系化。全問の共通言語</div><div class="fp">Framework / 定義問題</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q5</div><div class="fh">横展開</div><div class="fd">Pass the Hash で平文復元なしに他システムへ認証。Lateral Movement</div><div class="fp">攻撃技法 / T1550.002</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q2</div><div class="fh">ランサム</div><div class="fd">暗号化＋窃取。バックアップも破壊される→イミュータブル/オフライン</div><div class="fp">Impact / 3-2-1</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q3</div><div class="fh">検知/対応</div><div class="fd">EDR→XDR(横断相関)→MDR(運用代行)。検知・封じ込め基盤</div><div class="fp">SOC / 監視体制</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q4</div><div class="fh">保全</div><div class="fd">揮発性の高い順(メモリ→ディスク)に証拠保全。ライブ採取が要</div><div class="fp">Forensics / 事後対応</div></div>
+  </div>
+  <div class="steps">
+    <div class="step s1"><div class="sk">STEP 1 ｜ WHY</div><div class="st">攻撃を「戦術×技法(TTP)」で捉え、キルチェーンとの違いと攻防の全体像を掴む</div></div>
+    <div class="step s2"><div class="sk">STEP 2 ｜ HOW</div><div class="st">5問で「攻撃技法／検知製品／保全原則」を判別し、混同ひっかけを切る</div></div>
+    <div class="step s3"><div class="sk">STEP 3 ｜ WHAT</div><div class="st">空-雨-傘で対策(MFA・イミュータブル・振る舞い検知・ライブ保全)へ落とす</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>2 / 14</span></div>
+</section>
+
+<!-- 3. CONCEPT 1: 攻撃ライフサイクル分類マップ -->
+<section class="slide">
+  <div class="hbar"><span class="ic">①</span><div><h2>基礎概念 — 攻撃ライフサイクルと本デッキの配置</h2><div class="sub">キルチェーン(線)× ATT&amp;CK 戦術(面)の2軸で5問と主要技法を俯瞰</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:20%">キルチェーン段階</th><th style="width:26%">対応する ATT&amp;CK 戦術(例)</th><th>代表技法・本デッキ論点</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:800;color:var(--navy)">配送・エクスプロイト</td><td>Initial Access</td><td>VPN 不正ログイン(MFA未導入・パスワード使い回し)／フィッシング</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">インストール・C2</td><td>Execution / Command &amp; Control</td><td style="background:var(--tealbg)">正規プロセスからの PowerShell 実行(LotL)／<b>コネクトバック通信</b></td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">目的の実行(内部活動)</td><td style="background:var(--violetbg)">Credential Access / Lateral Movement</td><td style="background:var(--violetbg)">LSASS ダンプ／<b>Q5</b> Pass the Hash(T1550.002)＝横展開</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">目的の実行(被害)</td><td style="background:var(--redbg)">Impact</td><td style="background:var(--redbg)"><b>Q2</b> ランサムウェア(二重脅迫)／バックアップ暗号化</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">検知・対応・事後</td><td>Detection / Response(防御側)</td><td><b>Q3</b> EDR/XDR/MDR ／ <b>Q4</b> フォレンジック(揮発性順) ／ 全体を <b>Q1 ATT&amp;CK</b> で整理</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>核心:</b> キルチェーンは偵察〜目的実行を並べた<b>直線(線)</b>のモデル、ATT&amp;CK は順序を前提としない<b>網羅マトリクス(面)</b>。攻撃の各段階を <b>Q1 ATT&amp;CK</b> の戦術で言語化し、被害(Q2)・検知(Q3)・保全(Q4)・横展開(Q5)を配置すると全体像が一枚で見える。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>3 / 14</span></div>
+</section>
+
+<!-- 4. CONCEPT 2: 混同比較表 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">②</span><div><h2>基礎概念 — 混同しやすい概念 比較表</h2><div class="sub">似て見えるが「役割・段階・対象」が異なる5ペア</div></div><span class="badge">CONCEPT</span></div>
+  <table class="cmp">
+    <thead><tr><th>対象概念</th><th class="g">🟢 概念A</th><th class="b">🔴 概念B（混同パターン）</th></tr></thead>
+    <tbody>
+      <tr><td>攻撃モデル</td><td class="good">キルチェーン：偵察〜目的実行を<b>直線的に順序づけた「線」</b>のモデル</td><td class="bad">ATT&amp;CK：順序を前提としない<b>網羅的な手法辞書「面」</b>(マトリクス)</td></tr>
+      <tr><td>TTP の階層</td><td class="good">Tactics=目的(What)／Techniques=手段(How)：<b>汎用的な手法分類</b></td><td class="bad">Procedures/IOC：<b>特定攻撃者の具体実装</b>や IP・ハッシュ等の個別指標</td></tr>
+      <tr><td>PtH の戦術</td><td class="good">取得済みハッシュの<b>再利用</b>＝Lateral Movement/Defense Evasion</td><td class="bad">ハッシュを<b>ダンプする行為</b>自体＝Credential Access(取り違え注意)</td></tr>
+      <tr><td>監視の範囲</td><td class="good">EDR：<b>エンドポイント</b>の検知・対応／XDR：NW・クラウド・ID まで<b>横断相関</b></td><td class="bad">SIEM＝ログ収集・相関の<b>製品</b>／SOAR＝対応<b>自動化</b>(いずれも別概念)</td></tr>
+      <tr><td>バックアップ</td><td class="good">イミュータブル＋<b>オフライン/エアギャップ</b>＋3-2-1で隔離保管</td><td class="bad">本番と同一 NAS に<b>常時オンライン</b>保存＝暗号化が同時波及</td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>4 / 14</span></div>
+</section>
+
+<!-- 5. CONCEPT 3: 用語集 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">③</span><div><h2>基礎概念 — 必須用語集</h2><div class="sub">攻撃手法・IR の5問を解く8用語</div></div><span class="badge">CONCEPT</span></div>
+  <div class="gloss">
+    <div class="gi"><div class="gt">TTP <span class="ge">Tactics / Techniques / Procedures</span></div><div class="gd">Tactics=目的(What)、Techniques=手段(How)、Procedures=特定攻撃者の具体的実装。1技法は複数戦術に属し得る。</div><div class="gr">🔖 MITRE ATT&amp;CK</div></div>
+    <div class="gi"><div class="gt">IOC <span class="ge">Indicator of Compromise</span></div><div class="gd">IPアドレス・ファイルハッシュ等の侵害指標。Techniques より低抽象度で個別的。Techniques と混同しない。</div><div class="gr">🔖 侵害指標</div></div>
+    <div class="gi"><div class="gt">二重脅迫 <span class="ge">Double Extortion</span></div><div class="gd">暗号化に加えデータを窃取し、支払わなければ公開すると脅す手口。単なる「ランサムウェア」では不可。</div><div class="gr">🔖 ランサム最新動向</div></div>
+    <div class="gi"><div class="gt">イミュータブルバックアップ <span class="ge">Immutable / WORM</span></div><div class="gd">書き換え・削除ができない保存。3-2-1(3世代・2媒体・1拠点分離)＋オフライン/エアギャップが定石。</div><div class="gr">🔖 3-2-1 ルール</div></div>
+    <div class="gi"><div class="gt">EDR / XDR / MDR</div><div class="gd">EDR=端末の検知・対応、XDR=EDRをNW/クラウド/ID等へ拡張し横断相関、MDR=監視・運用を外部が代行。</div><div class="gr">🔖 検知・運用</div></div>
+    <div class="gi"><div class="gt">揮発性の順序 <span class="ge">Order of Volatility</span></div><div class="gd">揮発性の高い順(CPUレジスタ/キャッシュ→メモリ→ディスクログ→媒体)に保全。電源断で消える情報を優先。</div><div class="gr">🔖 証拠保全の原則</div></div>
+    <div class="gi"><div class="gt">Pass the Hash <span class="ge">PtH</span></div><div class="gd">NTLMハッシュ等をそのまま認証に再利用し、平文復元なしで横展開。ATT&amp;CK では T1550.002。</div><div class="gr">🔖 T1550.002</div></div>
+    <div class="gi"><div class="gt">Living off the Land <span class="ge">LotL</span></div><div class="gd">PowerShell 等の正規ツールを悪用する手法。シグネチャを回避するため振る舞い検知が有効。</div><div class="gr">🔖 正規ツール悪用</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>5 / 14</span></div>
+</section>
+
+<!-- 6. CONCEPT 4: フレームワーク/ツールマトリクス -->
+<section class="slide">
+  <div class="hbar"><span class="ic">④</span><div><h2>基礎概念 — フレームワーク・ツールマトリクス</h2><div class="sub">「攻撃体系／防御体系／検知製品／可視化ツール」を混同しない</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:22%">名称</th><th style="width:22%">種別</th><th>要点（試験での問われ方）</th></tr></thead>
+    <tbody>
+      <tr><td><b>MITRE ATT&amp;CK</b></td><td>攻撃TTPの体系化(面)</td><td>実観測の攻撃者の振る舞いを戦術×技法で網羅。<b>Q1の題材</b>。順序を前提としないマトリクス。</td></tr>
+      <tr><td>サイバーキルチェーン</td><td>攻撃段階モデル(線)</td><td>偵察〜目的実行を直線的な7段階で示す。ATT&amp;CK とは相補的に併用(排他ではない)。</td></tr>
+      <tr><td>MITRE D3FEND</td><td>防御技術の体系化</td><td><b>対策側</b>のマッピング。攻撃TTPの体系化ではない=キルチェーン/ATT&amp;CKとの取り違えに注意。</td></tr>
+      <tr><td>ATT&amp;CK Navigator</td><td>可視化ツール</td><td>自社検知ルールが<b>どの技術をカバーし空白があるか</b>を可視化。午後問2の解。SIEM/SOARは不可。</td></tr>
+      <tr><td>EDR / XDR</td><td>検知・対応 製品</td><td>EDR=端末、XDR=横断相関。<b>Q3の題材</b>。振る舞い検知でLotL/未知亜種に対応。</td></tr>
+      <tr><td>MDR / SOC</td><td>監視・運用サービス</td><td>EDR/XDR の監視・運用を専門ベンダが24時間代行。SIEM(製品)・SOAR(自動化)とは別。</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>💡 頻出の軸:</b> 「攻撃を体系化=ATT&amp;CK/キルチェーン」「防御を体系化=D3FEND」「検知製品=EDR/XDR」「運用代行=MDR」「カバレッジ可視化=Navigator」。この取り違えが4択・午後のひっかけの定番。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>6 / 14</span></div>
+</section>
+
+<!-- 7. TIPS -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🎯</span><div><h2>試験のコツ ＆ 頻出ひっかけ</h2><div class="sub">Exam Strategy &amp; Common Pitfalls</div></div><span class="badge">TIPS</span></div>
+  <div class="twocol">
+    <div class="panel ok"><h3>✅ 解くコツ</h3><ol>
+      <li>ATT&amp;CK は<b>What=Tactics / How=Techniques / 実装=Procedures</b>の3階層。番号は Tactics=TA、Techniques=T。</li>
+      <li>横展開の技法(PtH)は<b>取得済みハッシュの「再利用」</b>=Lateral Movement。ダンプ行為(Credential Access)と分ける。</li>
+      <li>ランサム対策は<b>イミュータブル＋オフライン(エアギャップ)＋3-2-1</b>が正解語彙。</li>
+      <li>フォレンジックは<b>揮発性の高い順</b>=メモリ→ディスク→媒体。ライブ(活性)採取を優先。</li>
+    </ol></div>
+    <div class="panel warn"><h3>⚠️ よくあるひっかけ</h3><ul>
+      <li>EDR と XDR の説明を<b>逆</b>にする／SIEM(収集)・SOAR(自動化)をEDRと混同。</li>
+      <li>バックアップを「本番と同一NASに常時オンライン」=<b>同時暗号化</b>で復旧不可。</li>
+      <li>PtHで「平文パスワードを復元して」と書く選択肢=<b>復元しない</b>のが本質。</li>
+      <li>「単なるランサムウェア」で二重脅迫を答える／保全で先に<b>電源を切る</b>=揮発情報消失。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>合言葉:</b> 「攻撃は TTP で言語化」→ 対策は「<b>MFA・イミュータブル/オフライン・横断相関(XDR)・振る舞い検知・ライブ保全</b>」の5語彙に集約される。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>7 / 14</span></div>
+</section>
+
+<!-- 8. Q1 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q1 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">MITRE ATT&amp;CK ・ TTP の3階層</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">MITRE ATT&amp;CK(Enterprise)における Tactics、Techniques、Procedures(TTP)の関係の説明として、適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>Procedures は攻撃者の最終目的を表す最上位の分類であり、その下位に Tactics と Techniques が位置づけられる</div>
+    <div class="opt correct"><span class="ol">イ</span>Tactics は達成しようとする目的(What)、Techniques はその手段(How)を表し、個々の攻撃者による具体的な実装が Procedures である</div>
+    <div class="opt"><span class="ol">ウ</span>Techniques は個別の攻撃で観測された IP アドレスやファイルハッシュなどの侵害指標(IOC)そのものを指す</div>
+    <div class="opt"><span class="ol">エ</span>Tactics は T 番号、Techniques は TA 番号で識別され、両者は 1 対 1 に対応する</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=階層が逆／ウ=IOCはProceduresより個別・低抽象度／エ=番号割当が逆かつ1対1でない</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">Tactics=目的(What)、Techniques=手段(How)、Procedures=特定攻撃者の具体的実装、という3階層。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">識別子は Tactics=TA、Techniques=T(サブは T####.###)。1技法は複数戦術に属し得るため1対1ではない。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">TTP を共通言語に脅威分析を行い、汎用手法(Techniques)と個別指標(IOC/Procedures)を分けて整理する。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>8 / 14</span></div>
+</section>
+
+<!-- 9. Q2 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q2 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">ランサムウェア ・ バックアップ運用</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">ランサムウェアによる被害拡大を防ぐためのバックアップ運用として、最も効果が高いものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>バックアップデータを本番サーバと同一のファイルサーバ上の別フォルダに毎時保存する</div>
+    <div class="opt correct"><span class="ol">イ</span>書き換え・削除ができないイミュータブル(改変不可)ストレージへ保存し、あわせてオフラインの複製を保持する</div>
+    <div class="opt"><span class="ol">ウ</span>バックアップ管理者と本番システム管理者に同一の特権アカウントを共有させ、復旧を迅速化する</div>
+    <div class="opt"><span class="ol">エ</span>ネットワーク上で常時オンラインの単一の共有ストレージに世代を集約し、容量効率を最優先する</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア・エ=常時オンライン・同一系統で同時波及／ウ=特権共有で一括破壊リスク増</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">近年のランサムウェアはバックアップの探索・破壊を定石とする。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">書き換え・削除不可のイミュータブル、3-2-1(3世代・2媒体・1拠点分離)、オフライン/エアギャップが有効。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">イミュータブル/WORM保存＋<b>オフライン隔離複製</b>。特権アカウントは分離し一括破壊を防ぐ。</div></div>
+  </div>
+  <div class="memo"><b>💼 実務メモ:</b> 午後のランサム設問で頻出。「バックアップが本番と<b>同一・オンライン・書き換え可能</b>」だった点を復旧失敗の要因として特定できるかが分水嶺。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>9 / 14</span></div>
+</section>
+
+<!-- 10. Q3 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q3 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">EDR / XDR / MDR ・ 検知と運用</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">EDR、XDR、MDR の説明の組合せとして、適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>EDR はネットワーク・クラウド・メール・ID まで横断的に相関分析する仕組みであり、XDR はエンドポイント単体に限定した監視である</div>
+    <div class="opt correct"><span class="ol">イ</span>XDR は EDR の監視範囲をエンドポイント外へ拡張し横断的に相関分析する仕組みであり、MDR はそれらの監視・運用を外部が代行するサービスである</div>
+    <div class="opt"><span class="ol">ウ</span>MDR はログを収集・相関する製品(SIEM)そのものを指し、EDR/XDR とは無関係である</div>
+    <div class="opt"><span class="ol">エ</span>EDR は対応を自動化するプレイブック実行基盤(SOAR)の別称であり、XDR はその上位互換である</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=EDRとXDRの説明が逆／ウ=SIEMは別概念／エ=SOARは別概念</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">EDR=エンドポイントの監視・検知・対応、XDR=EDRを端末外へ拡張し横断相関。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">MDR=これらの監視・運用を専門ベンダが代行するサービス。SIEM(収集)・SOAR(自動化)とは別。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">端末はEDR、横断相関はXDRで補い、自社に人的リソースが無ければMDRで24時間監視を委託。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>10 / 14</span></div>
+</section>
+
+<!-- 11. Q4 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q4 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">フォレンジック ・ Order of Volatility</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">インシデント対応におけるディジタルフォレンジックスで、揮発性の高い情報から順に証拠保全を行う原則(Order of Volatility)に従うとき、最も優先して取得すべきものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>ハードディスク上のログファイル</div>
+    <div class="opt correct"><span class="ol">イ</span>CPU レジスタ・キャッシュおよびメモリ上の情報</div>
+    <div class="opt"><span class="ol">ウ</span>定期バックアップ用の磁気テープ</div>
+    <div class="opt"><span class="ol">エ</span>監視カメラの録画データ</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">揮発性の高い順=メモリ→ディスクログ(ア)→バックアップ媒体(ウ)→物理記録(エ)</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">CPUレジスタ・キャッシュ・メモリ上の情報は電源断で失われる。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">メモリには実行中プロセス・NW接続状態・復号された暗号鍵が含まれ、最優先で保全すべき。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">電源を切らず<b>活性(ライブ)状態</b>で揮発性情報から採取し、以降ディスク・媒体の順で保全する。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>11 / 14</span></div>
+</section>
+
+<!-- 12. Q5 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q5 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">Pass the Hash ・ 横展開(Lateral Movement)</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">攻撃者が窃取済みの認証情報のハッシュ値を用い、平文パスワードを復元することなく他システムへ認証を通す横展開(Lateral Movement)の手法はどれか。</div>
+  <div class="opts">
+    <div class="opt correct"><span class="ol">ア</span>Pass the Hash</div>
+    <div class="opt"><span class="ol">イ</span>DNS リフレクション攻撃</div>
+    <div class="opt"><span class="ol">ウ</span>クリプトジャッキング</div>
+    <div class="opt"><span class="ol">エ</span>ディレクトリトラバーサル</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ア</span><span class="at">イ=DNS悪用のDRDoS／ウ=無断マイニング／エ=想定外ファイルへの不正アクセス</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">NTLMハッシュ等をそのまま認証に再利用し、平文復元なしで他システムへ認証を通す。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">ATT&amp;CK では T1550.002。ハッシュの<b>再利用</b>=Lateral Movement/Defense Evasion。ダンプ行為(Credential Access)と分ける。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">LSASS保護・特権分離・NTLM制限・管理者ログオン制限、EDRでの認証情報アクセス検知。</div></div>
+  </div>
+  <div class="memo"><b>💼 実務メモ:</b> 取得済みハッシュの<b>再利用</b>が横展開/防御回避、<b>ダンプ行為</b>自体が Credential Access。この戦術の区別を問う選択肢が定番のひっかけ。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>12 / 14</span></div>
+</section>
+
+<!-- 13. 午後 記述 要点 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">📝</span><div><h2>午後 記述式 — シナリオ要点</h2><div class="sub">ランサムウェアIR ／ SOC 検知強化・フォレンジック</div></div><span class="badge">記述</span></div>
+  <div class="twocol">
+    <div class="panel" style="background:#eef4fb;border:1px solid #cfe0f2"><h3 style="color:var(--navy)">🔹 問1（秋想定）ランサムウェアIR</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">暗号化＋窃取・暴露で金銭要求 → <b>二重脅迫(ダブルエクストーション)</b>。「ランサムウェア」だけでは不可。</li>
+      <li style="font-size:12px;margin-bottom:6px">侵入要因(認証観点)＝<b>VPNにMFA未導入(単要素)</b>＋<b>パスワード使い回し</b>(漏えい済み認証情報の悪用)。</li>
+      <li style="font-size:12px;margin-bottom:6px">復旧失敗＝バックアップが<b>本番と同一NASにオンライン・書換可</b>で同時暗号化。改善=イミュータブル＋オフライン/3-2-1。</li>
+      <li style="font-size:12px">ATT&amp;CK戦術：LSASSダンプ=<b>Credential Access</b>／RDP他サーバ接続=<b>Lateral Movement</b>。</li>
+    </ul></div>
+    <div class="panel" style="background:#f4eefb;border:1px solid #ddc9f2"><h3 style="color:var(--violet)">🔹 問2（春想定）SOC検知・フォレンジック</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">感染端末から外部C2へ自ら接続 → <b>コネクトバック通信</b>。境界FWは内→外を広く許可し正規通信に紛れ通過。</li>
+      <li style="font-size:12px;margin-bottom:6px">隔離後に電源を切らず<b>ライブ保全</b>＝メモリ・NW接続・復号鍵は電源断で消失(Order of Volatility)。</li>
+      <li style="font-size:12px;margin-bottom:6px">正規プロセスからのPowerShell難読化実行＝<b>振る舞い(挙動)検知</b>。LotL型はシグネチャ回避のため連鎖を評価。</li>
+      <li style="font-size:12px">検知カバレッジと空白の可視化＝<b>ATT&amp;CK Navigator</b>(SIEM/SOARは不可)。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>採点の分水嶺:</b> ①「<b>二重脅迫</b>」を明示 ②MFA未導入＋使い回しの<b>両方</b> ③バックアップが同一・オンライン・書換可だった点＋イミュータブル/オフラインの二つ ④<b>Credential Access と Lateral Movement を取り違えない</b> ⑤Navigator を挙げられるか。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>13 / 14</span></div>
+</section>
+
+<!-- 14. 統合サマリー -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🧭</span><div><h2>統合サマリー — 頻出ヒートマップ &amp; 総括</h2><div class="sub">出題可能性 × 難易度で攻撃・IR論点を俯瞰</div></div><span class="badge">SUMMARY</span></div>
+  <div class="heat">
+    <div class="hc colh">論点</div><div class="hc colh">出題可能性</div><div class="hc colh">難易度</div><div class="hc colh">対策語彙</div>
+    <div class="hc rowh">MITRE ATT&amp;CK / TTP・キルチェーン</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">What/How/実装</div>
+    <div class="hc rowh">ランサムウェア / 二重脅迫・バックアップ</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">イミュータブル/3-2-1</div>
+    <div class="hc rowh">EDR / XDR / MDR</div><div class="hc h3lv">最有力</div><div class="hc h1lv">低</div><div class="hc h1lv">横断相関/運用代行</div>
+    <div class="hc rowh">フォレンジック / 揮発性の順序</div><div class="hc h2lv">高</div><div class="hc h2lv">中</div><div class="hc h1lv">メモリ優先/ライブ保全</div>
+    <div class="hc rowh">横展開 / Pass the Hash・LotL</div><div class="hc h2lv">高</div><div class="hc h3lv">高</div><div class="hc h1lv">再利用=横展開/振る舞い検知</div>
+  </div>
+  <div class="summary-note" style="margin-top:14px"><b>総括:</b> 攻撃・IR分野は<b>午前IIの用語定義</b>(ATT&amp;CK・EDR/XDR/MDR・PtH・揮発性順)と、<b>午後の実務シナリオ</b>(ランサムウェアIR・SOC検知)の両輪で狙われる。全論点を<b>ATT&amp;CKの戦術</b>で言語化し、対策は「MFA・イミュータブル/オフライン・XDR横断相関・振る舞い検知・ライブ保全」に集約して固めること。</div>
+  <div class="disc">※本デッキはAIが過去問傾向・最新動向をもとに作成した予想問題です。正解・解説・図解は最終確認を推奨します。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — マルウェア・攻撃手法・インシデント対応｜予想デッキ05</span><span>14 / 14</span></div>
+</section>
+
+</div>

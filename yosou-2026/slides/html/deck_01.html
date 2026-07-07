@@ -1,0 +1,391 @@
+<meta charset="utf-8">
+<title>SC予想 暗号・認証・PKI デッキ</title>
+<style>
+  :root{
+    --navy:#16233f; --navy2:#243a63; --ink:#1c2534; --sub:#5b6b82;
+    --line:#d7dfea; --bg:#eef2f7; --card:#ffffff;
+    --teal:#0e7490; --tealbg:#e0f2f6;
+    --violet:#6d28d9; --violetbg:#efe7fc;
+    --amber:#b45309; --amberbg:#fdf1dd;
+    --red:#c1272d; --redbg:#fce8e8;
+    --green:#15803d; --greenbg:#e4f3e9;
+    --shadow:0 6px 22px rgba(20,35,64,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;padding:26px 0 60px}
+  .deck{display:flex;flex-direction:column;align-items:center;gap:26px}
+  .slide{position:relative;width:1120px;aspect-ratio:16/9;background:var(--card);
+    border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
+    padding:38px 44px 54px;display:flex;flex-direction:column}
+  .slide.pad-tight{padding:30px 40px 50px}
+  /* header band */
+  .hbar{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:16px;
+    border-bottom:3px solid var(--navy)}
+  .hbar .ic{font-size:26px;line-height:1}
+  .hbar h2{margin:0;font-size:23px;font-weight:800;color:var(--navy);letter-spacing:.2px}
+  .hbar .sub{margin:2px 0 0;font-size:13px;color:var(--sub);font-weight:600}
+  .hbar .badge{margin-left:auto;background:var(--navy);color:#fff;font-size:12px;font-weight:800;
+    padding:5px 12px;border-radius:999px;letter-spacing:1px}
+  .foot{position:absolute;left:44px;right:44px;bottom:16px;display:flex;justify-content:space-between;
+    font-size:11px;color:#93a2b8;border-top:1px solid var(--line);padding-top:8px}
+  .foot b{color:var(--navy);font-weight:800}
+  /* cover */
+  .cover{background:linear-gradient(135deg,#16233f 0%,#243a63 55%,#3a2b63 100%);color:#fff;justify-content:center}
+  .cover .kicker{font-size:14px;letter-spacing:3px;color:#a9c4ff;font-weight:700;text-transform:uppercase}
+  .cover h1{font-size:44px;margin:14px 0 8px;font-weight:900;line-height:1.15}
+  .cover .lead{font-size:17px;color:#d7e2f5;max-width:760px}
+  .cover .deckno{position:absolute;top:34px;right:44px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 16px;font-weight:800;font-size:14px}
+  .qprev{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:26px}
+  .qprev .qc{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:12px;
+    padding:12px 12px 14px}
+  .qprev .qn{font-size:12px;font-weight:800;color:#a9c4ff}
+  .qprev .qt{font-size:13px;font-weight:700;margin:5px 0 8px;color:#fff;line-height:1.3}
+  .qprev .qtag{font-size:11px;color:#ffd7a1;font-weight:700}
+  .cover .meta{margin-top:26px;font-size:13px;color:#b9c6de;display:flex;gap:22px;flex-wrap:wrap}
+  .cover .note{margin-top:10px;font-size:11.5px;color:#8ea2c4}
+  /* flow map */
+  .flow{display:flex;align-items:stretch;gap:6px;margin-top:6px}
+  .fnode{flex:1;background:var(--tealbg);border:1px solid #bfe0e8;border-radius:12px;padding:12px 12px 14px;display:flex;flex-direction:column}
+  .fnode .fq{font-size:12px;font-weight:900;color:var(--teal)}
+  .fnode .fh{font-size:14px;font-weight:800;margin:4px 0 6px;color:var(--ink)}
+  .fnode .fd{font-size:11.5px;color:#40566f;flex:1}
+  .fnode .fp{margin-top:8px;font-size:10.5px;color:var(--teal);border-top:1px dashed #a9d2dc;padding-top:6px}
+  .farrow{display:flex;align-items:center;color:#8fb7c2;font-size:22px;font-weight:900}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .step{border-radius:12px;padding:12px 14px;border-left:6px solid}
+  .step.s1{background:var(--violetbg);border-color:var(--violet)}
+  .step.s2{background:var(--tealbg);border-color:var(--teal)}
+  .step.s3{background:var(--amberbg);border-color:var(--amber)}
+  .step .sk{font-size:12px;font-weight:900}
+  .step.s1 .sk{color:var(--violet)} .step.s2 .sk{color:var(--teal)} .step.s3 .sk{color:var(--amber)}
+  .step .st{font-size:13px;color:#33465e;margin-top:4px}
+  /* generic tables */
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:4px}
+  th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+  th{background:var(--navy);color:#fff;font-weight:800;font-size:12px}
+  tbody tr:nth-child(even){background:#f6f9fc}
+  .cmp th:first-child{background:var(--navy2)}
+  .cmp td:first-child{background:#eef2f7;font-weight:800;color:var(--navy);text-align:center;width:19%}
+  .cmp .good{background:var(--greenbg)} .cmp .bad{background:var(--redbg)}
+  .cmp thead th.g{background:var(--green)} .cmp thead th.b{background:var(--red)}
+  /* glossary */
+  .gloss{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:4px}
+  .gi{border:1px solid var(--line);border-left:5px solid var(--violet);border-radius:8px;padding:9px 12px;background:#fff}
+  .gi .gt{font-size:13px;font-weight:800;color:var(--navy)}
+  .gi .ge{font-size:11px;color:var(--sub);font-weight:600}
+  .gi .gd{font-size:11.5px;color:#3c4d63;margin-top:4px}
+  .gi .gr{font-size:10.5px;color:var(--teal);margin-top:5px;font-weight:700}
+  /* tips */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px}
+  .panel{border-radius:12px;padding:14px 16px}
+  .panel.ok{background:var(--greenbg);border:1px solid #bfe0c9}
+  .panel.warn{background:var(--redbg);border:1px solid #f0c9c9}
+  .panel h3{margin:0 0 8px;font-size:15px;font-weight:900}
+  .panel.ok h3{color:var(--green)} .panel.warn h3{color:var(--red)}
+  .panel ol,.panel ul{margin:0;padding-left:20px}
+  .panel li{font-size:12.5px;margin-bottom:7px;color:#33465e}
+  /* question slide */
+  .qhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .qhead .qbig{background:var(--violet);color:#fff;font-weight:900;font-size:14px;border-radius:8px;padding:5px 11px}
+  .qhead .season{font-size:11px;font-weight:800;color:#fff;background:var(--teal);border-radius:999px;padding:3px 10px}
+  .qhead .freq{margin-left:auto;font-size:12px;font-weight:800;color:var(--amber)}
+  .qbody{font-size:14px;font-weight:700;color:var(--ink);background:#f4f7fb;border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin-bottom:10px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin-bottom:12px}
+  .opt{font-size:12px;color:#3c4d63;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .opt.correct{background:var(--greenbg);border-color:#8fc7a0;font-weight:700;color:#14532d}
+  .opt .ol{font-weight:900;color:var(--navy);margin-right:5px}
+  .opt.correct .ol{color:var(--green)}
+  .sru{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .sc{border-radius:11px;padding:11px 13px;border-top:5px solid}
+  .sc.sky{background:#e8f1fb;border-color:#2f6fb3}
+  .sc.rain{background:var(--amberbg);border-color:var(--amber)}
+  .sc.umb{background:var(--greenbg);border-color:var(--green)}
+  .sc .sh{font-size:12.5px;font-weight:900;display:flex;align-items:center;gap:6px}
+  .sc.sky .sh{color:#2f6fb3} .sc.rain .sh{color:var(--amber)} .sc.umb .sh{color:var(--green)}
+  .sc .sb{font-size:11.5px;color:#33465e;margin-top:6px}
+  .ansrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ansrow .ab{background:var(--green);color:#fff;font-weight:900;font-size:13px;border-radius:8px;padding:4px 12px}
+  .ansrow .at{font-size:12.5px;color:var(--sub);font-weight:700}
+  .memo{margin-top:10px;background:#f0edf9;border-left:5px solid var(--violet);border-radius:8px;
+    padding:8px 12px;font-size:11.5px;color:#3a2b63}
+  .memo b{color:var(--violet)}
+  /* heatmap */
+  .heat{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:6px;margin-top:6px;font-size:12px}
+  .heat .hc{padding:9px 10px;border-radius:7px;text-align:center;font-weight:700}
+  .heat .rowh{background:#eef2f7;text-align:left;font-weight:800;color:var(--navy)}
+  .heat .colh{background:var(--navy);color:#fff;text-align:center;font-weight:800}
+  .h3lv{background:var(--red);color:#fff} .h2lv{background:var(--amber);color:#fff} .h1lv{background:var(--greenbg);color:#14532d}
+  .summary-note{margin-top:14px;font-size:12.5px;color:#33465e;background:var(--tealbg);border-radius:10px;padding:12px 14px;border:1px solid #bfe0e8}
+  .summary-note b{color:var(--teal)}
+  .disc{font-size:10.5px;color:#93a2b8;margin-top:auto}
+  @media print{body{background:#fff;padding:0}
+    .slide{box-shadow:none;border:1px solid #ccc;border-radius:0;page-break-after:always;width:100%;margin:0}
+    .deck{gap:0}}
+</style>
+
+<div class="deck">
+
+<!-- 1. COVER -->
+<section class="slide cover">
+  <div class="deckno">SC 予想デッキ 01 / 07</div>
+  <div class="kicker">SC Exam Prep — Predicted 2026</div>
+  <h1>暗号・認証・PKI</h1>
+  <div class="lead">PKCE／パスキー(FIDO2/WebAuthn)／OIDC／OCSP／mTLS／耐量子暗号(PQC)。認証・認可・鍵基盤の頻出論点を、代表5問で「経路」と「役割」から体系学習する。</div>
+  <div class="qprev">
+    <div class="qc"><div class="qn">Q1 · RFC 7636</div><div class="qt">PKCE と認可コード横取り対策</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q2 · WebAuthn</div><div class="qt">パスキーのフィッシング耐性</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q3 · OIDC</div><div class="qt">ID トークン(JWT)の検証</div><div class="qtag">頻出 ★★☆</div></div>
+    <div class="qc"><div class="qn">Q4 · OCSP</div><div class="qt">OCSP ステープリング</div><div class="qtag">頻出 ★★☆</div></div>
+    <div class="qc"><div class="qn">Q5 · RFC 8705</div><div class="qt">mTLS と証明書バインドトークン</div><div class="qtag">頻出 ★★☆</div></div>
+  </div>
+  <div class="meta"><span>📚 基礎概念 5枚</span><span>📝 問題演習 5問</span><span>🎯 統合サマリー</span><span>🗓 2026 春・秋 想定</span></div>
+  <div class="note">※ 過去問傾向(令和3〜7年)と最新動向をもとにAIが作成した予想問題です。実際の試験問題ではありません。最終確認を推奨します。</div>
+</section>
+
+<!-- 2. LEARNING MAP -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🗺️</span><div><h2>学習マップ — 5問の相互関係</h2><div class="sub">「フロント認証 → 認可コード → 認証連携 → 失効確認 → サーバ間信頼」の動線</div></div><span class="badge">MAP</span></div>
+  <div class="flow">
+    <div class="fnode"><div class="fq">Q1</div><div class="fh">PKCE</div><div class="fd">公開クライアントの認可コード横取りを防ぎ、正規主体だけがトークン交換できる</div><div class="fp">RFC 7636 / OAuth 2.0</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q2</div><div class="fh">パスキー</div><div class="fd">オリジンを署名対象にバインドしRPが検証。偽ドメインで署名検証不成立</div><div class="fp">FIDO2 / WebAuthn</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q3</div><div class="fh">OIDC</div><div class="fd">IDトークン(JWT)で「誰が認証されたか」を伝達。iss/aud/exp/nonce検証</div><div class="fp">OIDC / 認証と認可</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q4</div><div class="fh">OCSP</div><div class="fd">証明書の失効確認。ステープリングでプライバシ・可用性を改善</div><div class="fp">RFC 6960 / PKI</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q5</div><div class="fh">mTLS</div><div class="fd">相互TLS＋証明書バインドトークンで盗難トークンの再利用を阻止</div><div class="fp">RFC 8705 / ゼロトラスト</div></div>
+  </div>
+  <div class="steps">
+    <div class="step s1"><div class="sk">STEP 1 ｜ WHY</div><div class="st">「認証(誰か)・認可(何を許可)・PKI(鍵/証明書)」の3層で全体像を掴む</div></div>
+    <div class="step s2"><div class="sk">STEP 2 ｜ HOW</div><div class="st">5問で「どの層・どのRFCの話か」を判別し、混同狙いの選択肢を切る</div></div>
+    <div class="step s3"><div class="sk">STEP 3 ｜ WHAT</div><div class="st">空-雨-傘で対策(オリジン束縛・鍵所有証明・完全一致・失効確認)へ落とす</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>2 / 14</span></div>
+</section>
+
+<!-- 3. CONCEPT 1: 全体像 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">①</span><div><h2>基礎概念 — 認証・認可・PKI 全体マップ</h2><div class="sub">「通信の主体(層)」×「認証／認可／鍵基盤」の2軸で本デッキ5問を配置</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:20%">通信の主体 / 層</th><th>認証（誰か）</th><th>認可・トークン（何を許可）</th><th>証明書・鍵基盤（PKI / 暗号）</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:800;color:var(--navy)">利用者 ⇄ Webサイト(RP)</td><td style="background:var(--violetbg)"><b>Q2</b> パスキー(FIDO2/WebAuthn)／ジェイルブレイク不可のオリジン束縛</td><td><b>Q1</b> 認可コードフロー＋PKCE(RFC 7636)</td><td>TLSサーバ証明書</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">認証連携 IdP ⇄ RP</td><td style="background:var(--tealbg)"><b>Q3</b> OIDC IDトークン(JWT)／認証層</td><td>OAuthアクセストークン(RFC 6749/6750, Bearer)</td><td>JWT署名 / JWKS(kid で公開鍵取得)</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">サーバ ⇄ サーバ / 基盤</td><td style="background:var(--amberbg)"><b>Q5</b> mTLS(相互TLS)でクライアント認証</td><td>証明書バインドトークン(RFC 8705)／DPoP(RFC 9449)</td><td style="background:var(--redbg)"><b>Q4</b> 失効確認 OCSP/CRL・<b>PQC</b> 移行</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>核心:</b> 論点は「①どの層の通信か(フロント／認証連携／サーバ間)」と「②何の話か(認証=誰か／認可=何を許可／PKI=鍵・証明書)」で切り分けられる。<b>認証(OIDC IDトークン)と認可(OAuthアクセストークン)の混同</b>、および<b>失効確認方式(OCSP/CRL/ステープリング)の取り違え</b>が4択の定番ひっかけ。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>3 / 14</span></div>
+</section>
+
+<!-- 4. CONCEPT 2: 混同比較表 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">②</span><div><h2>基礎概念 — 混同しやすい概念 比較表</h2><div class="sub">似て見えるが「役割・経路・対策」が異なる5ペア</div></div><span class="badge">CONCEPT</span></div>
+  <table class="cmp">
+    <thead><tr><th>対象概念</th><th class="g">🟢 概念A</th><th class="b">🔴 概念B（混同パターン）</th></tr></thead>
+    <tbody>
+      <tr><td>トークンの役割</td><td class="good">OIDC IDトークン＝<b>認証</b>「誰が認証されたか」をRPへ伝達</td><td class="bad">OAuthアクセストークン＝<b>認可</b>「何にアクセス可か」。認証as認可の混同</td></tr>
+      <tr><td>失効確認方式</td><td class="good">OCSPステープリング＝サーバが署名済み応答を<b>TLSに添付</b>し提示</td><td class="bad">従来OCSP＝クライアントが<b>レスポンダへ直接問合せ</b>、アクセス先が漏れる</td></tr>
+      <tr><td>トークン束縛</td><td class="good">送信者制約トークン＝<b>鍵所有の証明</b>にバインド(cert-bound/DPoP)</td><td class="bad">ベアラトークン＝<b>所持者なら誰でも利用可</b>、盗難再利用に弱い</td></tr>
+      <tr><td>パスキー種別</td><td class="good">device-bound passkey＝鍵が<b>認証器内に留まり</b>攻撃面が狭い</td><td class="bad">synced passkey＝クラウド同期で<b>アカウント乗っ取り時に一括危殆化</b></td></tr>
+      <tr><td>redirect_uri登録</td><td class="good">完全一致(exact)登録＝コード送信先を<b>厳格に固定</b></td><td class="bad">前方一致(部分一致)＝<b>コード横取り/オープンリダイレクト</b>悪用</td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>4 / 14</span></div>
+</section>
+
+<!-- 5. CONCEPT 3: 用語集 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">③</span><div><h2>基礎概念 — 必須用語集</h2><div class="sub">暗号・認証・PKI 5問を解く8用語(根拠RFC/規格つき)</div></div><span class="badge">CONCEPT</span></div>
+  <div class="gloss">
+    <div class="gi"><div class="gt">PKCE <span class="ge">Proof Key for Code Exchange</span></div><div class="gd">認可要求ごとに code_verifier(乱数)とハッシュ code_challenge(S256)を用い、認可コード横取り者の交換を阻止(検知でなく交換のbinding)。</div><div class="gr">🔖 RFC 7636 / OAuth 2.0</div></div>
+    <div class="gi"><div class="gt">FIDO2 / WebAuthn <span class="ge">パスキー</span></div><div class="gd">clientDataにオリジン、authenticatorDataにrpIdHashを含めて認証器が署名。RPがオリジン一致を検証し偽サイトでは不成立=フィッシング耐性。</div><div class="gr">🔖 W3C WebAuthn / CTAP</div></div>
+    <div class="gi"><div class="gt">OIDC IDトークン <span class="ge">OpenID Connect</span></div><div class="gd">OAuth上の認証層。JWSで署名されたJWTで「誰が認証されたか」を伝達。iss/aud/exp、要求時はnonceを検証して初めて信頼可。</div><div class="gr">🔖 OIDC Core / JWT(RFC 7519)</div></div>
+    <div class="gi"><div class="gt">OCSPステープリング <span class="ge">OCSP Stapling</span></div><div class="gd">サーバがCA(レスポンダ)から取得した署名済みOCSP応答をTLSハンドシェイクに添付。署名者は常にCA。プライバシ・可用性を改善。</div><div class="gr">🔖 RFC 6960 / RFC 6066</div></div>
+    <div class="gi"><div class="gt">証明書バインドトークン <span class="ge">certificate-bound</span></div><div class="gd">アクセストークンをmTLSクライアント証明書のサムプリント(cnf の x5t#S256)に束縛。秘密鍵なしでは盗難トークンを再利用できない。</div><div class="gr">🔖 RFC 8705</div></div>
+    <div class="gi"><div class="gt">DPoP <span class="ge">Demonstrating PoP</span></div><div class="gd">クライアント保有鍵で署名したDPoP証明をリクエストに付与し、トークンを鍵所有に束縛する送信者制約方式。ベアラ盗難再利用を防ぐ。</div><div class="gr">🔖 RFC 9449</div></div>
+    <div class="gi"><div class="gt">JWKS / kid <span class="ge">JSON Web Key Set</span></div><div class="gd">署名検証用の公開鍵集合。JWTヘッダのkidで対応鍵を選択。複数鍵の並行公開で無停止の鍵ローテーションが可能。</div><div class="gr">🔖 RFC 7517</div></div>
+    <div class="gi"><div class="gt">耐量子暗号(PQC) <span class="ge">Post-Quantum</span></div><div class="gd">ショアのアルゴリズムでRSA/ECCが危殆化。格子ベース(ML-KEM等)へ移行。計算量的仮定に依存し情報理論的安全ではない。</div><div class="gr">🔖 FIPS 203 / CRYPTREC</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>5 / 14</span></div>
+</section>
+
+<!-- 6. CONCEPT 4: 規格/RFCマトリクス -->
+<section class="slide">
+  <div class="hbar"><span class="ic">④</span><div><h2>基礎概念 — 規格・RFC マトリクス</h2><div class="sub">「認証／認可／トークン束縛／失効／PQC」の根拠を取り違えない</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:26%">規格 / RFC</th><th style="width:20%">種別</th><th>要点（試験での問われ方）</th></tr></thead>
+    <tbody>
+      <tr><td><b>RFC 7636</b> PKCE</td><td>認可コード保護</td><td>code_verifier/challenge(S256)でコード横取りを阻止。<b>Q1の正解</b>。公開クライアント向け。</td></tr>
+      <tr><td>RFC 6749 / 6750 OAuth 2.0</td><td>認可フレームワーク</td><td>認可コード・アクセストークン(Bearer)。あくまで<b>認可</b>であり認証ではない。</td></tr>
+      <tr><td>OpenID Connect Core</td><td>認証層</td><td>OAuth上のIDトークン(JWT)で<b>認証</b>。iss/aud/exp/nonce検証。<b>Q3の正解</b>。</td></tr>
+      <tr><td>W3C WebAuthn / FIDO2</td><td>パスワードレス認証</td><td>オリジンを署名対象に束縛しRPが検証=フィッシング耐性。<b>Q2の正解</b>。</td></tr>
+      <tr><td><b>RFC 8705</b>(mTLS) / <b>RFC 9449</b>(DPoP)</td><td>送信者制約トークン</td><td>cnf(x5t#S256)/鍵所有証明でトークンを束縛。<b>Q5</b>・午後の狙い目。</td></tr>
+      <tr><td>RFC 6960 OCSP / RFC 5280 CRL</td><td>証明書失効</td><td>OCSP=個別問合せ、CRL=一覧DL、ステープリング=TLS添付。<b>Q4</b>。</td></tr>
+      <tr><td>FIPS 203 ML-KEM / CRYPTREC</td><td>耐量子暗号(PQC)</td><td>ショアでRSA/ECC危殆化→格子ベース移行。移行期はハイブリッド鍵交換が推奨。</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>💡 頻出の軸:</b> 「認証=OIDC/WebAuthn」「認可=OAuth」「トークン束縛=RFC 8705/9449」「失効=OCSP/CRL」「PQC=FIPS 203」。RFC番号と“何の話か”をセットで暗記すると4択のひっかけを外さない。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>6 / 14</span></div>
+</section>
+
+<!-- 7. TIPS -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🎯</span><div><h2>試験のコツ ＆ 頻出ひっかけ</h2><div class="sub">Exam Strategy &amp; Common Pitfalls</div></div><span class="badge">TIPS</span></div>
+  <div class="twocol">
+    <div class="panel ok"><h3>✅ 解くコツ</h3><ol>
+      <li><b>認証か認可か</b>で峻別：IDトークン(誰か)=OIDC/認証、アクセストークン(何を許可)=OAuth/認可。</li>
+      <li>フィッシング耐性の本質は「<b>オリジンを署名にバインドしRPが検証</b>」。OTPやパスワードハッシュは本質でない。</li>
+      <li>トークン盗難対策は「<b>鍵所有の証明に束縛</b>(cert-bound/DPoP/mTLS)」=送信者制約トークン。</li>
+      <li>PKCEは"検知"でなく<b>"交換の阻止(binding)"</b>。redirect_uriは<b>完全一致</b>登録。</li>
+    </ol></div>
+    <div class="panel warn"><h3>⚠️ よくあるひっかけ</h3><ul>
+      <li>パスキーを「<b>秘密鍵が漏れない</b>」だけで説明→それは鍵漏えい耐性で別論点、減点。</li>
+      <li>OCSPステープリングの利点と従来OCSPの課題を取り違える。<b>署名者は常にCA</b>(Webサーバでない)。</li>
+      <li>「クッキー暗号化」「有効期限短縮」だけではトークン窃取再利用を<b>緩和しきれない</b>(束縛が主眼)。</li>
+      <li>PQCは<b>情報理論的安全ではない</b>。AES-256はGroverでも実用上安全。ハイブリッド鍵交換は<b>推奨</b>(避けるは誤)。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>合言葉:</b> 「層(どこ)×役割(認証/認可/PKI)」で分類 → 対策は「<b>オリジン束縛・鍵所有証明・完全一致・失効確認・ハイブリッド移行</b>」の5語彙に集約される。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>7 / 14</span></div>
+</section>
+
+<!-- 8. Q1 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q1 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">PKCE ・ RFC 7636</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">OAuth 2.0 の認可コードフローに PKCE(Proof Key for Code Exchange)を適用する主目的として、最も適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>アクセストークンを JWT 形式にし、リソースサーバでの署名検証を可能にする</div>
+    <div class="opt"><span class="ol">イ</span>認可サーバとリソースサーバ間の通信を相互 TLS で保護する</div>
+    <div class="opt correct"><span class="ol">ウ</span>悪意のあるアプリによる認可コードの横取りを防ぎ、正規クライアント(元の認可要求を出した主体)だけがトークンと交換できるようにする</div>
+    <div class="opt"><span class="ol">エ</span>リフレッシュトークンの有効期限を延長し、再認可の頻度を下げる</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ウ</span><span class="at">ア=JWTアクセストークンの話／イ=mTLSの話／エ=PKCEの目的ではない</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">ネイティブ/SPAなど公開クライアントでは、認可コードを横取り(Authorization Code Interception)され得る。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">要求ごとにcode_verifier(高エントロピー乱数)を生成しcode_challenge(S256)を送付、交換時にverifierを提示して束縛。本質は「検知」でなく交換の阻止。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">PKCE適用で、コードを横取りした第三者はcode_verifierを知らずトークン交換できない。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>8 / 14</span></div>
+</section>
+
+<!-- 9. Q2 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q2 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">パスキー ・ FIDO2/WebAuthn</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">FIDO2/WebAuthn によるパスキー認証がフィッシングに耐性をもつ根本的な理由として、最も適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>認証のたびにワンタイムパスワードを生成し、一定時間で失効させるため</div>
+    <div class="opt correct"><span class="ol">イ</span>署名対象データにアクセス先のオリジン情報がバインドされ、RP がオリジンの一致を検証するため、偽ドメインでは署名検証が成立しない</div>
+    <div class="opt"><span class="ol">ウ</span>秘密鍵をサーバ側にも複製保管し、突合により本人性を確認するため</div>
+    <div class="opt"><span class="ol">エ</span>利用者が入力したパスワードをソルト付きハッシュで保存するため</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=OTPはAiTM中継で突破され得る／ウ=秘密鍵は認証器内に留まる(誤)／エ=本質でない</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">clientDataに乱数チャレンジとオリジン、authenticatorDataにrpIdHashが含まれ、認証器がそのハッシュに署名する。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">RPは署名検証時にオリジン/rpIdHashの一致を検証。オリジンの異なる偽サイトでは検証に失敗し、資格情報もrpIdのオリジンでしか呼ばれない。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">パスワードレス+オリジン束縛のパスキーへ移行。秘密鍵はサーバへ渡らず認証器内に留まる。</div></div>
+  </div>
+  <div class="memo"><b>💼 実務メモ:</b> AiTM(中間者型)フィッシングではOTPも中継突破される。「秘密鍵が漏れない」だけでは説明不足で、<b>オリジンを署名にバインドしRPが検証</b>と書けるかが分水嶺。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>9 / 14</span></div>
+</section>
+
+<!-- 10. Q3 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q3 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">OIDC ID トークン ・ 認証と認可</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">OpenID Connect(OIDC)における ID トークンに関する記述のうち、適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt correct"><span class="ol">ア</span>ID トークンは JWS で署名された JWT であり、iss・aud・exp・(要求時は)nonce 等のクレームを検証して初めて認証結果として信頼できる</div>
+    <div class="opt"><span class="ol">イ</span>ID トークンは認可(アクセス権の委譲)そのものを表し、リソースアクセスに直接使用する</div>
+    <div class="opt"><span class="ol">ウ</span>ID トークンの署名検証には、クライアントとサーバで事前共有した対称鍵のみを用いる</div>
+    <div class="opt"><span class="ol">エ</span>ID トークンは平文の JSON であり、TLS 上で送るため署名は不要である</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ア</span><span class="at">イ=アクセストークンの役割(認証/認可の混同)／ウ=非対称鍵(RS256等)が一般／エ=改ざん検知に署名必須</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">OIDCはOAuth 2.0上に構築した「認証」層で、IDトークン(JWT)により「誰が認証されたか」を伝える。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">受信側RPは署名(通常RS256、JWKSからkidで公開鍵取得)とiss/aud/expを必ず検証し、リプレイ防止に要求時はnonceも照合する。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">検証項目の徹底を運用に組み込む。認証(IDトークン)と認可(アクセストークン)を混同しない。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>10 / 14</span></div>
+</section>
+
+<!-- 11. Q4 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q4 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">OCSP ステープリング ・ RFC 6960</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">電子証明書の失効確認方式である OCSP と、そのプライバシ・可用性上の課題を改善する OCSP ステープリングに関する記述のうち、適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>OCSP ステープリングでは、クライアントが検証対象サーバごとに OCSP レスポンダへ直接問い合わせるため、利用者のアクセス先が漏れる</div>
+    <div class="opt correct"><span class="ol">イ</span>OCSP ステープリングでは、サーバがあらかじめ取得した有効期限付きの署名済み OCSP レスポンスを TLS ハンドシェイク時にクライアントへ提示する</div>
+    <div class="opt"><span class="ol">ウ</span>OCSP は CRL 全体をダウンロードして失効を確認する方式であり、証明書ごとの個別問い合わせはできない</div>
+    <div class="opt"><span class="ol">エ</span>OCSP ステープリングを用いると、失効情報の署名者は当該 Web サーバ自身になる</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=従来OCSPの課題(ステープリングでない)／ウ=CRLの説明／エ=署名者はCA(OCSPレスポンダ)</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">サーバがCA(OCSPレスポンダ)から取得した署名済みレスポンスをTLSハンドシェイクに添付(staple)し、Certificate Statusとして提示する。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">クライアントがレスポンダへ直接問い合わせないため、アクセス先の漏えいを防ぎ、レスポンダの負荷・可用性依存も下げる。署名者はあくまでCA。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">ステープリング採用でプライバシと可用性を両立。従来OCSP直問合せ/CRL一覧DLとの違いを整理。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>11 / 14</span></div>
+</section>
+
+<!-- 12. Q5 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q5 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">mTLS ＋ 証明書バインドトークン ・ RFC 8705</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">サーバ間 API 通信で mTLS(相互 TLS)と、証明書にバインドしたアクセストークン(certificate-bound token, RFC 8705)を組み合わせる主目的として、最も適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt correct"><span class="ol">ア</span>トークンが漏えいしても、対応するクライアント証明書の秘密鍵を持たない第三者は当該トークンを使えないようにする</div>
+    <div class="opt"><span class="ol">イ</span>トークンのペイロードを暗号化し、リソースサーバ以外が内容を読めないようにする</div>
+    <div class="opt"><span class="ol">ウ</span>トークンの有効期限を無期限にし、再発行を不要にする</div>
+    <div class="opt"><span class="ol">エ</span>クライアントがパスワードを送信することで多要素認証を実現する</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ア</span><span class="at">イ・ウ・エはいずれも目的ではない</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">アクセストークンを、mTLSで提示したクライアント証明書のサムプリント(確認方法クレーム cnf の x5t#S256)に束縛する。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">リソースサーバは提示時のmTLS証明書のハッシュとcnfを照合。盗まれても正規証明書の秘密鍵がなければ利用できず、ベアラ盗難再利用(リプレイ)を防ぐ。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">ゼロトラストのサービス間通信で、送信者制約トークン(cert-bound / DPoP)を採用してトークン窃取の被害を封じる。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>12 / 14</span></div>
+</section>
+
+<!-- 13. 午後 記述 要点 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">📝</span><div><h2>午後 記述式 — シナリオ要点</h2><div class="sub">パスワードレス認証導入／外部API連携の OAuth・PKI 運用</div></div><span class="badge">記述</span></div>
+  <div class="twocol">
+    <div class="panel" style="background:#eef4fb;border:1px solid #cfe0f2"><h3 style="color:var(--navy)">🔹 問1（春想定）社内SaaSパスワードレス認証</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">設問1：AiTMでパスワード+SMS OTP突破・クッキー窃取 → パスキー移行。<b>オリジンを署名対象にバインドしRPが検証</b>するため偽ドメインで署名検証不成立。</li>
+      <li style="font-size:12px;margin-bottom:6px">設問2：セッション乗っ取り残存 → <b>送信者制約トークン</b>(RFC 8705 cert-bound / RFC 9449 DPoP / DBSC)で鍵所有証明に束縛し窃取再利用を防止。</li>
+      <li style="font-size:12px">設問3：synced passkeyは<b>同期クラウドアカウントが防御境界</b>となり、乗っ取り時に複数デバイスが一括危殆化。</li>
+    </ul></div>
+    <div class="panel" style="background:#f4eefb;border:1px solid #ddc9f2"><h3 style="color:var(--violet)">🔹 問2（秋想定）外部API連携 OAuth＋PKI</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">設問1：JWT検証は署名＋<b>aud</b>(未検証=トークン転用/混同)＋<b>exp</b>(未検証=失効/期限切れ受理継続)。iss/nbfでも可。</li>
+      <li style="font-size:12px;margin-bottom:6px">設問2：JWKSに<b>kid付き複数鍵を並行公開</b>、新旧のオーバーラップ期間＋キャッシュTTL考慮で無停止ローテーション。</li>
+      <li style="font-size:12px">設問3：redirect_uri前方一致 → <b>認可コード横取り/オープンリダイレクト悪用</b>。是正策は<b>完全一致(exact)登録</b>。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>採点の分水嶺:</b> ①フィッシング耐性は「<b>オリジン署名バインド＋RP検証</b>」(鍵漏えい耐性と区別) ②残存対策は「<b>鍵所有証明への束縛(送信者制約)</b>」 ③JWTは<b>aud/exp</b>まで検証 ④redirect_uriは<b>完全一致</b>・鍵は<b>kidで無停止ローテーション</b>まで踏み込めているか。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>13 / 14</span></div>
+</section>
+
+<!-- 14. 統合サマリー -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🧭</span><div><h2>統合サマリー — 頻出ヒートマップ &amp; 総括</h2><div class="sub">出題可能性 × 難易度で暗号・認証・PKI論点を俯瞰</div></div><span class="badge">SUMMARY</span></div>
+  <div class="heat">
+    <div class="hc colh">論点</div><div class="hc colh">出題可能性</div><div class="hc colh">難易度</div><div class="hc colh">対策語彙</div>
+    <div class="hc rowh">PKCE / 認可コード保護(RFC 7636)</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">verifier束縛・完全一致</div>
+    <div class="hc rowh">パスキー(FIDO2/WebAuthn)</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">オリジン署名バインド</div>
+    <div class="hc rowh">OIDC IDトークン検証</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">iss/aud/exp/nonce</div>
+    <div class="hc rowh">OCSP / ステープリング</div><div class="hc h2lv">高</div><div class="hc h1lv">低</div><div class="hc h1lv">署名者はCA</div>
+    <div class="hc rowh">mTLS / 送信者制約トークン</div><div class="hc h2lv">高</div><div class="hc h3lv">高</div><div class="hc h1lv">cert-bound/DPoP</div>
+    <div class="hc rowh">PQC移行(ショア/ML-KEM)</div><div class="hc h2lv">高</div><div class="hc h2lv">中</div><div class="hc h1lv">ハイブリッド鍵交換</div>
+  </div>
+  <div class="summary-note" style="margin-top:14px"><b>総括:</b> 本分野は<b>午前IIの定義問題</b>(PKCE・OCSPステープリング・RFC 8705・ショア等)と、<b>午後の実務シナリオ</b>(パスワードレス認証・OAuth/PKI運用)の両面で狙われる。既存Web/暗号知識と接続する<b>認証と認可の峻別</b>、フィッシング耐性の本質=<b>オリジン束縛</b>、トークン盗難対策=<b>鍵所有証明への束縛</b>を最優先で固めること。</div>
+  <div class="disc">※本デッキはAIが過去問傾向・最新動向をもとに作成した予想問題です。正解・解説・図解は最終確認を推奨します。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — 暗号・認証・PKI｜予想デッキ01</span><span>14 / 14</span></div>
+</section>
+
+</div>

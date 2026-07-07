@@ -1,0 +1,391 @@
+<meta charset="utf-8">
+<title>SC予想 AIセキュリティ・LLM デッキ</title>
+<style>
+  :root{
+    --navy:#16233f; --navy2:#243a63; --ink:#1c2534; --sub:#5b6b82;
+    --line:#d7dfea; --bg:#eef2f7; --card:#ffffff;
+    --teal:#0e7490; --tealbg:#e0f2f6;
+    --violet:#6d28d9; --violetbg:#efe7fc;
+    --amber:#b45309; --amberbg:#fdf1dd;
+    --red:#c1272d; --redbg:#fce8e8;
+    --green:#15803d; --greenbg:#e4f3e9;
+    --shadow:0 6px 22px rgba(20,35,64,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;padding:26px 0 60px}
+  .deck{display:flex;flex-direction:column;align-items:center;gap:26px}
+  .slide{position:relative;width:1120px;aspect-ratio:16/9;background:var(--card);
+    border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
+    padding:38px 44px 54px;display:flex;flex-direction:column}
+  .slide.pad-tight{padding:30px 40px 50px}
+  /* header band */
+  .hbar{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:16px;
+    border-bottom:3px solid var(--navy)}
+  .hbar .ic{font-size:26px;line-height:1}
+  .hbar h2{margin:0;font-size:23px;font-weight:800;color:var(--navy);letter-spacing:.2px}
+  .hbar .sub{margin:2px 0 0;font-size:13px;color:var(--sub);font-weight:600}
+  .hbar .badge{margin-left:auto;background:var(--navy);color:#fff;font-size:12px;font-weight:800;
+    padding:5px 12px;border-radius:999px;letter-spacing:1px}
+  .foot{position:absolute;left:44px;right:44px;bottom:16px;display:flex;justify-content:space-between;
+    font-size:11px;color:#93a2b8;border-top:1px solid var(--line);padding-top:8px}
+  .foot b{color:var(--navy);font-weight:800}
+  /* cover */
+  .cover{background:linear-gradient(135deg,#16233f 0%,#243a63 55%,#3a2b63 100%);color:#fff;justify-content:center}
+  .cover .kicker{font-size:14px;letter-spacing:3px;color:#a9c4ff;font-weight:700;text-transform:uppercase}
+  .cover h1{font-size:44px;margin:14px 0 8px;font-weight:900;line-height:1.15}
+  .cover .lead{font-size:17px;color:#d7e2f5;max-width:760px}
+  .cover .deckno{position:absolute;top:34px;right:44px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 16px;font-weight:800;font-size:14px}
+  .qprev{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:26px}
+  .qprev .qc{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:12px;
+    padding:12px 12px 14px}
+  .qprev .qn{font-size:12px;font-weight:800;color:#a9c4ff}
+  .qprev .qt{font-size:13px;font-weight:700;margin:5px 0 8px;color:#fff;line-height:1.3}
+  .qprev .qtag{font-size:11px;color:#ffd7a1;font-weight:700}
+  .cover .meta{margin-top:26px;font-size:13px;color:#b9c6de;display:flex;gap:22px;flex-wrap:wrap}
+  .cover .note{margin-top:10px;font-size:11.5px;color:#8ea2c4}
+  /* flow map */
+  .flow{display:flex;align-items:stretch;gap:6px;margin-top:6px}
+  .fnode{flex:1;background:var(--tealbg);border:1px solid #bfe0e8;border-radius:12px;padding:12px 12px 14px;display:flex;flex-direction:column}
+  .fnode .fq{font-size:12px;font-weight:900;color:var(--teal)}
+  .fnode .fh{font-size:14px;font-weight:800;margin:4px 0 6px;color:var(--ink)}
+  .fnode .fd{font-size:11.5px;color:#40566f;flex:1}
+  .fnode .fp{margin-top:8px;font-size:10.5px;color:var(--teal);border-top:1px dashed #a9d2dc;padding-top:6px}
+  .farrow{display:flex;align-items:center;color:#8fb7c2;font-size:22px;font-weight:900}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .step{border-radius:12px;padding:12px 14px;border-left:6px solid}
+  .step.s1{background:var(--violetbg);border-color:var(--violet)}
+  .step.s2{background:var(--tealbg);border-color:var(--teal)}
+  .step.s3{background:var(--amberbg);border-color:var(--amber)}
+  .step .sk{font-size:12px;font-weight:900}
+  .step.s1 .sk{color:var(--violet)} .step.s2 .sk{color:var(--teal)} .step.s3 .sk{color:var(--amber)}
+  .step .st{font-size:13px;color:#33465e;margin-top:4px}
+  /* generic tables */
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:4px}
+  th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+  th{background:var(--navy);color:#fff;font-weight:800;font-size:12px}
+  tbody tr:nth-child(even){background:#f6f9fc}
+  .cmp th:first-child{background:var(--navy2)}
+  .cmp td:first-child{background:#eef2f7;font-weight:800;color:var(--navy);text-align:center;width:19%}
+  .cmp .good{background:var(--greenbg)} .cmp .bad{background:var(--redbg)}
+  .cmp thead th.g{background:var(--green)} .cmp thead th.b{background:var(--red)}
+  /* glossary */
+  .gloss{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:4px}
+  .gi{border:1px solid var(--line);border-left:5px solid var(--violet);border-radius:8px;padding:9px 12px;background:#fff}
+  .gi .gt{font-size:13px;font-weight:800;color:var(--navy)}
+  .gi .ge{font-size:11px;color:var(--sub);font-weight:600}
+  .gi .gd{font-size:11.5px;color:#3c4d63;margin-top:4px}
+  .gi .gr{font-size:10.5px;color:var(--teal);margin-top:5px;font-weight:700}
+  /* tips */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px}
+  .panel{border-radius:12px;padding:14px 16px}
+  .panel.ok{background:var(--greenbg);border:1px solid #bfe0c9}
+  .panel.warn{background:var(--redbg);border:1px solid #f0c9c9}
+  .panel h3{margin:0 0 8px;font-size:15px;font-weight:900}
+  .panel.ok h3{color:var(--green)} .panel.warn h3{color:var(--red)}
+  .panel ol,.panel ul{margin:0;padding-left:20px}
+  .panel li{font-size:12.5px;margin-bottom:7px;color:#33465e}
+  /* question slide */
+  .qhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .qhead .qbig{background:var(--violet);color:#fff;font-weight:900;font-size:14px;border-radius:8px;padding:5px 11px}
+  .qhead .season{font-size:11px;font-weight:800;color:#fff;background:var(--teal);border-radius:999px;padding:3px 10px}
+  .qhead .freq{margin-left:auto;font-size:12px;font-weight:800;color:var(--amber)}
+  .qbody{font-size:14px;font-weight:700;color:var(--ink);background:#f4f7fb;border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin-bottom:10px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin-bottom:12px}
+  .opt{font-size:12px;color:#3c4d63;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .opt.correct{background:var(--greenbg);border-color:#8fc7a0;font-weight:700;color:#14532d}
+  .opt .ol{font-weight:900;color:var(--navy);margin-right:5px}
+  .opt.correct .ol{color:var(--green)}
+  .sru{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .sc{border-radius:11px;padding:11px 13px;border-top:5px solid}
+  .sc.sky{background:#e8f1fb;border-color:#2f6fb3}
+  .sc.rain{background:var(--amberbg);border-color:var(--amber)}
+  .sc.umb{background:var(--greenbg);border-color:var(--green)}
+  .sc .sh{font-size:12.5px;font-weight:900;display:flex;align-items:center;gap:6px}
+  .sc.sky .sh{color:#2f6fb3} .sc.rain .sh{color:var(--amber)} .sc.umb .sh{color:var(--green)}
+  .sc .sb{font-size:11.5px;color:#33465e;margin-top:6px}
+  .ansrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ansrow .ab{background:var(--green);color:#fff;font-weight:900;font-size:13px;border-radius:8px;padding:4px 12px}
+  .ansrow .at{font-size:12.5px;color:var(--sub);font-weight:700}
+  .memo{margin-top:10px;background:#f0edf9;border-left:5px solid var(--violet);border-radius:8px;
+    padding:8px 12px;font-size:11.5px;color:#3a2b63}
+  .memo b{color:var(--violet)}
+  /* heatmap */
+  .heat{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:6px;margin-top:6px;font-size:12px}
+  .heat .hc{padding:9px 10px;border-radius:7px;text-align:center;font-weight:700}
+  .heat .rowh{background:#eef2f7;text-align:left;font-weight:800;color:var(--navy)}
+  .heat .colh{background:var(--navy);color:#fff;text-align:center;font-weight:800}
+  .h3lv{background:var(--red);color:#fff} .h2lv{background:var(--amber);color:#fff} .h1lv{background:var(--greenbg);color:#14532d}
+  .summary-note{margin-top:14px;font-size:12.5px;color:#33465e;background:var(--tealbg);border-radius:10px;padding:12px 14px;border:1px solid #bfe0e8}
+  .summary-note b{color:var(--teal)}
+  .disc{font-size:10.5px;color:#93a2b8;margin-top:auto}
+  @media print{body{background:#fff;padding:0}
+    .slide{box-shadow:none;border:1px solid #ccc;border-radius:0;page-break-after:always;width:100%;margin:0}
+    .deck{gap:0}}
+</style>
+
+<div class="deck">
+
+<!-- 1. COVER -->
+<section class="slide cover">
+  <div class="deckno">SC 予想デッキ 04 / 07</div>
+  <div class="kicker">SC Exam Prep — Predicted 2026</div>
+  <h1>AIセキュリティ・LLM</h1>
+  <div class="lead">OWASP Top 10 for LLM／プロンプトインジェクション／RAG／AIエージェント／MITRE ATLAS。「出る出ると言われ続けて未出題」の最有力テーマを5問で体系学習する。</div>
+  <div class="qprev">
+    <div class="qc"><div class="qn">Q1 · LLM01</div><div class="qt">間接プロンプトインジェクション</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q2 · LLM05</div><div class="qt">不適切な出力処理→XSS/SQLi連鎖</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q3 · Framework</div><div class="qt">MITRE ATLAS の位置づけ</div><div class="qtag">頻出 ★★☆</div></div>
+    <div class="qc"><div class="qn">Q4 · LLM08</div><div class="qt">ベクトルと埋め込みの脆弱性</div><div class="qtag">頻出 ★★☆</div></div>
+    <div class="qc"><div class="qn">Q5 · LLM06</div><div class="qt">過剰な代理権限(AIエージェント)</div><div class="qtag">頻出 ★★★</div></div>
+  </div>
+  <div class="meta"><span>📚 基礎概念 5枚</span><span>📝 問題演習 5問</span><span>🎯 統合サマリー</span><span>🗓 2026 春・秋 想定</span></div>
+  <div class="note">※ 過去問傾向(令和3〜7年)と最新動向をもとにAIが作成した予想問題です。実際の試験問題ではありません。最終確認を推奨します。</div>
+</section>
+
+<!-- 2. LEARNING MAP -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🗺️</span><div><h2>学習マップ — 5問の相互関係</h2><div class="sub">攻撃の「経路」と「フェーズ」で切り分ける学習動線</div></div><span class="badge">MAP</span></div>
+  <div class="flow">
+    <div class="fnode"><div class="fq">Q1</div><div class="fh">間接PI</div><div class="fd">外部データ(Web/メール/PDF)に指示を潜ませ、利用者を介さず実行</div><div class="fp">LLM01 / 直接PIと対比</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q2</div><div class="fh">出力処理</div><div class="fd">LLM出力を無検証で下流へ→XSS/SQLi/コマンドインジェクションに連鎖</div><div class="fp">LLM05 / Webセキュ接続</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q3</div><div class="fh">ATLAS</div><div class="fd">攻撃TTPを体系化。ATT&amp;CKのAI版。RMF/42001と区別</div><div class="fp">Framework / 定義問題</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q4</div><div class="fh">ベクトルDB</div><div class="fd">RAGの権限フィルタ不備→他部署・他テナント文書が漏えい</div><div class="fp">LLM08 / RAG分離</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q5</div><div class="fh">過剰権限</div><div class="fd">エージェントの権限・自律性が過大→注入指示で高影響操作まで実行</div><div class="fp">LLM06 / 最小権限</div></div>
+  </div>
+  <div class="steps">
+    <div class="step s1"><div class="sk">STEP 1 ｜ WHY</div><div class="st">OWASP LLM Top10 と攻撃分類(経路×フェーズ)の全体像を理解する</div></div>
+    <div class="step s2"><div class="sk">STEP 2 ｜ HOW</div><div class="st">5問で「どのLLMリスクか」を判別し、ひっかけ選択肢を切る</div></div>
+    <div class="step s3"><div class="sk">STEP 3 ｜ WHAT</div><div class="st">空-雨-傘で対策(分離・最小権限・出力エスケープ・権限フィルタ)へ落とす</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>2 / 14</span></div>
+</section>
+
+<!-- 3. CONCEPT 1: MAP of OWASP LLM -->
+<section class="slide">
+  <div class="hbar"><span class="ic">①</span><div><h2>基礎概念 — OWASP LLM Top10 分類マップ</h2><div class="sub">攻撃の「経路」と「フェーズ」の2軸で本デッキ5問を配置</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:22%">軸 / リスク</th><th>学習時(Training)</th><th>推論時・入力(Inference / Input)</th><th>出力・下流(Output / Downstream)</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:800;color:var(--navy)">利用者入力 経由</td><td>—</td><td>直接プロンプトインジェクション(LLM01)／<b>ジェイルブレイク</b></td><td rowspan="2" style="background:var(--redbg)"><b>Q2</b> 不適切な出力処理(LLM05)<br>→XSS/SQLi/コマンドインジェクション/SSRF</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">外部データ 経由</td><td>データ/モデルのポイズニング(LLM04)</td><td style="background:var(--violetbg)"><b>Q1</b> 間接プロンプトインジェクション(LLM01)</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">検索・データ層</td><td colspan="2" style="background:var(--tealbg)"><b>Q4</b> ベクトルと埋め込みの脆弱性(LLM08)／機密情報漏えい(LLM02)</td><td>システムプロンプト漏えい(LLM07)／誤情報(LLM09)</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">エージェント / 資源</td><td colspan="2" style="background:var(--amberbg)"><b>Q5</b> 過剰な代理権限(LLM06)</td><td>無制限消費(LLM10)</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>核心:</b> LLMリスクは「①どこから入るか(利用者入力／外部データ／検索層／ツール)」と「②いつ起きるか(学習時／推論時／出力時)」の2軸で切り分けられる。<b>Q3のMITRE ATLAS</b>は、この攻撃TTP全体を体系化するナレッジベースとして俯瞰の役割を担う。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>3 / 14</span></div>
+</section>
+
+<!-- 4. CONCEPT 2: 混同比較表 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">②</span><div><h2>基礎概念 — 混同しやすい概念 比較表</h2><div class="sub">似て見えるが「経路・フェーズ・対策」が異なる5ペア</div></div><span class="badge">CONCEPT</span></div>
+  <table class="cmp">
+    <thead><tr><th>対象概念</th><th class="g">🟢 概念A</th><th class="b">🔴 概念B（混同パターン）</th></tr></thead>
+    <tbody>
+      <tr><td>PIの経路</td><td class="good">直接PI：利用者が入力欄に「指示を無視せよ」と<b>自ら注入</b></td><td class="bad">間接PI：Web/メール/PDF等<b>外部データに潜む指示</b>をLLMが読み込み実行</td></tr>
+      <tr><td>攻撃フェーズ</td><td class="good">回避攻撃(敵対的サンプル)：<b>推論時</b>に微小摂動で誤分類</td><td class="bad">データポイズニング：<b>学習時</b>にデータ汚染でバックドア</td></tr>
+      <tr><td>出力の扱い</td><td class="good">LLM出力を<b>信頼境界の外側</b>として出力時にエスケープ(LLM05対策)</td><td class="bad">入力のエスケープだけで対策したつもり＝<b>出力処理漏れ</b>でXSS成立</td></tr>
+      <tr><td>データ復元系</td><td class="good">モデル反転／メンバーシップ推論：出力から<b>学習データ</b>を推定</td><td class="bad">モデル抽出(窃取)：大量クエリで<b>モデル機能</b>を複製</td></tr>
+      <tr><td>エージェント統制</td><td class="good">最小権限＋高影響操作に<b>人間承認(HITL)</b></td><td class="bad">全ツールをLLM判断で自動実行＝<b>過剰な代理権限</b>(LLM06)</td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>4 / 14</span></div>
+</section>
+
+<!-- 5. CONCEPT 3: 用語集 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">③</span><div><h2>基礎概念 — 必須用語集</h2><div class="sub">AIセキュリティ5問を解く8用語</div></div><span class="badge">CONCEPT</span></div>
+  <div class="gloss">
+    <div class="gi"><div class="gt">プロンプトインジェクション <span class="ge">Prompt Injection</span></div><div class="gd">指示とデータを同一チャネルで処理する性質を突き、意図しない指示を実行させる。利用者入力経由=直接、外部データ経由=間接。</div><div class="gr">🔖 OWASP LLM01:2025</div></div>
+    <div class="gi"><div class="gt">不適切な出力処理 <span class="ge">Improper Output Handling</span></div><div class="gd">LLM出力を無検証で下流(ブラウザ/DB/OS/API)へ渡し、XSS・SQLi・コマンドインジェクション・SSRF・RCEに連鎖。</div><div class="gr">🔖 OWASP LLM05:2025</div></div>
+    <div class="gi"><div class="gt">ベクトルと埋め込みの脆弱性 <span class="ge">Vector &amp; Embedding</span></div><div class="gd">RAGのベクトルDBのアクセス制御不備・テナント分離不足で横断的情報漏えい。埋め込みからの元データ復元も。</div><div class="gr">🔖 OWASP LLM08:2025</div></div>
+    <div class="gi"><div class="gt">過剰な代理権限 <span class="ge">Excessive Agency</span></div><div class="gd">エージェントの機能・権限・自律性が過大で、誤動作や注入成立時の被害が拡大。最小権限＋人間承認が定石。</div><div class="gr">🔖 OWASP LLM06:2025</div></div>
+    <div class="gi"><div class="gt">MITRE ATLAS</div><div class="gd">ATT&amp;CKをAI/機械学習向けに拡張し、攻撃戦術×技法(TTP)を実事例で体系化したナレッジベース。脅威分析の共通言語。</div><div class="gr">🔖 ATT&amp;CK の AI 版</div></div>
+    <div class="gi"><div class="gt">敵対的サンプル / 回避攻撃 <span class="ge">Adversarial / Evasion</span></div><div class="gd">推論時に人間には知覚しにくい微小な摂動を入力へ加え、分類器に誤分類を起こさせる。</div><div class="gr">🔖 推論時攻撃</div></div>
+    <div class="gi"><div class="gt">ジェイルブレイク <span class="ge">Jailbreak</span></div><div class="gd">言い回しやロールプレイでガードレール(安全機構)を回避し、禁止された出力を引き出す。</div><div class="gr">🔖 ガードレール回避</div></div>
+    <div class="gi"><div class="gt">human-in-the-loop <span class="ge">HITL</span></div><div class="gd">影響の大きい/不可逆な操作(外部送信・削除・決済)の実行前に人間の承認を挟む統制。</div><div class="gr">🔖 LLM06 の定番対策</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>5 / 14</span></div>
+</section>
+
+<!-- 6. CONCEPT 4: フレームワーク/規格マトリクス -->
+<section class="slide">
+  <div class="hbar"><span class="ic">④</span><div><h2>基礎概念 — フレームワーク・規格マトリクス</h2><div class="sub">「攻撃TTP／防御／リスク管理／認証規格」を混同しない</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:20%">名称</th><th style="width:22%">種別</th><th>要点（試験での問われ方）</th></tr></thead>
+    <tbody>
+      <tr><td><b>MITRE ATLAS</b></td><td>攻撃TTPの体系化</td><td>ATT&amp;CKのAI版。「戦術×技法」でAIへの攻撃を整理。<b>Q3の正解</b>。攻撃側の知識ベース。</td></tr>
+      <tr><td>MITRE ATT&amp;CK</td><td>攻撃TTPの体系化(汎用)</td><td>実観測の攻撃者の振る舞い(TTP)を分類。ATLASの母体。第5分野(攻撃・IR)と接続。</td></tr>
+      <tr><td>MITRE D3FEND</td><td>防御技術の体系化</td><td><b>対策</b>側のマッピング。攻撃TTPの体系化ではない=Q3のひっかけ。</td></tr>
+      <tr><td>NIST AI RMF</td><td>リスク管理FW</td><td>GOVERN/MAP/MEASURE/MANAGEでAIリスクを管理。攻撃TTP体系ではない。</td></tr>
+      <tr><td>ISO/IEC 42001</td><td>認証規格(AIMS)</td><td>AIマネジメントシステムの認証規格。ISMS(27001)のAI版という位置づけ。</td></tr>
+      <tr><td>AI事業者ガイドライン</td><td>国内ガイドライン</td><td>総務省・経産省。開発者/提供者/利用者の3主体区分。組織統制の根拠。</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>💡 頻出の軸:</b> 「攻撃を体系化=ATLAS/ATT&amp;CK」「防御を体系化=D3FEND」「リスク管理=AI RMF」「認証規格=ISO/IEC 42001」。この4分類の取り違えが4択のひっかけの定番。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>6 / 14</span></div>
+</section>
+
+<!-- 7. TIPS -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🎯</span><div><h2>試験のコツ ＆ 頻出ひっかけ</h2><div class="sub">Exam Strategy &amp; Common Pitfalls</div></div><span class="badge">TIPS</span></div>
+  <div class="twocol">
+    <div class="panel ok"><h3>✅ 解くコツ</h3><ol>
+      <li>PIは<b>経路で判別</b>。利用者入力=直接／外部データ(Web・メール・PDF・検索結果)=間接。</li>
+      <li>LLM05は「<b>出力</b>を信頼境界の外側として扱う」。対策は<b>出力時</b>のエスケープ／サニタイズ。</li>
+      <li>フレームワークは4分類で暗記：攻撃=ATLAS/ATT&amp;CK、防御=D3FEND、管理=AI RMF、規格=42001。</li>
+      <li>エージェント問題は<b>最小権限＋HITL(人間承認)＋監査ログ</b>が正解語彙。</li>
+    </ol></div>
+    <div class="panel warn"><h3>⚠️ よくあるひっかけ</h3><ul>
+      <li>LLM05を「<b>入力</b>のエスケープ」で対策したつもり→出力処理漏れでXSS成立。</li>
+      <li>「大量クエリでコスト増」=LLM10無制限消費。PIやポイズニングと混同しない。</li>
+      <li>回避攻撃(推論時)とポイズニング(学習時)の<b>フェーズ取り違え</b>。</li>
+      <li>エージェント対策で「自動実行で速度優先」「システムプロンプトを応答に含める」は<b>逆効果</b>。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>合言葉:</b> 「経路(どこから)×フェーズ(いつ)」で分類 → 対策は「<b>分離・最小権限・出力エスケープ・権限フィルタ・人間承認</b>」の5語彙に集約される。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>7 / 14</span></div>
+</section>
+
+<!-- 8. Q1 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q1 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">間接プロンプトインジェクション ・ LLM01:2025</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">OWASP Top 10 for LLM 2025 における「間接プロンプトインジェクション」に該当する攻撃はどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>入力欄に「これまでの指示を無視せよ」と直接打ち込み制約を解除させる</div>
+    <div class="opt correct"><span class="ol">イ</span>公開Webページやメール本文に視認しにくい指示文を埋め込み、RAGや要約でLLMに実行させる</div>
+    <div class="opt"><span class="ol">ウ</span>APIに大量かつ長大な推論要求を送り、応答遅延とコスト増を起こす</div>
+    <div class="opt"><span class="ol">エ</span>学習用データに悪意あるサンプルを混入させバックドアを仕込む</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=直接PI(LLM01)／ウ=無制限消費(LLM10)／エ=データ・モデルのポイズニング(LLM04)</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">利用者の直接入力ではなく、LLMが処理対象として取り込む外部データに指示が潜んでいる。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">利用者を介さず実行される点が「間接」の核心。指示とデータを同一チャネルで処理する構造が原因。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">取り込む外部データを検証・無害化し、指示とデータを分離。要約対象データにツール実行権限を与えない。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>8 / 14</span></div>
+</section>
+
+<!-- 9. Q2 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q2 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">不適切な出力処理 ・ LLM05:2025</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">OWASP LLM05:2025「不適切な出力処理」に起因する被害として最も適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt correct"><span class="ol">ア</span>LLM生成のHTML/スクリプトを無検証で埋め込み格納型XSS、あるいは生成文字列をそのままOS/SQLに渡しコマンド/SQLインジェクションに連鎖</div>
+    <div class="opt"><span class="ol">イ</span>MFAの時刻同期ずれでOTP検証に失敗し正規利用者がログイン不可</div>
+    <div class="opt"><span class="ol">ウ</span>ベクトルDBのアクセス制御不備で他テナント文書が検索結果に混入</div>
+    <div class="opt"><span class="ol">エ</span>エージェントに過大なツール権限を与え意図しない外部操作が行われる</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ア</span><span class="at">イ=認証運用の可用性問題(LLM無関係)／ウ=LLM08／エ=LLM06</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">LLM出力を検証せず、下流のブラウザ・DB・OS・APIへそのまま渡している。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">LLM出力＝信頼できない外部入力。既存のインジェクション脆弱性(XSS/SQLi/RCE)へ連鎖する。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">出力を信頼境界の外側として扱い、<b>出力時</b>にコンテキスト依存のエスケープ/サニタイズ＋CSP。</div></div>
+  </div>
+  <div class="memo"><b>💼 実務メモ:</b> ここは既存Webアプリセキュリティ(第3分野)と直結する午後の狙い目。「入力エスケープ」ではなく<b>出力エスケープ</b>と書けるかが分水嶺。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>9 / 14</span></div>
+</section>
+
+<!-- 10. Q3 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q3 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">MITRE ATLAS ・ フレームワーク</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">AIシステムへの攻撃を体系化したナレッジベースであり、MITRE ATT&amp;CK の考え方をAI/機械学習システムの攻撃戦術・技法(TTP)に拡張したものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>MITRE D3FEND</div>
+    <div class="opt correct"><span class="ol">イ</span>MITRE ATLAS</div>
+    <div class="opt"><span class="ol">ウ</span>NIST AI RMF</div>
+    <div class="opt"><span class="ol">エ</span>ISO/IEC 42001</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=防御技術の体系化／ウ=リスク管理FW／エ=AIMS認証規格</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">「戦術×技法」マトリクス形式で、AI/MLへの攻撃TTPを実事例に基づき整理したもの。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">ATT&amp;CKの“AI版”。攻撃を体系化=ATLAS、防御=D3FEND、管理=RMF、規格=42001の4分類で判別。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">脅威分析・検知/対策検討の共通言語として活用。CSIRTのインシデント整理に用いる。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>10 / 14</span></div>
+</section>
+
+<!-- 11. Q4 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q4 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">ベクトルと埋め込みの脆弱性 ・ LLM08:2025</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">RAGを用いた社内文書検索チャットボットにおいて、LLM08:2025「ベクトルと埋め込みの脆弱性」として顕在化するリスクはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>回答の根拠が提示されず利用者が誤情報を過度に信頼する</div>
+    <div class="opt correct"><span class="ol">イ</span>ベクトルDBの権限フィルタリング不足で、閲覧権限のない他部署・他テナント文書を検索取得できる</div>
+    <div class="opt"><span class="ol">ウ</span>システム指示が応答に出力され内部構成が推測される</div>
+    <div class="opt"><span class="ol">エ</span>長大コンテキストの投入で推論コストが急増する</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=誤情報(LLM09)／ウ=システムプロンプト漏えい(LLM07)／エ=無制限消費(LLM10)</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">RAGのベクトルDBにアクセス制御・テナント分離の不備がある。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">埋め込み/検索層固有の脆弱性。横断的な情報漏えい、埋め込みからの元データ復元が中心。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">検索時に<b>利用者の権限で結果をフィルタリング</b>、部署ごとに<b>インデックス/テナント分離</b>。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>11 / 14</span></div>
+</section>
+
+<!-- 12. Q5 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q5 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">過剰な代理権限 ・ LLM06:2025</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">LLM06:2025「過剰な代理権限」を持つAIエージェントのリスクを低減する対策として、最も適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>すべてのツール呼び出しをLLMの判断のみで自動実行し応答速度を最優先</div>
+    <div class="opt correct"><span class="ol">イ</span>ツール・権限・自律性を最小化し、高影響操作(外部送信・削除・決済)の実行前に人間承認(HITL)を挟む</div>
+    <div class="opt"><span class="ol">ウ</span>出力トークン数の上限を撤廃しより詳細な応答を返す</div>
+    <div class="opt"><span class="ol">エ</span>システムプロンプトを応答に含めて挙動を検証できるようにする</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=自律性・権限を最大化し逆効果／ウ=LLM10助長／エ=LLM07招く</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">エージェントに与えた機能・権限・自律性が過大。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">誤動作やプロンプトインジェクション成立時に、注入指示が高影響操作まで実行され被害拡大。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb"><b>最小権限・ツール制限</b>＋不可逆/高影響操作への<b>人間承認</b>＋操作の<b>監査ログ化</b>。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>12 / 14</span></div>
+</section>
+
+<!-- 13. 午後 記述 要点 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">📝</span><div><h2>午後 記述式 — シナリオ要点</h2><div class="sub">RAGチャットボット導入／AIエージェント・ガバナンス</div></div><span class="badge">記述</span></div>
+  <div class="twocol">
+    <div class="panel" style="background:#eef4fb;border:1px solid #cfe0f2"><h3 style="color:var(--navy)">🔹 問1（秋想定）社内RAGチャットボット</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">単一インデックス・権限チェック無し → <b>LLM08</b>。対策=検索時の権限フィルタ＋インデックス分離。</li>
+      <li style="font-size:12px;margin-bottom:6px">外部PDFの指示で顧客リスト出力 → <b>間接プロンプトインジェクション</b>。原因=外部データを検証せずシステムプロンプトへ連結(指示とデータ未分離)。</li>
+      <li style="font-size:12px">生成結果をHTMLに無検証埋め込み → <b>格納型XSS</b>。対策=出力エスケープ＋CSP。</li>
+    </ul></div>
+    <div class="panel" style="background:#f4eefb;border:1px solid #ddc9f2"><h3 style="color:var(--violet)">🔹 問2（春想定）AIエージェント・ガバナンス</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">社外へファイル送信の直接要因＝<b>LLM06 過剰な代理権限</b>＋<b>LLM01 間接PI</b>の2軸。</li>
+      <li style="font-size:12px;margin-bottom:6px">対策＝最小権限・HITL(高影響操作の事前承認)・指示とデータの分離。</li>
+      <li style="font-size:12px;margin-bottom:6px"><b>MITRE ATLAS</b>＝ATT&amp;CKのAI拡張で攻撃TTPを体系化した共通言語。</li>
+      <li style="font-size:12px">組織統制＝入力禁止情報の規程化／シャドーAI禁止(承認制)。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>採点の分水嶺:</b> ①「間接」PIと明示 ②「<b>出力</b>時」エスケープ ③エージェントは<b>最小権限＋HITL</b> ④組織統制は<b>入力禁止情報の規程化・シャドーAI防止</b>まで踏み込めているか。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>13 / 14</span></div>
+</section>
+
+<!-- 14. 統合サマリー -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🧭</span><div><h2>統合サマリー — 頻出ヒートマップ &amp; 総括</h2><div class="sub">出題可能性 × 難易度でAIセキュリティ論点を俯瞰</div></div><span class="badge">SUMMARY</span></div>
+  <div class="heat">
+    <div class="hc colh">論点</div><div class="hc colh">出題可能性</div><div class="hc colh">難易度</div><div class="hc colh">対策語彙</div>
+    <div class="hc rowh">間接プロンプトインジェクション(LLM01)</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">指示/データ分離</div>
+    <div class="hc rowh">不適切な出力処理(LLM05)</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">出力エスケープ</div>
+    <div class="hc rowh">過剰な代理権限(LLM06)</div><div class="hc h3lv">最有力</div><div class="hc h3lv">高</div><div class="hc h1lv">最小権限＋HITL</div>
+    <div class="hc rowh">ベクトル/埋め込み(LLM08)</div><div class="hc h2lv">高</div><div class="hc h2lv">中</div><div class="hc h1lv">権限フィルタ/分離</div>
+    <div class="hc rowh">MITRE ATLAS / RMF / 42001</div><div class="hc h2lv">高</div><div class="hc h1lv">低</div><div class="hc h1lv">4分類で暗記</div>
+  </div>
+  <div class="summary-note" style="margin-top:14px"><b>総括:</b> AIセキュリティは<b>午前IIの用語定義</b>(ATLAS・敵対的サンプル・ジェイルブレイク等)と、<b>午後の実務シナリオ</b>(RAG・AIエージェント)の両方で狙われる。既存のWebセキュリティ知識(XSS/SQLi)と接続する<b>LLM05</b>、エージェント時代の目玉<b>LLM06</b>を最優先で固めること。</div>
+  <div class="disc">※本デッキはAIが過去問傾向・最新動向をもとに作成した予想問題です。正解・解説・図解は最終確認を推奨します。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AIセキュリティ・LLM｜予想デッキ04</span><span>14 / 14</span></div>
+</section>
+
+</div>

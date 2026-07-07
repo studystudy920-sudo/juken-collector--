@@ -1,0 +1,392 @@
+<meta charset="utf-8">
+<title>SC予想 AI駆動型サイバー攻撃・フロンティアAI デッキ</title>
+<style>
+  :root{
+    --navy:#16233f; --navy2:#243a63; --ink:#1c2534; --sub:#5b6b82;
+    --line:#d7dfea; --bg:#eef2f7; --card:#ffffff;
+    --teal:#0e7490; --tealbg:#e0f2f6;
+    --violet:#6d28d9; --violetbg:#efe7fc;
+    --amber:#b45309; --amberbg:#fdf1dd;
+    --red:#c1272d; --redbg:#fce8e8;
+    --green:#15803d; --greenbg:#e4f3e9;
+    --shadow:0 6px 22px rgba(20,35,64,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.55;padding:26px 0 60px}
+  .deck{display:flex;flex-direction:column;align-items:center;gap:26px}
+  .slide{position:relative;width:1120px;aspect-ratio:16/9;background:var(--card);
+    border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
+    padding:38px 44px 54px;display:flex;flex-direction:column}
+  .slide.pad-tight{padding:30px 40px 50px}
+  /* header band */
+  .hbar{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:16px;
+    border-bottom:3px solid var(--navy)}
+  .hbar .ic{font-size:26px;line-height:1}
+  .hbar h2{margin:0;font-size:23px;font-weight:800;color:var(--navy);letter-spacing:.2px}
+  .hbar .sub{margin:2px 0 0;font-size:13px;color:var(--sub);font-weight:600}
+  .hbar .badge{margin-left:auto;background:var(--navy);color:#fff;font-size:12px;font-weight:800;
+    padding:5px 12px;border-radius:999px;letter-spacing:1px}
+  .foot{position:absolute;left:44px;right:44px;bottom:16px;display:flex;justify-content:space-between;
+    font-size:11px;color:#93a2b8;border-top:1px solid var(--line);padding-top:8px}
+  .foot b{color:var(--navy);font-weight:800}
+  /* cover */
+  .cover{background:linear-gradient(135deg,#16233f 0%,#243a63 55%,#3a2b63 100%);color:#fff;justify-content:center}
+  .cover .kicker{font-size:14px;letter-spacing:3px;color:#a9c4ff;font-weight:700;text-transform:uppercase}
+  .cover h1{font-size:44px;margin:14px 0 8px;font-weight:900;line-height:1.15}
+  .cover .lead{font-size:17px;color:#d7e2f5;max-width:760px}
+  .cover .deckno{position:absolute;top:34px;right:44px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 16px;font-weight:800;font-size:14px}
+  .qprev{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:26px}
+  .qprev .qc{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:12px;
+    padding:12px 12px 14px}
+  .qprev .qn{font-size:12px;font-weight:800;color:#a9c4ff}
+  .qprev .qt{font-size:13px;font-weight:700;margin:5px 0 8px;color:#fff;line-height:1.3}
+  .qprev .qtag{font-size:11px;color:#ffd7a1;font-weight:700}
+  .cover .meta{margin-top:26px;font-size:13px;color:#b9c6de;display:flex;gap:22px;flex-wrap:wrap}
+  .cover .note{margin-top:10px;font-size:11.5px;color:#8ea2c4}
+  /* flow map */
+  .flow{display:flex;align-items:stretch;gap:6px;margin-top:6px}
+  .fnode{flex:1;background:var(--tealbg);border:1px solid #bfe0e8;border-radius:12px;padding:12px 12px 14px;display:flex;flex-direction:column}
+  .fnode .fq{font-size:12px;font-weight:900;color:var(--teal)}
+  .fnode .fh{font-size:14px;font-weight:800;margin:4px 0 6px;color:var(--ink)}
+  .fnode .fd{font-size:11.5px;color:#40566f;flex:1}
+  .fnode .fp{margin-top:8px;font-size:10.5px;color:var(--teal);border-top:1px dashed #a9d2dc;padding-top:6px}
+  .farrow{display:flex;align-items:center;color:#8fb7c2;font-size:22px;font-weight:900}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .step{border-radius:12px;padding:12px 14px;border-left:6px solid}
+  .step.s1{background:var(--violetbg);border-color:var(--violet)}
+  .step.s2{background:var(--tealbg);border-color:var(--teal)}
+  .step.s3{background:var(--amberbg);border-color:var(--amber)}
+  .step .sk{font-size:12px;font-weight:900}
+  .step.s1 .sk{color:var(--violet)} .step.s2 .sk{color:var(--teal)} .step.s3 .sk{color:var(--amber)}
+  .step .st{font-size:13px;color:#33465e;margin-top:4px}
+  /* generic tables */
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:4px}
+  th,td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+  th{background:var(--navy);color:#fff;font-weight:800;font-size:12px}
+  tbody tr:nth-child(even){background:#f6f9fc}
+  .cmp th:first-child{background:var(--navy2)}
+  .cmp td:first-child{background:#eef2f7;font-weight:800;color:var(--navy);text-align:center;width:19%}
+  .cmp .good{background:var(--greenbg)} .cmp .bad{background:var(--redbg)}
+  .cmp thead th.g{background:var(--green)} .cmp thead th.b{background:var(--red)}
+  /* glossary */
+  .gloss{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:4px}
+  .gi{border:1px solid var(--line);border-left:5px solid var(--violet);border-radius:8px;padding:9px 12px;background:#fff}
+  .gi .gt{font-size:13px;font-weight:800;color:var(--navy)}
+  .gi .ge{font-size:11px;color:var(--sub);font-weight:600}
+  .gi .gd{font-size:11.5px;color:#3c4d63;margin-top:4px}
+  .gi .gr{font-size:10.5px;color:var(--teal);margin-top:5px;font-weight:700}
+  /* tips */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px}
+  .panel{border-radius:12px;padding:14px 16px}
+  .panel.ok{background:var(--greenbg);border:1px solid #bfe0c9}
+  .panel.warn{background:var(--redbg);border:1px solid #f0c9c9}
+  .panel h3{margin:0 0 8px;font-size:15px;font-weight:900}
+  .panel.ok h3{color:var(--green)} .panel.warn h3{color:var(--red)}
+  .panel ol,.panel ul{margin:0;padding-left:20px}
+  .panel li{font-size:12.5px;margin-bottom:7px;color:#33465e}
+  /* question slide */
+  .qhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .qhead .qbig{background:var(--violet);color:#fff;font-weight:900;font-size:14px;border-radius:8px;padding:5px 11px}
+  .qhead .season{font-size:11px;font-weight:800;color:#fff;background:var(--teal);border-radius:999px;padding:3px 10px}
+  .qhead .freq{margin-left:auto;font-size:12px;font-weight:800;color:var(--amber)}
+  .qbody{font-size:14px;font-weight:700;color:var(--ink);background:#f4f7fb;border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin-bottom:10px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin-bottom:12px}
+  .opt{font-size:12px;color:#3c4d63;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .opt.correct{background:var(--greenbg);border-color:#8fc7a0;font-weight:700;color:#14532d}
+  .opt .ol{font-weight:900;color:var(--navy);margin-right:5px}
+  .opt.correct .ol{color:var(--green)}
+  .sru{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .sc{border-radius:11px;padding:11px 13px;border-top:5px solid}
+  .sc.sky{background:#e8f1fb;border-color:#2f6fb3}
+  .sc.rain{background:var(--amberbg);border-color:var(--amber)}
+  .sc.umb{background:var(--greenbg);border-color:var(--green)}
+  .sc .sh{font-size:12.5px;font-weight:900;display:flex;align-items:center;gap:6px}
+  .sc.sky .sh{color:#2f6fb3} .sc.rain .sh{color:var(--amber)} .sc.umb .sh{color:var(--green)}
+  .sc .sb{font-size:11.5px;color:#33465e;margin-top:6px}
+  .ansrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ansrow .ab{background:var(--green);color:#fff;font-weight:900;font-size:13px;border-radius:8px;padding:4px 12px}
+  .ansrow .at{font-size:12.5px;color:var(--sub);font-weight:700}
+  .memo{margin-top:10px;background:#f0edf9;border-left:5px solid var(--violet);border-radius:8px;
+    padding:8px 12px;font-size:11.5px;color:#3a2b63}
+  .memo b{color:var(--violet)}
+  /* heatmap */
+  .heat{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:6px;margin-top:6px;font-size:12px}
+  .heat .hc{padding:9px 10px;border-radius:7px;text-align:center;font-weight:700}
+  .heat .rowh{background:#eef2f7;text-align:left;font-weight:800;color:var(--navy)}
+  .heat .colh{background:var(--navy);color:#fff;text-align:center;font-weight:800}
+  .h3lv{background:var(--red);color:#fff} .h2lv{background:var(--amber);color:#fff} .h1lv{background:var(--greenbg);color:#14532d}
+  .summary-note{margin-top:14px;font-size:12.5px;color:#33465e;background:var(--tealbg);border-radius:10px;padding:12px 14px;border:1px solid #bfe0e8}
+  .summary-note b{color:var(--teal)}
+  .disc{font-size:10.5px;color:#93a2b8;margin-top:auto}
+  @media print{body{background:#fff;padding:0}
+    .slide{box-shadow:none;border:1px solid #ccc;border-radius:0;page-break-after:always;width:100%;margin:0}
+    .deck{gap:0}}
+</style>
+
+<div class="deck">
+
+<!-- 1. COVER -->
+<section class="slide cover">
+  <div class="deckno">SC 予想デッキ 07 / 07</div>
+  <div class="kicker">SC Exam Prep — Predicted 2026</div>
+  <h1>AI駆動型サイバー攻撃・フロンティアAI</h1>
+  <div class="lead">自律型攻撃/防御／デュアルユース／悪用リードタイム短縮／防御AIのHITLガバナンス。2026年のフロンティアAI登場で現実化した「攻撃と防御のAI化」を5問で体系学習する。</div>
+  <div class="qprev">
+    <div class="qc"><div class="qn">Q1 · Governance</div><div class="qt">デュアルユースとフロンティアAIの公開制限</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q2 · Vuln Mgmt</div><div class="qt">悪用リードタイム短縮への対応</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q3 · Chaining</div><div class="qt">低スコア脆弱性の連鎖と攻撃経路</div><div class="qtag">頻出 ★★☆</div></div>
+    <div class="qc"><div class="qn">Q4 · SOC AI</div><div class="qt">自律型防御エージェントとHITL</div><div class="qtag">頻出 ★★★</div></div>
+    <div class="qc"><div class="qn">Q5 · Least Priv</div><div class="qt">防御AIエージェントへの権限付与原則</div><div class="qtag">頻出 ★★☆</div></div>
+  </div>
+  <div class="meta"><span>📚 基礎概念 5枚</span><span>📝 問題演習 5問</span><span>🎯 統合サマリー</span><span>🗓 2026 春・秋 想定</span></div>
+  <div class="note">※ 過去問傾向(令和3〜7年)と最新動向をもとにAIが作成した予想問題です。実際の試験問題ではありません。最終確認を推奨します。</div>
+</section>
+
+<!-- 2. LEARNING MAP -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🗺️</span><div><h2>学習マップ — 5問の相互関係</h2><div class="sub">「攻撃のAI化」→「守りの立て直し」→「防御のAI化ガバナンス」の学習動線</div></div><span class="badge">MAP</span></div>
+  <div class="flow">
+    <div class="fnode"><div class="fq">Q1</div><div class="fh">デュアルユース</div><div class="fd">脆弱性発見・悪用能力の高いAIは攻守両用。ゆえに提供を防御目的組織に限定</div><div class="fp">フロンティアAI統制</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q2</div><div class="fh">リードタイム</div><div class="fd">発見〜悪用の自動化・高速化で公表〜悪用の時間差が縮む→パッチ運用見直し</div><div class="fp">リスクベース脆弱性管理</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q3</div><div class="fh">連鎖(チェーン)</div><div class="fd">低スコア脆弱性の組合せで権限昇格。CVSS閾値でなく攻撃経路で優先度</div><div class="fp">コンテキスト依存の優先度</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q4</div><div class="fh">SOC自律AI</div><div class="fd">検知〜遮断を自律実行。誤検知で業務停止のリスク→高影響操作はHITL＋監査</div><div class="fp">防御AIのガバナンス</div></div>
+    <div class="farrow">➜</div>
+    <div class="fnode"><div class="fq">Q5</div><div class="fh">最小権限</div><div class="fd">エージェントの誤動作・乗っ取り時の被害を限定。付与権限を必要最小限に</div><div class="fp">least privilege</div></div>
+  </div>
+  <div class="steps">
+    <div class="step s1"><div class="sk">STEP 1 ｜ WHY</div><div class="st">AIで「発見〜悪用」が自動化・高速化し、攻守が同一能力で回るデュアルユース構造を理解する</div></div>
+    <div class="step s2"><div class="sk">STEP 2 ｜ HOW</div><div class="st">5問で「攻撃AI化への守り」と「防御AIのガバナンス」を判別し、ひっかけ選択肢を切る</div></div>
+    <div class="step s3"><div class="sk">STEP 3 ｜ WHAT</div><div class="st">空-雨-傘で対策(適用迅速化・攻撃経路優先・HITL・最小権限・監査)へ落とす</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>2 / 14</span></div>
+</section>
+
+<!-- 3. CONCEPT 1: 全体像マップ -->
+<section class="slide">
+  <div class="hbar"><span class="ic">①</span><div><h2>基礎概念 — 攻撃/防御のAI化 全体像</h2><div class="sub">「攻撃ライフサイクル」×「攻撃側/防御側のAI化」の2軸で本デッキ5問を配置</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:20%">局面</th><th>攻撃側のAI化（オフェンス）</th><th>防御側のAI化・ガバナンス（ディフェンス）</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:800;color:var(--navy)">脆弱性の発見</td><td>脆弱性を自律的に発見(専門家を上回る能力)</td><td style="background:var(--violetbg)"><b>Q1</b> デュアルユース→フロンティアAIの提供を防御目的組織に限定</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">悪用/武器化</td><td style="background:var(--redbg)"><b>Q2</b> 実証コードを自動生成→公表〜悪用のリードタイム短縮</td><td>リスクベースで適用サイクルを短縮(月次一括では間に合わない)</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">攻撃設計</td><td style="background:var(--amberbg)"><b>Q3</b> 低スコア脆弱性を連鎖(チェーン)し権限昇格</td><td>自社構成の攻撃経路・連鎖を踏まえ優先順位付け</td></tr>
+      <tr><td style="font-weight:800;color:var(--navy)">検知〜対応</td><td>攻撃の高速化・自動化で対応遅延が致命傷に</td><td style="background:var(--tealbg)"><b>Q4</b> SOCで検知〜遮断を自律実行＋<b>Q5</b> 最小権限・HITL・監査</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>核心:</b> 脆弱性発見・悪用能力の高いAIは<b>防御(自組織の診断・修正)にも攻撃(第三者侵害)にも使えるデュアルユース技術</b>。攻撃のAI化は「①悪用リードタイム短縮」「②低スコア脆弱性の連鎖」で守りを崩し、防御のAI化は「③自律対応の高速化」と引き換えに「④誤検知・乗っ取りのガバナンス」を要求する。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>3 / 14</span></div>
+</section>
+
+<!-- 4. CONCEPT 2: 混同比較表 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">②</span><div><h2>基礎概念 — 混同しやすい概念 比較表</h2><div class="sub">「正しい対応」と「もっともらしい誤答」を5ペアで対比</div></div><span class="badge">CONCEPT</span></div>
+  <table class="cmp">
+    <thead><tr><th>対象概念</th><th class="g">🟢 概念A（適切）</th><th class="b">🔴 概念B（ひっかけ）</th></tr></thead>
+    <tbody>
+      <tr><td>攻撃AI化の本質</td><td class="good">公表〜悪用の<b>リードタイムが短縮</b>し無防備期間が拡大</td><td class="bad">「試行頻度が下がる」「IPS更新を減らせる」など<b>逆の効果</b>と誤解</td></tr>
+      <tr><td>脆弱性の選別</td><td class="good"><b>攻撃経路・連鎖</b>と資産の重要度でリスクベースに優先度付け</td><td class="bad">CVSS基本値が<b>閾値以上のみ</b>対応＝連鎖リスクを見落とす</td></tr>
+      <tr><td>フロンティアAI提供</td><td class="good">デュアルユース性ゆえ<b>防御目的組織に限定</b>してアクセス許可</td><td class="bad">「推論コスト」「個人情報保護法」を<b>本質理由</b>と誤認</td></tr>
+      <tr><td>SOC自動化の範囲</td><td class="good">影響大の対応は<b>人間承認(HITL)</b>を挟み判断根拠を記録</td><td class="bad">「AIは常に正確」と全自動実行＝<b>誤検知で業務停止</b></td></tr>
+      <tr><td>エージェント権限</td><td class="good"><b>最小権限</b>で乗っ取り・誤動作時の被害範囲を限定</td><td class="bad">迅速化のため<b>管理者権限を常時付与</b>＝被害拡大</td></tr>
+    </tbody>
+  </table>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>4 / 14</span></div>
+</section>
+
+<!-- 5. CONCEPT 3: 用語集 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">③</span><div><h2>基礎概念 — 必須用語集</h2><div class="sub">AI駆動型攻撃・フロンティアAI 5問を解く8用語</div></div><span class="badge">CONCEPT</span></div>
+  <div class="gloss">
+    <div class="gi"><div class="gt">フロンティアAI <span class="ge">Frontier AI</span></div><div class="gd">脆弱性の自律的発見・攻撃コード生成などで人間の専門家を上回り得る高性能モデル。能力が一定水準を超えると悪用時の被害が甚大化する。</div><div class="gr">🔖 高能力の最先端AI</div></div>
+    <div class="gi"><div class="gt">デュアルユース <span class="ge">Dual-use</span></div><div class="gd">防御(診断・修正)にも攻撃(第三者侵害)にも使える両義性。武器化の恐れから提供先を防御目的組織に限定する運用の根拠となる。</div><div class="gr">🔖 軍民・攻守両用性</div></div>
+    <div class="gi"><div class="gt">悪用リードタイム <span class="ge">Time-to-Exploit</span></div><div class="gd">脆弱性の公表から悪用開始までの期間。AIによる発見〜悪用の自動化で短縮し、月次一括のパッチ運用では無防備期間が生じる。</div><div class="gr">🔖 公表→悪用の時間差</div></div>
+    <div class="gi"><div class="gt">脆弱性の連鎖 <span class="ge">Vulnerability Chaining</span></div><div class="gd">単体ではCVSS基本値が低い複数脆弱性を組み合わせ、権限昇格など深刻な攻撃を成立させる手法。</div><div class="gr">🔖 チェーン攻撃</div></div>
+    <div class="gi"><div class="gt">リスクベース脆弱性管理 <span class="ge">RBVM</span></div><div class="gd">CVSS基本値の閾値だけでなく、悪用可能性(露出)・資産の重要度・攻撃経路で対応の優先度を決める考え方。</div><div class="gr">🔖 悪用可能性×重要度</div></div>
+    <div class="gi"><div class="gt">human-in-the-loop <span class="ge">HITL</span></div><div class="gd">影響の大きい/不可逆な対応(本番遮断・アカウント無効化等)の実行前に人間の承認を挟む統制。誤検知の業務停止を防ぐ。</div><div class="gr">🔖 人間の承認組込み</div></div>
+    <div class="gi"><div class="gt">最小権限の原則 <span class="ge">Least Privilege</span></div><div class="gd">業務遂行に必要な最小限の権限のみ付与。エージェントの誤動作・乗っ取り時の被害範囲を限定する。</div><div class="gr">🔖 被害範囲の限定</div></div>
+    <div class="gi"><div class="gt">自律型AIエージェント <span class="ge">Autonomous SOC Agent</span></div><div class="gd">SOARに加え、検知内容の分析・影響範囲調査・隔離/無効化までを自律実行。速度と引換えにガバナンスが要る。</div><div class="gr">🔖 検知〜対応の自律化</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>5 / 14</span></div>
+</section>
+
+<!-- 6. CONCEPT 4: フレームワーク/規制マトリクス -->
+<section class="slide">
+  <div class="hbar"><span class="ic">④</span><div><h2>基礎概念 — 規格・規制・優先度指標マトリクス</h2><div class="sub">「AIガバナンス」と「脆弱性優先度」の道具を混同しない</div></div><span class="badge">CONCEPT</span></div>
+  <table>
+    <thead><tr><th style="width:22%">名称</th><th style="width:20%">種別</th><th>要点（試験での問われ方）</th></tr></thead>
+    <tbody>
+      <tr><td><b>NIST AI RMF</b></td><td>AIリスク管理FW</td><td>GOVERN/MAP/MEASURE/MANAGEでAIリスクを管理。攻撃TTP体系や認証規格ではない。</td></tr>
+      <tr><td>ISO/IEC 42001</td><td>認証規格(AIMS)</td><td>AIマネジメントシステムの認証規格。ISMS(27001)のAI版という位置づけ。</td></tr>
+      <tr><td>AI事業者ガイドライン</td><td>国内ガイドライン</td><td>総務省・経産省。開発者/提供者/利用者の3主体区分。組織統制・デュアルユース対応の根拠。</td></tr>
+      <tr><td>フロンティアAI安全性の枠組</td><td>提供者の自主的取組</td><td>危険能力の評価と、閾値超過時の<b>提供制限</b>等のリスク低減策。Q1の背景。</td></tr>
+      <tr><td>CISA KEV / EPSS</td><td>悪用可能性の指標</td><td>実際に悪用された脆弱性(KEV)・悪用確率(EPSS)。<b>リードタイム短縮時代の優先度付け</b>に有効。</td></tr>
+      <tr><td>CVSS 基本値</td><td>深刻度の指標</td><td>単体の深刻度。<b>閾値のみでの選別は連鎖リスクを見落とす</b>=Q3のひっかけ源。</td></tr>
+    </tbody>
+  </table>
+  <div class="summary-note"><b>💡 頻出の軸:</b> 「AIリスク管理=AI RMF」「認証規格=42001」「国内統制=AI事業者ガイドライン」の3分類と、脆弱性優先度は「深刻度=CVSS」「悪用可能性=KEV/EPSS」「連鎖=攻撃経路」で切り分ける。CVSS一本での判断が4択・記述の定番ひっかけ。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>6 / 14</span></div>
+</section>
+
+<!-- 7. TIPS -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🎯</span><div><h2>試験のコツ ＆ 頻出ひっかけ</h2><div class="sub">Exam Strategy &amp; Common Pitfalls</div></div><span class="badge">TIPS</span></div>
+  <div class="twocol">
+    <div class="panel ok"><h3>✅ 解くコツ</h3><ol>
+      <li>攻撃AI化の本質は<b>「リードタイム短縮」と「連鎖による深刻化」</b>。この2語で正解を選ぶ。</li>
+      <li>優先度は<b>悪用可能性(露出)×資産の重要度×攻撃経路</b>。CVSS高い順「のみ」は誤答。</li>
+      <li>フロンティアAIの提供制限の理由は<b>デュアルユース性</b>。コスト・法令は本質理由でない。</li>
+      <li>防御AIの自律化は「速度」と「<b>HITL・最小権限・監査</b>」をセットで語る。</li>
+    </ol></div>
+    <div class="panel warn"><h3>⚠️ よくあるひっかけ</h3><ul>
+      <li>「攻撃頻度が下がる」「IPS更新を減らせる」「IPブロックで十分」は<b>逆・過小評価</b>。</li>
+      <li>「AIは既知脆弱性しか悪用できない」→ゼロデイ発見にも使われ得るので<b>誤り</b>。</li>
+      <li>「低評価の脆弱性は恒久的に見送り」「全て一律同期限」は<b>両極端で不適切</b>。</li>
+      <li>「AIは常に人間より正確」「管理者権限を常時付与」「手順書は不要」は<b>ガバナンス放棄</b>。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>合言葉:</b> 攻めは「リードタイム短縮×連鎖」、守りは「リスクベース優先度＋HITL・最小権限・監査」。極端な断定(「常に」「全て」「不要」「十分」)の選択肢は<b>まず疑う</b>。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>7 / 14</span></div>
+</section>
+
+<!-- 8. Q1 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q1 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">デュアルユース ・ フロンティアAIの提供制限</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">ソフトウェア脆弱性の自律的な発見と実証コード(エクスプロイト)生成において人間の専門家を上回る能力をもつAIモデルについて、開発元が一般公開やAPI提供を行わず、防御目的の組織に限定してアクセスを許可する運用を採ることがある。この判断の主な理由はどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>モデルの推論コストが高く、一般提供では採算が取れないため</div>
+    <div class="opt correct"><span class="ol">イ</span>防御にも攻撃にも利用できるデュアルユース性をもち、攻撃者の手に渡った場合に脆弱性の武器化が大規模かつ高速に行われるおそれがあるため</div>
+    <div class="opt"><span class="ol">ウ</span>学習データに個人情報が含まれ、個人情報保護法の第三者提供制限に抵触するため</div>
+    <div class="opt"><span class="ol">エ</span>生成する攻撃コードの品質が低く、誤検知を誘発して防御側の運用を妨げるため</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=採算/ウ=法令/エ=品質は、いずれも本質的な理由ではない</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">脆弱性発見・悪用能力の高いAIは、自組織の診断・修正にも第三者への侵害にも使える。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">能力が一定水準を超えると悪用時の被害が甚大化する。ゆえに提供先を絞るのはリスク低減策。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">危険能力の評価と閾値超過時のアクセス制限。防御目的組織に限定して提供する。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>8 / 14</span></div>
+</section>
+
+<!-- 9. Q2 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q2 / 5</span><span class="season">春想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">悪用リードタイム短縮 ・ 脆弱性管理</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">攻撃側がAIを活用して脆弱性の発見から悪用までを自動化・高速化する状況が、企業の脆弱性管理に与える影響として、最も適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>攻撃の試行頻度が下がるため、IPSのシグネチャ更新頻度を下げてよい</div>
+    <div class="opt correct"><span class="ol">イ</span>脆弱性公表から悪用開始までのリードタイムが短縮するため、修正適用までの許容時間を見直し、悪用可能性に基づく優先順位付けと適用の迅速化が必要になる</div>
+    <div class="opt"><span class="ol">ウ</span>AIは既知の脆弱性しか悪用できないため、ゼロデイ攻撃への対策は不要になる</div>
+    <div class="opt"><span class="ol">エ</span>攻撃が自動化されると攻撃元IPが固定されるため、IPアドレスブロックだけで十分な防御となる</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=更新は不要にならない／ウ=ゼロデイ発見にも用いられ得る／エ=IPブロックのみでは不十分</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">AIによる自動化で、発見から悪用までの時間が大幅に短縮する。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">月次一括のような固定サイクルでは間に合わず、無防備な期間が生じる。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">悪用可能性・資産の重要度による<b>リスクベースの優先順位付け</b>と適用サイクルの短縮。</div></div>
+  </div>
+  <div class="memo"><b>💼 実務メモ:</b> 午後の直球テーマ。「四半期一括適用」の危険性を<b>「リードタイム短縮＝無防備期間」</b>で説明できるかが分水嶺。KEV/EPSSでの優先度付けと結び付けたい。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>9 / 14</span></div>
+</section>
+
+<!-- 10. Q3 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q3 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">脆弱性の連鎖 ・ 攻撃経路ベース優先度</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">AIによる脆弱性分析では、単体ではCVSS基本値が低い複数の脆弱性を組み合わせて(チェーンして)権限昇格などの深刻な攻撃を成立させる能力が示されている。この状況を踏まえた脆弱性対応の考え方として、最も適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>CVSS基本値が一定値以上の脆弱性のみを対応対象とすれば十分である</div>
+    <div class="opt"><span class="ol">イ</span>低重要度の脆弱性は悪用されないので、対応を恒久的に見送ってよい</div>
+    <div class="opt correct"><span class="ol">ウ</span>個々のスコアだけでなく、自社システムの構成における攻撃経路(複数脆弱性の連鎖を含む)を考慮して対応の優先順位を決める</div>
+    <div class="opt"><span class="ol">エ</span>すべての脆弱性に対して、重要度にかかわらず同一の期限で一律に対応する</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 ウ</span><span class="at">ア・イ=閾値/軽視で連鎖を見落とす／エ=リソース有限で非現実的</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">単体では低リスクに見える脆弱性でも、連鎖により深刻な侵害が成立し得る。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">CVSS基本値の閾値のみでの選別は連鎖リスクを見落とす。一方で一律対応も現実的でない。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">自社固有の<b>構成・攻撃シナリオ(攻撃経路)</b>に基づき優先順位を決める。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>10 / 14</span></div>
+</section>
+
+<!-- 11. Q4 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q4 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">自律型防御AIエージェント ・ HITL</span><span class="freq">頻出 ★★★</span></div>
+  <div class="qbody">SOCにおいて、検知から遮断までを自律的に実行するAIエージェントを導入する場合の留意点として、最も適切なものはどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>AIの判断は常に人間より正確なので、遮断の実行に人間の承認を挟む必要はない</div>
+    <div class="opt correct"><span class="ol">イ</span>誤検知で正常業務が停止するリスクがあるため、影響の大きい対応(本番システムの遮断等)には人間の承認を組み込み、AIの判断根拠を記録・監査できるようにする</div>
+    <div class="opt"><span class="ol">ウ</span>AIエージェントには管理者権限を常時付与し、あらゆる対応を即時実行できるようにすべきである</div>
+    <div class="opt"><span class="ol">エ</span>AIエージェントを導入すれば、インシデント対応手順書や体制の整備は不要になる</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=承認省略は誤検知に無防備／ウ=常時管理者権限は被害拡大／エ=手順・体制は必要</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">防御の自動化は対応の高速化に有効だが、誤検知時に正常業務を止めるリスクを伴う。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">影響度に応じてHITL(人間承認)を組み込むことが、防御AI運用のガバナンスの要点。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">影響大の対応は<b>人間承認</b>＋<b>最小権限</b>＋判断根拠の<b>ログ記録・監査可能性</b>を確保。</div></div>
+  </div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>11 / 14</span></div>
+</section>
+
+<!-- 12. Q5 -->
+<section class="slide pad-tight">
+  <div class="qhead"><span class="qbig">Q5 / 5</span><span class="season">秋想定</span><span style="font-size:12.5px;color:var(--sub);font-weight:700">防御AIエージェント ・ 最小権限の原則</span><span class="freq">頻出 ★★☆</span></div>
+  <div class="qbody">SOCに導入する自律型対応AIエージェントへ付与する権限について、誤動作や乗っ取り(注入指示等)が生じた場合の被害範囲を限定する観点から、最も適切な原則はどれか。</div>
+  <div class="opts">
+    <div class="opt"><span class="ol">ア</span>対応の迅速化を最優先し、エージェントに管理者権限を常時付与する</div>
+    <div class="opt correct"><span class="ol">イ</span>業務遂行に必要な最小限の権限のみを付与し、権限外の操作を実行できないようにする(最小権限の原則)</div>
+    <div class="opt"><span class="ol">ウ</span>あらゆる操作を人手を介さず即時自動実行できるよう、権限の制限を撤廃する</div>
+    <div class="opt"><span class="ol">エ</span>処理を高速化するため、判断根拠や操作履歴のログ記録を省略する</div>
+  </div>
+  <div class="ansrow"><span class="ab">正解 イ</span><span class="at">ア=常時管理者権限は被害拡大／ウ=制限撤廃は逆効果／エ=監査可能性を損なう</span></div>
+  <div class="sru">
+    <div class="sc sky"><div class="sh">☁ 空（事実）</div><div class="sb">エージェントに与えた権限が過大だと、誤動作や乗っ取り時の被害が拡大する。</div></div>
+    <div class="sc rain"><div class="sh">🌧 雨（解釈）</div><div class="sb">最小権限は被害範囲を局所化する統制の基本。乗っ取り成立時も影響を限定できる。</div></div>
+    <div class="sc umb"><div class="sh">☂ 傘（対策）</div><div class="sb">業務に必要な<b>最小権限</b>のみ付与＋権限分離。高影響操作はHITL、操作は<b>監査ログ化</b>。</div></div>
+  </div>
+  <div class="memo"><b>💼 実務メモ:</b> Q4(HITL・監査)と対で、防御AIガバナンスは<b>「最小権限＋人間承認＋ログ」</b>の3点セット。理由は必ず「誤動作・乗っ取り時の<b>被害範囲の限定</b>」で書く。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>12 / 14</span></div>
+</section>
+
+<!-- 13. 午後 記述 要点 -->
+<section class="slide">
+  <div class="hbar"><span class="ic">📝</span><div><h2>午後 記述式 — シナリオ要点</h2><div class="sub">K社 脆弱性管理体制の見直し／S社 防御AIエージェント・ガバナンス</div></div><span class="badge">記述</span></div>
+  <div class="twocol">
+    <div class="panel" style="background:#eef4fb;border:1px solid #cfe0f2"><h3 style="color:var(--navy)">🔹 問1（春想定）K社 脆弱性管理の見直し</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">設問1＝四半期一括が危険な理由：<b>悪用開始までのリードタイムが短縮</b>し、次回適用まで<b>無防備な期間</b>が生じるから。</li>
+      <li style="font-size:12px;margin-bottom:6px">設問2＝優先順位の観点2つ：①<b>悪用可能性(外部公開資産など露出)</b> ②<b>影響資産の事業上の重要度</b>(脅威情報も可)。</li>
+      <li style="font-size:12px">設問3＝低CVSSも対応要の理由：AIが<b>複数の低評価脆弱性を連鎖</b>させ権限昇格など深刻な攻撃を成立させ得るから。</li>
+    </ul></div>
+    <div class="panel" style="background:#f4eefb;border:1px solid #ddc9f2"><h3 style="color:var(--violet)">🔹 問2（秋想定）S社 SOC 防御AIエージェント</h3><ul style="margin:0;padding-left:20px">
+      <li style="font-size:12px;margin-bottom:6px">設問1＝完全自動化のリスク：<b>誤検知による自動遮断で正常業務(勘定系)が停止</b>するおそれ。</li>
+      <li style="font-size:12px;margin-bottom:6px">設問2＝設計方針：影響が<b>限定的な対応は自動実行</b>、本番遮断など<b>影響大は人間承認(HITL)</b>を経て実行。</li>
+      <li style="font-size:12px;margin-bottom:6px">設問3＝権限原則：<b>最小権限</b>。理由＝誤動作・乗っ取り時の被害範囲を限定するため。</li>
+      <li style="font-size:12px">設問4＝記録事項：①<b>判断根拠(検知内容・入力情報)</b> ②<b>実行した対応内容と時刻</b>(承認者含む操作履歴も可)。</li>
+    </ul></div>
+  </div>
+  <div class="summary-note" style="margin-top:16px"><b>採点の分水嶺:</b> ①「<b>リードタイム短縮＝無防備期間</b>」を結び付ける ②優先度は「<b>露出×重要度</b>」の2軸(CVSS高い順のみは不十分) ③低評価も「<b>連鎖(チェーン)</b>」で深刻化 ④防御AIは「<b>影響度に応じたHITL＋最小権限＋判断根拠・実行内容のログ(監査可能性)</b>」まで踏み込めているか。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>13 / 14</span></div>
+</section>
+
+<!-- 14. 統合サマリー -->
+<section class="slide">
+  <div class="hbar"><span class="ic">🧭</span><div><h2>統合サマリー — 頻出ヒートマップ &amp; 総括</h2><div class="sub">出題可能性 × 難易度でAI駆動型攻撃・フロンティアAI論点を俯瞰</div></div><span class="badge">SUMMARY</span></div>
+  <div class="heat">
+    <div class="hc colh">論点</div><div class="hc colh">出題可能性</div><div class="hc colh">難易度</div><div class="hc colh">対策語彙</div>
+    <div class="hc rowh">デュアルユース／フロンティアAI提供制限</div><div class="hc h3lv">最有力</div><div class="hc h1lv">低</div><div class="hc h1lv">攻守両用・提供限定</div>
+    <div class="hc rowh">悪用リードタイム短縮／脆弱性管理</div><div class="hc h3lv">最有力</div><div class="hc h2lv">中</div><div class="hc h1lv">リスクベース優先度</div>
+    <div class="hc rowh">脆弱性の連鎖／攻撃経路</div><div class="hc h2lv">高</div><div class="hc h2lv">中</div><div class="hc h1lv">攻撃経路で優先度</div>
+    <div class="hc rowh">SOC自律防御AI／HITL</div><div class="hc h3lv">最有力</div><div class="hc h3lv">高</div><div class="hc h1lv">影響度×人間承認</div>
+    <div class="hc rowh">防御AIエージェントの最小権限・監査</div><div class="hc h2lv">高</div><div class="hc h2lv">中</div><div class="hc h1lv">最小権限＋ログ</div>
+  </div>
+  <div class="summary-note" style="margin-top:14px"><b>総括:</b> 本分野は<b>午前IIの用語・構造理解</b>(デュアルユース／リードタイム短縮／連鎖／HITL)と、<b>午後の実務シナリオ</b>(脆弱性管理体制の見直し／SOCの防御AIガバナンス)の両輪で狙われる。攻めは「<b>リードタイム短縮×連鎖</b>」、守りは「<b>リスクベース優先度＋HITL・最小権限・監査</b>」に集約。極端な断定選択肢を切る力を最優先で固めること。</div>
+  <div class="disc">※本デッキはAIが過去問傾向・最新動向をもとに作成した予想問題です。正解・解説・図解は最終確認を推奨します。ベンダー・製品名は本試験には登場しません。</div>
+  <div class="foot"><span><b>SC EXAM PREP</b> — AI駆動型サイバー攻撃・フロンティアAI｜予想デッキ07</span><span>14 / 14</span></div>
+</section>
+
+</div>

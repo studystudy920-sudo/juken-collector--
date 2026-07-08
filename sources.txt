@@ -29,3 +29,17 @@ https://admissions.tohoku.ac.jp/ja/materials/ito/
 https://www.kyushu-u.ac.jp/ja/admission/faculty/exam_question/
 https://www.hokudai.ac.jp/admission/faculty/general/R7examanswer.html
 https://www.osaka-u.ac.jp/ja/admissions/faculty/general/pastexam-answer
+
+# --- 追加分3（旧帝大残り・東京六大残り・上智・東京理科・筑波・横国・埼玉）---
+# 東京六大学の残り（慶應・明治・法政）
+https://www.keio.ac.jp/ja/admissions/faculty/examinations/general-admissions/question/
+https://www.meiji.ac.jp/exam/information/qfki0t00000f7yu6.html
+https://nyushi.hosei.ac.jp/nyushi/data/
+# 上智・東京理科
+https://adm.sophia.ac.jp/jpn/gakubu_ippan_ad/ippan_kaitourei/
+https://www.tus.ac.jp/admissions/university/data/
+# 筑波・横国（一般選抜はサイバーカレッジ等の外部が中心。公式直リンは少ない）
+https://ac.tsukuba.ac.jp/examination/exam_questions/
+https://www.ynu.ac.jp/exam/faculty/public/
+# 埼玉（一般選抜はサイバーカレッジ経由。理学部数学科の既出問題は直リンPDFあり）
+https://www.rimath.saitama-u.ac.jp/prob/

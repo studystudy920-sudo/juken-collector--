@@ -23,3 +23,9 @@ https://www.office.kobe-u.ac.jp/stdnt-examinavi/juken/past_exam/
 https://www.aoyama.ac.jp/admission/undergraduate/guide/ippan_shutsudai_nerai
 https://www.rikkyo.ac.jp/admissions/undergraduate/data.html
 https://www.chuo-u.ac.jp/connect/admission/exam/answer_example/2025.html
+
+# --- 追加分2（立教・中央ほか国公立の未取得分）---
+https://admissions.tohoku.ac.jp/ja/materials/ito/
+https://www.kyushu-u.ac.jp/ja/admission/faculty/exam_question/
+https://www.hokudai.ac.jp/admission/faculty/general/R7examanswer.html
+https://www.osaka-u.ac.jp/ja/admissions/faculty/general/pastexam-answer

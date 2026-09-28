@@ -1,0 +1,545 @@
+{
+  "topic_jp": "ネットワーク・クラウド・ゼロトラスト",
+  "topic_en": "Network, Cloud & Zero Trust",
+  "shared": {
+    "glossary": [
+      {
+        "term": "SASE",
+        "term_en": "Secure Access Service Edge",
+        "def": "SD-WAN等のネットワーク機能とSSE(SWG/CASB/ZTNA/FWaaS)のセキュリティ機能をクラウドで統合し、拠点や端末の場所を問わず一貫したアクセス制御を提供する概念。SASE≒SD-WAN+SSE。",
+        "regs": "Gartner SASE、NIST SP 800-207(参考)"
+      },
+      {
+        "term": "SSE",
+        "term_en": "Security Service Edge",
+        "def": "SASEからネットワーク機能を除いたセキュリティ機能群の総称。SWG・CASB・ZTNA・FWaaS等をクラウドで統合提供し、Webアクセス・SaaS利用・内部アプリ接続をエッジで保護する。",
+        "regs": "Gartner SSE"
+      },
+      {
+        "term": "ZTNA",
+        "term_en": "Zero Trust Network Access",
+        "def": "VPNの代替。最小権限に基づきアプリケーション単位でアクセスを許可し、ブローカ経由の接続で認可外アプリの所在(IP/ポート)を外部から秘匿する。常に検証を原則とする。",
+        "regs": "NIST SP 800-207"
+      },
+      {
+        "term": "CASB",
+        "term_en": "Cloud Access Security Broker",
+        "def": "利用者とクラウドサービスの間に立ち、SaaS利用状況の可視化、シャドーIT検出、データ持出しの検知・遮断、アクセスポリシー適用を行うSSE構成要素。",
+        "regs": "Gartner CASB、監督指針(参考)"
+      },
+      {
+        "term": "DMARC",
+        "term_en": "Domain-based Message Authentication, Reporting and Conformance",
+        "def": "SPFまたはDKIMの認証成功に加え、認証ドメインとヘッダFromのアライメント一致を検証し、none/quarantine/rejectのポリシーを適用する送信ドメイン認証。ruaレポートで送信実態を可視化する。",
+        "regs": "RFC 7489"
+      },
+      {
+        "term": "DNSSEC",
+        "term_en": "DNS Security Extensions",
+        "def": "リソースレコードにRRSIG署名を付与し、親のDSから子のDNSKEYへ至る信頼の連鎖で完全性・出自認証を提供する。キャッシュポイズニング緩和に有効だが通信路の暗号化は行わない。",
+        "regs": "RFC 4033/4034/4035"
+      },
+      {
+        "term": "mTLS",
+        "term_en": "Mutual TLS",
+        "def": "クライアントとサーバ双方が証明書を提示して相互認証するTLS。ゼロトラストのサービス間通信やAPI保護に用いられ、証明書バウンドトークン(RFC 8705)にも利用される。",
+        "regs": "RFC 8705、NIST SP 800-207"
+      },
+      {
+        "term": "PKCE",
+        "term_en": "Proof Key for Code Exchange",
+        "def": "認可コード横取り攻撃対策。クライアントがcode_verifierを生成し、S256方式ではcode_challenge=BASE64URL(SHA-256(verifier))を認可要求に送信、交換時にverifier提示で一致検証する。",
+        "regs": "RFC 7636"
+      }
+    ],
+    "comparison": [
+      {
+        "concept": "リモートアクセスの信頼モデル",
+        "normal": "ZTNA：アプリ単位で最小権限を都度認可し、常に検証する",
+        "suspicious": "全社VPN：一度接続した端末を暗黙に信頼し社内セグメント全体へ到達可能"
+      },
+      {
+        "concept": "SaaS利用の統制",
+        "normal": "CASBで利用状況を可視化し未承認サービスへの持出しを検知・遮断",
+        "suspicious": "私的クラウドへ業務データを持出すシャドーITが野放し"
+      },
+      {
+        "concept": "送信ドメイン認証",
+        "normal": "SPF＋DKIM＋DMARCでアライメント検証しrejectまで運用",
+        "suspicious": "SPFのみでヘッダFrom詐称のなりすましを拒否しきれない"
+      },
+      {
+        "concept": "DNSの保護対象",
+        "normal": "DNSSECで応答の完全性・出自を署名検証(改ざん防止)",
+        "suspicious": "DNSSECが暗号化を担うと誤認し機密性まで期待する取り違え"
+      },
+      {
+        "concept": "TLSクライアント認証",
+        "normal": "mTLSで双方が証明書提示し相互認証、トークンを証明書にバインド",
+        "suspicious": "サーバ証明書のみ検証しクライアントはパスワード頼みで盗用に弱い"
+      }
+    ],
+    "reg_matrix": [
+      {
+        "reg": "NIST SP 800-207(Zero Trust Architecture)",
+        "scope": "ゼロトラストの設計原則・論理コンポーネント",
+        "point": "PDP/PEPによる都度の認可、リソース単位アクセス、常に検証(never trust, always verify)"
+      },
+      {
+        "reg": "RFC 7489(DMARC)",
+        "scope": "送信ドメイン認証・レポーティング",
+        "point": "SPF/DKIMのアライメント検証とnone→quarantine→rejectの段階運用、rua/rufレポート"
+      },
+      {
+        "reg": "RFC 4033/4034/4035(DNSSEC)",
+        "scope": "DNS応答の完全性・出自認証",
+        "point": "RRSIG署名とDS/DNSKEYの信頼の連鎖。暗号化(機密性)は非対象でDoH/DoTが担う"
+      },
+      {
+        "reg": "RFC 7636(PKCE)",
+        "scope": "OAuth認可コードフローの保護",
+        "point": "code_verifier/code_challenge(S256推奨)で認可コード横取りを防止"
+      },
+      {
+        "reg": "RFC 8705(OAuth mTLS)",
+        "scope": "サービス間通信・API保護",
+        "point": "相互TLS認証と証明書バウンドトークンでトークン盗用の悪用を抑止"
+      }
+    ],
+    "map_nodes": [
+      "境界型からゼロトラストへ(暗黙の信頼を排除)",
+      "SASE/SSEでアクセス経路を統合保護(SWG/CASB/ZTNA)",
+      "メール・DNSの真正性(SPF/DKIM/DMARC・DNSSEC)",
+      "認証認可プロトコル(mTLS・PKCE/OAuth)",
+      "ポリシー決定と実施(PDP/PEP・継続的検証)"
+    ],
+    "map_summary": "本分野は境界防御の限界を出発点に、SASE/SSE(SWG・CASB・ZTNA)でアクセス経路を統合保護し、メール(SPF/DKIM/DMARC)とDNS(DNSSEC)の真正性、mTLS・PKCE等の認証認可を、NIST SP 800-207のPDP/PEPによる都度検証へ結び付ける土台領域である。",
+    "exam_tips": [
+      "SASE≒SD-WAN(ネットワーク)+SSE(セキュリティ)。SSEの中身はSWG/CASB/ZTNA/FWaaSと即答できるようにする。",
+      "『アプリ単位の許可・所在の秘匿』=ZTNA、『社内セグメント全体に到達』=旧来VPN、と対比で覚える。",
+      "SPF=エンベロープFrom、DKIM=署名(d=ドメイン)、DMARC=アライメント+ポリシー。BIMIはDMARC enforcement前提のロゴ表示。",
+      "DNSSECは完全性・出自認証で暗号化は非対象。暗号化はDoH/DoT。役割の取り違えが頻出論点。"
+    ],
+    "pitfalls": [
+      "SSEとSASEの混同、およびCSPM/CNAPP(クラウド資産側保護)をアクセスエッジと取り違える。",
+      "DNSSECが通信路を暗号化する/DoHが署名検証すると誤認する役割のすり替え。",
+      "ゼロトラストのPDP(決定点)とPEP(実施点)の取り違え、および『一度信頼したら再認証省略』という原則違反。"
+    ],
+    "concept_diagram": {
+      "title": "ゼロトラスト/SASE 中核構造",
+      "layers": [
+        [{"id": "user", "label": "利用者・端末", "role": "アクセス主体"}],
+        [{"id": "sse", "label": "SSE(アクセスエッジ)", "role": "統合セキュリティ"}, {"id": "pdp", "label": "PDP(ポリシー決定点)", "role": "認可判断"}],
+        [{"id": "swg", "label": "SWG", "role": "Web保護"}, {"id": "casb", "label": "CASB", "role": "SaaS可視化/統制"}, {"id": "ztna", "label": "ZTNA", "role": "アプリ単位接続"}],
+        [{"id": "app", "label": "内部アプリ/SaaS", "role": "保護資源"}, {"id": "vpn", "label": "旧来VPN(暗黙信頼)", "role": "縮小対象", "danger": true}]
+      ],
+      "edges": [
+        {"from": "user", "to": "sse", "label": "全アクセスを集約"},
+        {"from": "sse", "to": "pdp", "label": "都度の認可要求"},
+        {"from": "sse", "to": "swg", "label": "Web"},
+        {"from": "sse", "to": "casb", "label": "SaaS"},
+        {"from": "sse", "to": "ztna", "label": "内部アプリ"},
+        {"from": "ztna", "to": "app", "label": "アプリ単位で許可"},
+        {"from": "user", "to": "vpn", "label": "セグメント全体へ到達(危険)", "danger": true}
+      ],
+      "caption": "利用者の全アクセスをSSEに集約し、PDPが都度認可。ZTNAはアプリ単位で許可し所在を秘匿、VPNの過剰な信頼範囲を縮小する。"
+    }
+  },
+  "questions": [
+    {
+      "id": 201,
+      "no": 1,
+      "tag": "SASE/SSEの定義",
+      "q_jp": "SASE(Secure Access Service Edge)の構成要素のうち、SASEからSD-WANなどのネットワーク機能を除き、SWG・CASB・ZTNAといったセキュリティ機能群だけを指す概念はどれか。",
+      "choices_jp": ["CNAPP", "CSPM", "SSE", "XDR"],
+      "q_en": "Which concept refers to the set of security functions (SWG, CASB, ZTNA, etc.) obtained by removing network functions such as SD-WAN from SASE?",
+      "choices_en": ["CNAPP", "CSPM", "SSE", "XDR"],
+      "intro_jp": "【導入】SASE=SD-WAN+SSEという構図で、セキュリティ機能側の総称を選ぶ。",
+      "related_regs": ["Gartner SASE", "Gartner SSE", "NIST SP 800-207"],
+      "answer_letters": ["ウ"],
+      "answer_jp": "SSE",
+      "explain_jp": "SASE≒SD-WAN(ネットワーク機能)+SSE(セキュリティ機能)という関係で捉えられる。SSE(Security Service Edge)はSWG/CASB/ZTNA/FWaaS等のセキュリティ機能をクラウドで統合提供する概念であり、ウが正解。CSPMはクラウドの設定ミスやコンプライアンス逸脱を検出するポスチャ管理、CNAPPはCSPM/CWPP等を包含するクラウドネイティブアプリ保護基盤で、いずれもクラウド資産側の保護である。XDRは複数レイヤの検知・対応(EDRの拡張)であり、いずれもアクセス経路上のセキュリティエッジであるSSEとは別概念であるため誤り。",
+      "explain_en": "SASE is essentially SD-WAN (network) plus SSE (security). SSE bundles SWG/CASB/ZTNA/FWaaS in the cloud, so C is correct. CSPM and CNAPP protect cloud assets/posture, and XDR is multi-layer detection and response—none is the security edge on the access path.",
+      "sky": ["SASEはネットワーク機能とセキュリティ機能から成る", "SD-WANはネットワーク機能側", "SWG/CASB/ZTNAはセキュリティ機能", "CSPM/CNAPPはクラウド資産保護"],
+      "rain": ["ネットワークを除いた残りがSSE", "SSEの中身はSWG/CASB/ZTNA/FWaaS", "CSPM/CNAPP/XDRはアクセスエッジではない"],
+      "umbrella": ["SASE=SD-WAN+SSEで暗記", "SSEの構成要素を列挙できるようにする", "クラウド資産保護(CSPM/CNAPP)と役割を分離"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "CNAPPはCSPM/CWPP等を束ねるクラウドネイティブアプリ保護基盤で、アクセスエッジではない。"},
+        {"letter": "イ", "correct": false, "reason": "CSPMはクラウド設定ミス・逸脱を検出するポスチャ管理で資産側の保護。"},
+        {"letter": "ウ", "correct": true, "reason": "SSEはSWG/CASB/ZTNA/FWaaS等をクラウド統合するセキュリティ機能群でSASEからネットワークを除いた概念。"},
+        {"letter": "エ", "correct": false, "reason": "XDRは複数レイヤの検知・対応(EDR拡張)でアクセスエッジとは別概念。"}
+      ],
+      "hint_jp": "💡SASE=ネットワーク(SD-WAN)+セキュリティ(SSE)。引き算の残りがSSE。",
+      "bank_notes": [
+        "① SSE導入時はSWG/CASB/ZTNA/FWaaSのどれを先行するか、リスク評価に基づき優先順位を決める。",
+        "② SaaS可視化・シャドーIT統制はCASB、内部アプリのVPN代替はZTNAと役割を明確に割り当てる。",
+        "③ クラウド資産のポスチャ管理(CSPM/CNAPP)はSSEとは別レイヤとして統制範囲を切り分ける。",
+        "④ SASE移行はネットワーク(SD-WAN)側とセキュリティ(SSE)側の責任分界を運用設計で明確化する。",
+        "⑤ ログはSSEのエッジに集約されるため、SIEM連携と保管期間を運用ポリシーで定義する。",
+        "⑥ 用語の混同(SSE/SASE/CSPM/CNAPP/XDR)は設計要件の取り違えに直結するため社内標準用語を整備する。"
+      ],
+      "diagram": {
+        "title": "SASEの分解",
+        "layers": [
+          [{"id": "sase", "label": "SASE", "role": "統合フレーム"}],
+          [{"id": "net", "label": "SD-WAN(ネットワーク)", "role": "経路最適化"}, {"id": "sse", "label": "SSE(セキュリティ)", "role": "統合保護"}],
+          [{"id": "swg", "label": "SWG", "role": "Web"}, {"id": "casb", "label": "CASB", "role": "SaaS"}, {"id": "ztna", "label": "ZTNA", "role": "内部アプリ"}, {"id": "fwaas", "label": "FWaaS", "role": "FW"}]
+        ],
+        "edges": [
+          {"from": "sase", "to": "net", "label": "ネットワーク機能"},
+          {"from": "sase", "to": "sse", "label": "セキュリティ機能"},
+          {"from": "sse", "to": "swg", "label": "含む"},
+          {"from": "sse", "to": "casb", "label": "含む"},
+          {"from": "sse", "to": "ztna", "label": "含む"},
+          {"from": "sse", "to": "fwaas", "label": "含む"}
+        ],
+        "caption": "SASEをネットワーク(SD-WAN)とセキュリティ(SSE)に分解。SSEはSWG/CASB/ZTNA/FWaaSを束ねる。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "CSPM/CNAPP(クラウド資産側)やXDR(検知対応)をアクセスエッジのSSEと混同させる。",
+      "mnemonic": "SASE引くSD-WANはSSE。",
+      "related": "問2 ZTNA、午後問1 SSE導入(SWG/CASB/ZTNA)。",
+      "case": "リモートワーク常態化でSD-WAN+SSEのSASE構成に移行し、Web・SaaS・内部アプリを一括保護した事例。",
+      "reg_detail": [
+        {"reg": "Gartner SSE", "point": "SWG/CASB/ZTNA/FWaaSをクラウド統合する概念として定義。"},
+        {"reg": "Gartner SASE", "point": "SD-WANとSSEの結合としてSASEを提示。"}
+      ]
+    },
+    {
+      "id": 202,
+      "no": 2,
+      "tag": "ZTNAの特徴",
+      "q_jp": "VPNの代替として用いられるZTNA(Zero Trust Network Access)の特徴として、最も適切なものはどれか。",
+      "choices_jp": [
+        "認証済み端末に対して社内ネットワークセグメント全体への到達性を付与する。",
+        "アプリケーション単位でアクセスを許可し、認可されていないアプリの存在自体を秘匿する。",
+        "送信元IPアドレスをACLに登録した端末だけを常時信頼し、以後の再認証を省略する。",
+        "拠点間をIPsecトンネルで接続し、境界ファイアウォールで一括制御する。"
+      ],
+      "q_en": "Which best describes ZTNA (Zero Trust Network Access) used as a VPN replacement?",
+      "choices_en": [
+        "Grants authenticated devices reachability to the entire internal network segment.",
+        "Grants access per application and hides the existence of unauthorized applications.",
+        "Permanently trusts only devices whose source IP is in an ACL and skips re-authentication.",
+        "Connects sites via IPsec tunnels and controls them collectively at the perimeter firewall."
+      ],
+      "intro_jp": "【導入】ゼロトラストの原則(常に検証・最小権限)に照らしZTNAの本質を選ぶ。",
+      "related_regs": ["NIST SP 800-207"],
+      "answer_letters": ["イ"],
+      "answer_jp": "アプリケーション単位でアクセスを許可し、認可されていないアプリの存在自体を秘匿する。",
+      "explain_jp": "ZTNAは最小権限に基づきアプリケーション単位でアクセスを許可し、ブローカを介した接続により認可されていないアプリの所在(IPやポート)を外部から秘匿するため、イが正解。アはVPNの過剰な信頼範囲(接続すればセグメント全体に到達できる)という問題そのもので誤り。ウの『一度信頼したら以後は再認証省略』はゼロトラストの原則『常に検証(never trust, always verify)』に反する。エは拠点間IPsec+境界FWという従来の境界型ネットワークの説明であり、いずれもZTNAの特徴ではない。",
+      "explain_en": "ZTNA grants access per application under least privilege and, via a broker, conceals the location (IP/port) of unauthorized apps, so B is correct. A is the very over-trust problem of VPNs, C violates the never-trust-always-verify principle, and D describes traditional perimeter networking.",
+      "sky": ["ZTNAはVPNの代替", "ゼロトラストは常に検証・最小権限", "認可外アプリの所在を隠す設計"],
+      "rain": ["許可の粒度はアプリ単位", "セグメント全体を露出させない", "再認証省略はゼロトラスト違反"],
+      "umbrella": ["ZTNA=アプリ単位+所在秘匿と暗記", "VPNの暗黙信頼と対比する", "常に検証の原則を判断基準にする"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "セグメント全体への到達性付与はVPNの過剰信頼で、ラテラルムーブメントを助長する問題。ZTNAの逆。"},
+        {"letter": "イ", "correct": true, "reason": "アプリ単位の許可と認可外アプリの所在秘匿がZTNAの本質。"},
+        {"letter": "ウ", "correct": false, "reason": "IPベースの常時信頼・再認証省略は『常に検証』に反する。"},
+        {"letter": "エ", "correct": false, "reason": "拠点間IPsec+境界FWは従来の境界型ネットワークの説明。"}
+      ],
+      "hint_jp": "💡ZTNAは『アプリ単位で許可、それ以外は見えない』。VPNは『入れたら全部見える』。",
+      "bank_notes": [
+        "① VPNからZTNAへ移行し、接続端末が社内セグメント全体へ到達できる暗黙信頼を排除する。",
+        "② アプリ単位の許可でラテラルムーブメントの経路を遮断し、侵害の横展開を抑止する。",
+        "③ 認可外アプリの所在秘匿により外部スキャンからの攻撃対象領域を縮小する。",
+        "④ 端末姿勢(EDR状態・OSパッチ)を接続の都度評価し、条件を満たさなければ拒否する。",
+        "⑤ ZTNAブローカのログをSIEMへ送り、アプリ別アクセスの継続的監視を行う。",
+        "⑥ VPN装置の脆弱性を突く不正アクセスの根本対策として境界依存からの脱却を進める。",
+        "⑦ ゼロトラスト移行はPDP/PEPの整備とアイデンティティ基盤(IdP)連携が前提となる。"
+      ],
+      "diagram": {
+        "title": "VPNとZTNAの到達範囲",
+        "layers": [
+          [{"id": "ep", "label": "リモート端末", "role": "アクセス主体"}],
+          [{"id": "vpn", "label": "VPN(暗黙信頼)", "role": "境界越え", "danger": true}, {"id": "ztna", "label": "ZTNA(都度認可)", "role": "ブローカ"}],
+          [{"id": "seg", "label": "社内セグメント全体", "role": "露出", "danger": true}, {"id": "app1", "label": "許可アプリ", "role": "限定公開"}, {"id": "hidden", "label": "認可外アプリ", "role": "秘匿"}]
+        ],
+        "edges": [
+          {"from": "ep", "to": "vpn", "label": "接続で全到達", "danger": true},
+          {"from": "vpn", "to": "seg", "label": "横展開リスク", "danger": true},
+          {"from": "ep", "to": "ztna", "label": "都度検証"},
+          {"from": "ztna", "to": "app1", "label": "アプリ単位で許可"},
+          {"from": "ztna", "to": "hidden", "label": "所在を秘匿"}
+        ],
+        "caption": "VPNは接続でセグメント全体へ到達し横展開を招く。ZTNAはアプリ単位で許可し認可外アプリを秘匿する。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "アの『セグメント全体到達』を利便性と誤読。実はVPNの弱点でZTNAが解決する対象。",
+      "mnemonic": "ZTNA=『アプリごとに扉、他は壁』。",
+      "related": "問1 SSE、午後問1(1)(2) VPNの暗黙信頼とアタックサーフェス縮小。",
+      "case": "VPN接続端末からのマルウェア横展開を、ZTNAのアプリ単位許可で遮断した事例。",
+      "reg_detail": [
+        {"reg": "NIST SP 800-207", "point": "リソース単位アクセスと常に検証を原則として規定。"},
+        {"reg": "NIST SP 800-207", "point": "PDP/PEPによる接続の都度認可を求める。"}
+      ]
+    },
+    {
+      "id": 203,
+      "no": 3,
+      "tag": "DMARC(送信ドメイン認証)",
+      "q_jp": "送信ドメイン認証に関する記述のうち、DMARCの説明として適切なものはどれか。",
+      "choices_jp": [
+        "送信を許可するメールサーバのIPアドレスをDNSのTXTレコードに登録し、エンベロープFromの正当性を検証する。",
+        "送信側が秘密鍵でメールに電子署名し、受信側がDNSで公開した公開鍵で改ざんを検知する。",
+        "SPFまたはDKIMの認証成功に加え、認証されたドメインとヘッダFromドメインとの一致(アライメント)を検証し、none/quarantine/rejectのポリシーを適用する。",
+        "DMARCをquarantine以上で運用するドメインに対し、メールクライアント上でブランドロゴを表示する。"
+      ],
+      "q_en": "Which statement correctly describes DMARC among sender domain authentication technologies?",
+      "choices_en": [
+        "Registers permitted sending server IPs in a DNS TXT record and validates the envelope From.",
+        "The sender signs mail with a private key and the receiver detects tampering with a DNS-published public key.",
+        "In addition to SPF or DKIM passing, it verifies alignment between the authenticated domain and the header From, and applies a none/quarantine/reject policy.",
+        "Displays a brand logo in the mail client for domains operating DMARC at quarantine or stronger."
+      ],
+      "intro_jp": "【導入】SPF・DKIM・BIMIと切り分けてDMARC固有の要素(アライメント+ポリシー)を選ぶ。",
+      "related_regs": ["RFC 7489", "RFC 7208(SPF)", "RFC 6376(DKIM)", "BIMI"],
+      "answer_letters": ["ウ"],
+      "answer_jp": "SPFまたはDKIMの認証成功に加え、認証されたドメインとヘッダFromドメインとの一致(アライメント)を検証し、none/quarantine/rejectのポリシーを適用する。",
+      "explain_jp": "DMARCはSPF/DKIMいずれかの認証成功に加え、その認証済みドメインとヘッダFromドメインのアライメント(SPFはエンベロープFromドメイン、DKIMはd=ドメインとの一致)を要求する点が本質であり、ウが正解。rua/rufレポートで送信実態を可視化しつつ、ポリシーをnone→quarantine→rejectと段階適用する。アはSPF、イはDKIM、エはBIMI(DMARCのenforcement=quarantine/rejectが前提のブランドロゴ表示)の説明であり、いずれもDMARCそのものの説明ではないため誤り。",
+      "explain_en": "DMARC's essence is that, beyond SPF or DKIM passing, it requires alignment between the authenticated domain and the header From, and applies a none/quarantine/reject policy, so C is correct. A describes SPF, B describes DKIM, and D describes BIMI (which presupposes DMARC enforcement).",
+      "sky": ["送信ドメイン認証にはSPF/DKIM/DMARC/BIMIがある", "DMARCはヘッダFromの一致を見る", "ポリシーnone/quarantine/rejectを持つ"],
+      "rain": ["SPF=IP+エンベロープFrom", "DKIM=署名で改ざん検知", "DMARC=アライメント+ポリシー、BIMI=ロゴ表示"],
+      "umbrella": ["役割を4分類で暗記", "DMARC固有はアライメントとポリシー", "BIMIはDMARC enforcementが前提"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "送信許可IPをTXTに登録しエンベロープFromを検証するのはSPFの説明。"},
+        {"letter": "イ", "correct": false, "reason": "秘密鍵署名・公開鍵検証で改ざんを検知するのはDKIMの説明。"},
+        {"letter": "ウ", "correct": true, "reason": "SPF/DKIM成功に加えヘッダFromとのアライメント検証とポリシー適用がDMARC。"},
+        {"letter": "エ", "correct": false, "reason": "ブランドロゴ表示はBIMI。DMARC enforcementを前提とする別技術。"}
+      ],
+      "hint_jp": "💡DMARCは『SPF/DKIMの結果を、見えるFromと突き合わせて方針を決める』。",
+      "bank_notes": [
+        "① DMARCはp=noneで開始し、ruaレポートで送信実態を洗い出してから段階的にquarantine/rejectへ強化する。",
+        "② SPFのみではヘッダFrom詐称を拒否しきれないため、DKIMとDMARCの併用で真正性を担保する。",
+        "③ 転送・委託送信でSPFが崩れるケースはDKIMのアライメントで救済できるよう署名を設計する。",
+        "④ 受信側送信者ガイドライン(大手メール事業者)準拠のため一定量以上の配信ドメインはDMARC必須。",
+        "⑤ rua集計レポートを定常監視し、なりすまし送信源や設定漏れを継続的に検知する。",
+        "⑥ BEC(取引先なりすまし)対策として送信ドメイン認証の全面導入を経理・調達部門と連携し徹底する。",
+        "⑦ サブドメインのポリシー(sp=)や外部委託送信元の棚卸しをレコード整備時に確認する。"
+      ],
+      "diagram": {
+        "title": "送信ドメイン認証の役割分担",
+        "layers": [
+          [{"id": "mail", "label": "受信メール", "role": "検証対象"}],
+          [{"id": "spf", "label": "SPF(IP/エンベロープFrom)", "role": "経路認証"}, {"id": "dkim", "label": "DKIM(署名/d=)", "role": "改ざん検知"}],
+          [{"id": "dmarc", "label": "DMARC(アライメント+ポリシー)", "role": "統合判定"}],
+          [{"id": "bimi", "label": "BIMI(ロゴ表示)", "role": "enforcement前提"}]
+        ],
+        "edges": [
+          {"from": "mail", "to": "spf", "label": "IP検証"},
+          {"from": "mail", "to": "dkim", "label": "署名検証"},
+          {"from": "spf", "to": "dmarc", "label": "結果+ヘッダFrom一致"},
+          {"from": "dkim", "to": "dmarc", "label": "結果+ヘッダFrom一致"},
+          {"from": "dmarc", "to": "bimi", "label": "quarantine以上で有効"}
+        ],
+        "caption": "DMARCはSPF/DKIMの結果をヘッダFromと突き合わせて方針を適用。BIMIはその強制を前提とする。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "アをDMARC、エ(BIMI)をDMARCの標準機能と誤認。SPF/DKIM/BIMIの説明を混ぜてくる。",
+      "mnemonic": "DMARC=『整列(アライメント)+方針(none/quar/reject)』。",
+      "related": "問4 DNSSEC、午後問2 メールセキュリティ強化とDNS運用。",
+      "case": "BEC被害を機にSPF/DKIM/DMARCを全面導入し、noneから段階運用でなりすましを抑止した事例。",
+      "reg_detail": [
+        {"reg": "RFC 7489(DMARC)", "point": "アライメント検証とポリシー(none/quarantine/reject)、rua/rufレポートを規定。"},
+        {"reg": "RFC 6376(DKIM)", "point": "DMARCがd=ドメインのアライメント判定に用いる署名の仕様。"}
+      ]
+    },
+    {
+      "id": 204,
+      "no": 4,
+      "tag": "DNSSEC(完全性・出自認証)",
+      "q_jp": "権威DNSサーバの応答の完全性・出自を公開鍵署名で検証する技術と、その技術が担わない役割に関する記述として、最も適切なものはどれか。",
+      "choices_jp": [
+        "DNSSECはリソースレコードにデジタル署名(RRSIG)を付与し、DS/DNSKEYによる信頼の連鎖で完全性・出自認証を保証するが、通信路の暗号化は行わない。",
+        "DNSSECはDNSクエリ・応答の全体をTLSで暗号化し、経路上の盗聴を防止する。",
+        "DNS over HTTPS(DoH)はリソースレコードに署名を付与し、キャッシュポイズニングを署名検証で防ぐ。",
+        "DNSSECはカミンスキー攻撃の緩和には無効であり、権威サーバ応答の真正性は保証しない。"
+      ],
+      "q_en": "Which statement is most appropriate about the technology that verifies the integrity and origin of authoritative DNS responses with public-key signatures, and the role it does not perform?",
+      "choices_en": [
+        "DNSSEC attaches RRSIG signatures and, via the DS/DNSKEY chain of trust, ensures integrity and origin authentication, but does not encrypt the transport.",
+        "DNSSEC encrypts entire DNS queries/responses with TLS to prevent eavesdropping on the path.",
+        "DNS over HTTPS (DoH) signs resource records and prevents cache poisoning via signature verification.",
+        "DNSSEC is ineffective for mitigating the Kaminsky attack and does not assure authenticity of authoritative responses."
+      ],
+      "intro_jp": "【導入】DNSSEC(完全性・出自)とDoH/DoT(暗号化)の役割分担を切り分ける。",
+      "related_regs": ["RFC 4033/4034/4035(DNSSEC)", "RFC 8484(DoH)", "RFC 7858(DoT)"],
+      "answer_letters": ["ア"],
+      "answer_jp": "DNSSECはリソースレコードにデジタル署名(RRSIG)を付与し、DS/DNSKEYによる信頼の連鎖で完全性・出自認証を保証するが、通信路の暗号化は行わない。",
+      "explain_jp": "DNSSECはRRSIG署名と、親ゾーンのDSから子ゾーンのDNSKEYへ至る信頼の連鎖により、応答の完全性・出自認証(データ由来認証)を提供し、キャッシュポイズニングやカミンスキー攻撃の緩和に有効であるため、アが正解。ただしレコードは平文で流れ、機密性(暗号化)は提供しない。通信路の暗号化はDoH(DNS over HTTPS)/DoT(DNS over TLS)の役割であり、イ(DNSSECが暗号化するという誤り)・ウ(DoHが署名検証するという役割取り違え)・エ(DNSSECがカミンスキー攻撃に無効で真正性を保証しないという誤り)はいずれも役割の取り違えや事実誤認である。",
+      "explain_en": "DNSSEC provides integrity and origin (data-origin) authentication via RRSIG signatures and the DS-to-DNSKEY chain of trust, mitigating cache poisoning and the Kaminsky attack, so A is correct. Records still travel in cleartext; transport encryption is the role of DoH/DoT. B, C, and D confuse roles or state falsehoods.",
+      "sky": ["DNSSECは署名で応答を守る", "レコードは平文で流れる", "暗号化はDoH/DoTの役割"],
+      "rain": ["DNSSEC=完全性・出自認証(機密性でない)", "信頼の連鎖はDS→DNSKEY", "カミンスキー攻撃緩和に有効"],
+      "umbrella": ["DNSSEC=真正性、DoH/DoT=暗号化と切り分け", "『署名』はDNSSEC、『暗号化』はDoH/DoT", "機密性を期待しない"],
+      "options": [
+        {"letter": "ア", "correct": true, "reason": "RRSIG署名とDS/DNSKEYの信頼の連鎖で完全性・出自認証を提供し、暗号化はしない。正しい。"},
+        {"letter": "イ", "correct": false, "reason": "DNSSECは暗号化しない。TLS暗号化はDoT/DoHの役割で役割の取り違え。"},
+        {"letter": "ウ", "correct": false, "reason": "DoHは通信路の暗号化であり署名検証はしない。署名はDNSSEC。"},
+        {"letter": "エ", "correct": false, "reason": "DNSSECはカミンスキー攻撃緩和に有効で真正性を保証する。事実に反する。"}
+      ],
+      "hint_jp": "💡DNSSECは『中身の本物保証(署名)』、DoH/DoTは『覗き見防止(暗号化)』。",
+      "bank_notes": [
+        "① 権威DNSを自社運用する場合、鍵ロールオーバー(KSK/ZSK)手順とDS登録更新を運用に組み込む。",
+        "② DNSSECは完全性・出自認証であり機密性は非対象。盗聴対策が必要ならDoH/DoTを別途検討する。",
+        "③ キャッシュポイズニング・カミンスキー攻撃の緩和策としてバリデーション有効化を確認する。",
+        "④ 署名失効(RRSIG期限切れ)は名前解決障害に直結するため署名有効期間の監視を行う。",
+        "⑤ DoH/DoTはDNSSECと補完関係にあり、真正性と機密性を役割分担で整理する。",
+        "⑥ DNS運用の可用性(権威サーバ冗長化)とセキュリティ(署名検証)を両立させる構成を設計する。"
+      ],
+      "diagram": {
+        "title": "DNSSECとDoH/DoTの役割",
+        "layers": [
+          [{"id": "resolver", "label": "リゾルバ", "role": "問合せ元"}],
+          [{"id": "doh", "label": "DoH/DoT", "role": "通信路暗号化"}, {"id": "dnssec", "label": "DNSSEC(RRSIG)", "role": "完全性・出自"}],
+          [{"id": "auth", "label": "権威DNS", "role": "応答"}, {"id": "poison", "label": "キャッシュ汚染", "role": "脅威", "danger": true}]
+        ],
+        "edges": [
+          {"from": "resolver", "to": "doh", "label": "暗号化(機密性)"},
+          {"from": "resolver", "to": "dnssec", "label": "署名検証(真正性)"},
+          {"from": "dnssec", "to": "auth", "label": "DS→DNSKEYの連鎖"},
+          {"from": "poison", "to": "resolver", "label": "偽応答注入(DNSSECで緩和)", "danger": true}
+        ],
+        "caption": "DNSSECは署名で真正性を、DoH/DoTは暗号化で機密性を担う。キャッシュ汚染はDNSSECで緩和。"
+      },
+      "freq": 2,
+      "importance": "★★★",
+      "trap": "『DNSSECが暗号化する』『DoHが署名検証する』という役割のすり替えに注意。",
+      "mnemonic": "SEC=Signature(署名・真正性)、暗号化はDoH/DoT。",
+      "related": "問3 DMARC、午後問2 DNS運用(自社権威DNS)。",
+      "case": "権威DNSを自社運用しDNSSECで応答改ざんを防ぎつつ、盗聴対策はDoTで補完した事例。",
+      "reg_detail": [
+        {"reg": "RFC 4033/4034/4035(DNSSEC)", "point": "RRSIG/DNSKEY/DSによる完全性・出自認証の仕組みを規定。"},
+        {"reg": "RFC 8484(DoH)/RFC 7858(DoT)", "point": "DNS通信路の暗号化(機密性)を提供、真正性はDNSSECが担う。"}
+      ]
+    },
+    {
+      "id": 205,
+      "no": 5,
+      "tag": "mTLS(相互TLS)",
+      "q_jp": "ゼロトラストアーキテクチャ(NIST SP 800-207)やAPIのサービス間通信で用いられるmTLS(相互TLS)の説明として適切なものはどれか。",
+      "choices_jp": [
+        "サーバ証明書のみを検証し、クライアントはパスワードで認証する片方向TLSである。",
+        "クライアントとサーバの双方が証明書を提示して相互に認証し、証明書にバインドしたトークン発行(証明書バウンドトークン)にも利用される。",
+        "TLSハンドシェイクを省略し、事前共有鍵のみで通信を高速化する方式である。",
+        "クライアント証明書の代わりにSPFレコードで送信元の正当性を検証する方式である。"
+      ],
+      "q_en": "Which statement correctly describes mTLS (mutual TLS) as used in Zero Trust (NIST SP 800-207) and service-to-service API communication?",
+      "choices_en": [
+        "One-way TLS that validates only the server certificate while the client authenticates with a password.",
+        "Both client and server present certificates for mutual authentication, also used to issue certificate-bound tokens.",
+        "A scheme that skips the TLS handshake and speeds up communication using only a pre-shared key.",
+        "A scheme that validates the sender's legitimacy with SPF records instead of a client certificate."
+      ],
+      "intro_jp": "【導入】相互認証と証明書バウンドトークンというmTLS固有の性質を選ぶ。",
+      "related_regs": ["RFC 8705(OAuth mTLS)", "NIST SP 800-207"],
+      "answer_letters": ["イ"],
+      "answer_jp": "クライアントとサーバの双方が証明書を提示して相互に認証し、証明書にバインドしたトークン発行(証明書バウンドトークン)にも利用される。",
+      "explain_jp": "mTLSはサーバ・クライアント双方が証明書を提示して相互認証を行うTLSであり、イが正解。ゼロトラストのサービス間通信やAPI保護に用いられ、OAuth 2.0のmTLS(RFC 8705)では発行トークンをクライアント証明書に紐づける証明書バウンドトークンにより、トークンが盗まれても対応する証明書がなければ悪用できないようにする。アは通常のサーバ認証型(片方向)TLSの説明で相互認証ではない。ウの事前共有鍵のみでハンドシェイク省略、エのSPFで送信元検証は、いずれもmTLSと無関係で誤り。",
+      "explain_en": "mTLS is TLS where both server and client present certificates for mutual authentication, so B is correct. Used for zero-trust service-to-service and API protection, OAuth mTLS (RFC 8705) binds issued tokens to the client certificate so a stolen token cannot be abused without the matching certificate. A is one-way server-auth TLS; C and D are unrelated.",
+      "sky": ["mTLSはゼロトラストやAPI保護で使う", "TLSは証明書で認証する", "双方向か片方向かが論点"],
+      "rain": ["mTLS=双方が証明書提示の相互認証", "証明書バウンドトークンでトークン盗用を抑止", "片方向TLSはサーバのみ検証"],
+      "umbrella": ["mTLS=相互認証と暗記", "証明書バウンドトークン(RFC 8705)を関連付け", "片方向TLS/SPF/PSKと切り分け"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "サーバ証明書のみ検証は片方向TLSであり相互認証ではない。"},
+        {"letter": "イ", "correct": true, "reason": "双方が証明書提示で相互認証し証明書バウンドトークンにも利用されるのがmTLS。"},
+        {"letter": "ウ", "correct": false, "reason": "ハンドシェイク省略・PSKのみはmTLSと無関係。"},
+        {"letter": "エ", "correct": false, "reason": "SPFはメール送信ドメイン認証でクライアント証明書検証とは無関係。"}
+      ],
+      "hint_jp": "💡mの意味は mutual(相互)。両者が証明書を出す。",
+      "bank_notes": [
+        "① マイクロサービス間通信はmTLSで相互認証し、内部ネットワークでも暗黙信頼を排除する。",
+        "② OAuthのアクセストークンは証明書バウンド(RFC 8705)にし、盗用時の悪用を防ぐ。",
+        "③ クライアント証明書のライフサイクル(発行・失効・ローテーション)を運用で管理する。",
+        "④ サービスメッシュ(サイドカー)でmTLSを自動化し、証明書配布・更新の負荷を下げる。",
+        "⑤ 片方向TLS+パスワードのAPI認証は盗用に弱いため、機微APIはmTLSへ移行する。",
+        "⑥ ゼロトラストのワークロードIDとして証明書/SPIFFEを用い、PDPの認可判断に連携する。"
+      ],
+      "diagram": {
+        "title": "片方向TLSとmTLS",
+        "layers": [
+          [{"id": "client", "label": "クライアント/サービスA", "role": "接続元"}],
+          [{"id": "oneway", "label": "片方向TLS", "role": "サーバのみ検証", "danger": true}, {"id": "mtls", "label": "mTLS", "role": "相互認証"}],
+          [{"id": "server", "label": "サーバ/サービスB", "role": "接続先"}, {"id": "token", "label": "証明書バウンドトークン", "role": "盗用抑止"}]
+        ],
+        "edges": [
+          {"from": "client", "to": "oneway", "label": "パスワード頼み", "danger": true},
+          {"from": "client", "to": "mtls", "label": "証明書を提示"},
+          {"from": "mtls", "to": "server", "label": "双方が検証"},
+          {"from": "mtls", "to": "token", "label": "証明書に紐付け(RFC 8705)"}
+        ],
+        "caption": "片方向TLSはサーバのみ検証。mTLSは双方が証明書提示で相互認証し、トークンを証明書にバインドする。"
+      },
+      "freq": 2,
+      "importance": "★★",
+      "trap": "アの片方向TLS(サーバ認証+パスワード)をmTLSと誤認。相互(mutual)がキー。",
+      "mnemonic": "m=mutual。証明書は『お互い出す』。",
+      "related": "問6 PKCE/OAuth、問2 ZTNA(ゼロトラストのサービス間通信)。",
+      "case": "APIのトークン盗用事案を機に、証明書バウンドトークンとmTLSで盗用トークンの悪用を封じた事例。",
+      "reg_detail": [
+        {"reg": "RFC 8705(OAuth mTLS)", "point": "証明書バウンドアクセストークンで盗用トークンの悪用を防止。"},
+        {"reg": "NIST SP 800-207", "point": "ワークロード間の相互認証を都度の検証原則の一部として位置付け。"}
+      ]
+    },
+    {
+      "id": 206,
+      "no": 6,
+      "tag": "PKCE(認可コード横取り対策)",
+      "q_jp": "認可コードフローにおける認可コード横取り攻撃(authorization code interception)への対策として、code_verifierと、そこから導出するcode_challengeを用いて正規クライアントのみがトークン交換できることを保証する仕組みはどれか。",
+      "choices_jp": ["PKCE", "HSTS", "SNI", "OCSPステープリング"],
+      "q_en": "Which mechanism defends against authorization code interception in the authorization code flow by using a code_verifier and the derived code_challenge so that only the legitimate client can exchange the token?",
+      "choices_en": ["PKCE", "HSTS", "SNI", "OCSP stapling"],
+      "intro_jp": "【導入】認可コード横取り対策として code_verifier/code_challenge を使う仕組みを選ぶ。",
+      "related_regs": ["RFC 7636(PKCE)", "RFC 6749(OAuth 2.0)"],
+      "answer_letters": ["ア"],
+      "answer_jp": "PKCE",
+      "explain_jp": "PKCE(Proof Key for Code Exchange, RFC 7636)はパブリッククライアント等での認可コード横取り対策であり、アが正解。クライアントは高エントロピーのcode_verifier(43〜128文字)を生成し、S256方式ではそのcode_challenge = BASE64URL(SHA-256(code_verifier))を認可要求時に送信、トークン交換時に元のcode_verifierを提示させて一致を検証する(plain方式もあるがS256が推奨)。これにより横取りしたコードだけでは交換できない。HSTSは常時HTTPS強制、SNIはTLSハンドシェイクでの宛先ホスト名指定、OCSPステープリングは証明書失効確認の効率化であり、いずれもPKCEとは別物で誤り。",
+      "explain_en": "PKCE (Proof Key for Code Exchange, RFC 7636) defends against authorization code interception, so A is correct. The client generates a high-entropy code_verifier and sends code_challenge = BASE64URL(SHA-256(verifier)) (S256) at authorization, then presents the verifier at token exchange for matching, so a stolen code alone cannot be exchanged. HSTS, SNI, and OCSP stapling are unrelated.",
+      "sky": ["認可コードフローで横取り攻撃がある", "code_verifier/code_challengeを使う", "選択肢はセキュリティ用語4つ"],
+      "rain": ["verifierとchallengeの一致検証がPKCE", "横取りコードだけでは交換不可", "HSTS/SNI/OCSPは無関係"],
+      "umbrella": ["PKCE=認可コード横取り対策と暗記", "S256(SHA-256)が推奨方式", "他3語は別レイヤの技術と切り分け"],
+      "options": [
+        {"letter": "ア", "correct": true, "reason": "code_verifier/code_challengeで正規クライアントのみ交換可能にするPKCEが正解。"},
+        {"letter": "イ", "correct": false, "reason": "HSTSは常時HTTPSを強制するヘッダで認可コード保護とは無関係。"},
+        {"letter": "ウ", "correct": false, "reason": "SNIはTLSハンドシェイクで宛先ホスト名を示す仕組みで無関係。"},
+        {"letter": "エ", "correct": false, "reason": "OCSPステープリングは証明書失効確認の効率化で無関係。"}
+      ],
+      "hint_jp": "💡PKCE=『合言葉(verifier)を後で見せて本人確認』。横取りコードだけでは交換できない。",
+      "bank_notes": [
+        "① モバイル/SPA等のパブリッククライアントの認可コードフローにはPKCEを必須化する。",
+        "② code_challenge方式はplainではなくS256(SHA-256)を採用する。",
+        "③ code_verifierは十分なエントロピー(43〜128文字)で生成し、セッション内で安全に保持する。",
+        "④ 認可コードの短寿命化・一度限り利用と併せてPKCEで横取り耐性を高める。",
+        "⑤ HSTS/SNI/OCSPは通信路・証明書レイヤの対策でPKCEと役割が異なる点を設計で区別する。",
+        "⑥ OAuth 2.1ではPKCEが原則必須化されており、既存フローの棚卸しと移行を進める。"
+      ],
+      "diagram": {
+        "title": "PKCEによる認可コード保護",
+        "layers": [
+          [{"id": "client", "label": "クライアント", "role": "verifier生成"}],
+          [{"id": "authz", "label": "認可サーバ", "role": "challenge受領"}, {"id": "attacker", "label": "攻撃者", "role": "コード横取り", "danger": true}],
+          [{"id": "token", "label": "トークン交換", "role": "verifier一致検証"}]
+        ],
+        "edges": [
+          {"from": "client", "to": "authz", "label": "code_challenge送信"},
+          {"from": "authz", "to": "client", "label": "認可コード発行"},
+          {"from": "attacker", "to": "token", "label": "コードのみでは交換不可", "danger": true},
+          {"from": "client", "to": "token", "label": "code_verifier提示で成功"}
+        ],
+        "caption": "認可時にchallengeを渡し交換時にverifierで一致検証。横取りコードだけでは交換できない。"
+      },
+      "freq": 2,
+      "importance": "★★★",
+      "trap": "HSTS/SNI/OCSPなど無関係なTLS/証明書用語を混ぜる。code_verifierが出たらPKCE。",
+      "mnemonic": "PKCE=『Proof Key』。合言葉で正規クライアントを証明。",
+      "related": "問5 mTLS/OAuth、認可・トークン保護のつながり。",
+      "case": "モバイルアプリの認可コード横取りを、S256方式のPKCE導入で無効化した事例。",
+      "reg_detail": [
+        {"reg": "RFC 7636(PKCE)", "point": "code_verifier/code_challenge(S256推奨)で認可コード横取りを防止。"},
+        {"reg": "RFC 6749(OAuth 2.0)", "point": "認可コードフローの基本仕様。PKCEが横取り耐性を補強する。"}
+      ]
+    }
+  ]
+}

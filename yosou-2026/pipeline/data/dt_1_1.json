@@ -1,0 +1,1187 @@
+{
+  "topic_jp": "暗号・認証・PKI",
+  "topic_en": "Cryptography, Authentication & PKI",
+  "shared": {
+    "glossary": [
+      {
+        "term": "PKCE",
+        "term_en": "Proof Key for Code Exchange",
+        "def": "認可コードフローで公開クライアントの認可コード横取りを防ぐ拡張。code_verifierとそのハッシュcode_challenge(S256)を用い、正規クライアントだけがトークン交換できる。",
+        "regs": "RFC 7636、OAuth 2.0 Security BCP(RFC 9700)"
+      },
+      {
+        "term": "FIDO2/WebAuthn",
+        "term_en": "FIDO2 / WebAuthn",
+        "def": "公開鍵暗号による資格情報を用いた認証。認証器がオリジンを含むデータに署名し、RPがオリジン一致を検証するためフィッシング耐性を持つ。",
+        "regs": "W3C WebAuthn、FIDO2 CTAP、NIST SP 800-63B"
+      },
+      {
+        "term": "IDトークン",
+        "term_en": "ID Token",
+        "def": "OIDCで認証結果を伝えるJWS署名付きJWT。iss/aud/exp/nonce等のクレームを検証して初めて認証結果として信頼できる。",
+        "regs": "OpenID Connect Core 1.0、RFC 7519(JWT)"
+      },
+      {
+        "term": "OCSPステープリング",
+        "term_en": "OCSP Stapling",
+        "def": "サーバが事前取得した署名済みOCSPレスポンスをTLSハンドシェイクで提示する失効確認方式。クライアントがレスポンダへ直接問い合わせず秘匿性と可用性を改善する。",
+        "regs": "RFC 6960(OCSP)、RFC 6066(TLS Certificate Status Request)"
+      },
+      {
+        "term": "送信者制約トークン",
+        "term_en": "Sender-Constrained / Certificate-Bound Token",
+        "def": "アクセストークンをクライアントの鍵所有(mTLS証明書やDPoP鍵)に束縛する仕組み。盗まれても鍵を持たない第三者は再利用できずリプレイを防ぐ。",
+        "regs": "RFC 8705(mTLS/cnf x5t#S256)、RFC 9449(DPoP)"
+      },
+      {
+        "term": "耐量子計算機暗号",
+        "term_en": "Post-Quantum Cryptography (PQC)",
+        "def": "ショアのアルゴリズムでRSA/ECCが危殆化する脅威に備えた公開鍵暗号。格子ベース等が標準化され、移行期はハイブリッド鍵交換が推奨される。",
+        "regs": "NIST FIPS 203(ML-KEM)/204(ML-DSA)、CRYPTREC"
+      },
+      {
+        "term": "JWKS",
+        "term_en": "JSON Web Key Set",
+        "def": "署名検証用の公開鍵集合を公開するエンドポイント。JWTヘッダのkidで対応鍵を選択し、鍵ローテーション時は新旧鍵を併存させ無停止で更新する。",
+        "regs": "RFC 7517(JWK)、RFC 7515(JWS)"
+      },
+      {
+        "term": "リダイレクトURIの完全一致",
+        "term_en": "Exact-Match Redirect URI",
+        "def": "OAuthで登録済みリダイレクトURIを完全一致で照合する原則。前方一致だと認可コード横取りやオープンリダイレクト悪用を招くため完全一致が必須。",
+        "regs": "OAuth 2.0 Security BCP(RFC 9700)、RFC 6749"
+      }
+    ],
+    "comparison": [
+      {
+        "concept": "認可コードの保護(公開クライアント)",
+        "normal": "PKCE(S256)でcode_verifierを鍵バインドし正規クライアントのみ交換可",
+        "suspicious": "PKCEなしの素の認可コードフロー。横取りされたコードで第三者がトークン交換"
+      },
+      {
+        "concept": "認証のフィッシング耐性",
+        "normal": "WebAuthnでオリジンを署名にバインドしRPが検証",
+        "suspicious": "パスワード+SMS OTP。AiTM中継でOTPごと窃取・セッション乗っ取り"
+      },
+      {
+        "concept": "IDトークンの信頼",
+        "normal": "iss/aud/exp/nonce+署名(RS256/ES256)を検証してから信頼",
+        "suspicious": "署名検証のみ、あるいはalg=none/対称鍵混同でクレーム未検証"
+      },
+      {
+        "concept": "証明書失効確認",
+        "normal": "OCSPステープリングでサーバが署名済み応答を提示、秘匿性を確保",
+        "suspicious": "クライアントが直接OCSP問い合わせしアクセス先が漏えい、応答依存で可用性低下"
+      },
+      {
+        "concept": "リダイレクトURI登録",
+        "normal": "完全一致(exact match)で事前登録",
+        "suspicious": "前方一致/部分一致でパス・クエリ付加による認可コード横取りを許容"
+      }
+    ],
+    "reg_matrix": [
+      {
+        "reg": "RFC 7636 (PKCE)",
+        "scope": "OAuth 2.0 認可コードフロー拡張",
+        "point": "code_verifier/code_challenge(S256)で認可コード横取りを防ぎ正規クライアントに交換を束縛"
+      },
+      {
+        "reg": "W3C WebAuthn / FIDO2",
+        "scope": "パスワードレス・多要素認証",
+        "point": "公開鍵資格情報でオリジンを署名にバインド、RPがオリジン検証しフィッシング耐性を実現"
+      },
+      {
+        "reg": "OpenID Connect Core 1.0",
+        "scope": "OAuth2上の認証層",
+        "point": "IDトークン(JWT)でiss/aud/exp/nonce+署名を検証、認証と認可を分離"
+      },
+      {
+        "reg": "RFC 8705 / RFC 9449 (DPoP)",
+        "scope": "送信者制約アクセストークン",
+        "point": "mTLS証明書サムプリント(cnf x5t#S256)やDPoP鍵にトークンを束縛しリプレイを防止"
+      },
+      {
+        "reg": "NIST FIPS 203/204 (PQC)",
+        "scope": "耐量子公開鍵暗号標準",
+        "point": "ML-KEM/ML-DSA(格子ベース)へ移行、移行期はハイブリッド鍵交換を推奨"
+      }
+    ],
+    "map_nodes": [
+      "認証の基礎(パスワードレス/FIDO2・WebAuthnのフィッシング耐性)",
+      "認可の委譲(OAuth 2.0 + PKCE、リダイレクトURI完全一致)",
+      "トークンとID連携(OIDC IDトークン検証、JWKS鍵ローテーション)",
+      "トークン盗難対策(mTLS/DPoP送信者制約、cnfバインド)",
+      "PKIと暗号基盤(証明書失効/OCSPステープリング、PQC移行)"
+    ],
+    "map_summary": "認証(誰か=FIDO2/OIDC)と認可(何を許すか=OAuth+PKCE)を分離して理解し、トークンをオリジンや鍵所有にバインドしてフィッシング・リプレイを防ぎ、その土台をPKI(証明書失効)とPQC移行で支える、という一連の構造が本分野の全体像である。",
+    "exam_tips": [
+      "『検知』か『阻止(binding)』かを見分ける。PKCEやWebAuthnは横取り・偽サイトを『成立させない』束縛が本質。",
+      "認証(OIDC IDトークン)と認可(OAuthアクセストークン)を混同しない。IDトークンをAPIアクセスに使う選択肢は誤り。",
+      "JWT検証は署名だけでなくiss/aud/exp(必要ならnonce/nbf)まで。『署名検証のみ』は頻出の減点ポイント。",
+      "PKI系はOCSPステープリング(サーバ提示・秘匿性向上)とCRL/OCSPの違い、PQCはショアで危殆化するのは公開鍵(RSA/ECC)だけと押さえる。"
+    ],
+    "pitfalls": [
+      "『秘密鍵が漏れない/認証器から出ない』をフィッシング耐性の理由と誤認。本質はオリジンの署名バインドとRP検証。",
+      "OCSPステープリングで署名者がWebサーバになると誤認。署名者はあくまでCA(OCSPレスポンダ)。",
+      "PQCで共通鍵AES-256が真っ先に危殆化と誤認。グローバは実効鍵長を半減させるにとどまりAES-256は量子環境でも十分安全。"
+    ],
+    "concept_diagram": {
+      "title": "暗号・認証・PKIの中核構造(認証・認可・信頼基盤)",
+      "layers": [
+        [
+          {
+            "id": "user",
+            "label": "利用者/クライアント",
+            "role": "主体"
+          }
+        ],
+        [
+          {
+            "id": "authn",
+            "label": "認証 FIDO2/WebAuthn",
+            "role": "誰か"
+          },
+          {
+            "id": "authz",
+            "label": "認可 OAuth2+PKCE",
+            "role": "何を許す"
+          }
+        ],
+        [
+          {
+            "id": "oidc",
+            "label": "OIDC IDトークン",
+            "role": "認証結果"
+          },
+          {
+            "id": "token",
+            "label": "アクセストークン(送信者制約)",
+            "role": "認可の証"
+          },
+          {
+            "id": "weak",
+            "label": "素の認可コード/ベアラトークン",
+            "role": "弱点",
+            "danger": true
+          }
+        ],
+        [
+          {
+            "id": "pki",
+            "label": "PKI(証明書/OCSP/PQC)",
+            "role": "信頼基盤"
+          }
+        ]
+      ],
+      "edges": [
+        {
+          "from": "user",
+          "to": "authn",
+          "label": "オリジン署名で認証"
+        },
+        {
+          "from": "user",
+          "to": "authz",
+          "label": "認可要求(PKCE)"
+        },
+        {
+          "from": "authn",
+          "to": "oidc",
+          "label": "IDトークン発行"
+        },
+        {
+          "from": "authz",
+          "to": "token",
+          "label": "コード交換"
+        },
+        {
+          "from": "authz",
+          "to": "weak",
+          "label": "PKCE無/前方一致だと横取り",
+          "danger": true
+        },
+        {
+          "from": "token",
+          "to": "pki",
+          "label": "証明書/鍵で検証"
+        },
+        {
+          "from": "oidc",
+          "to": "pki",
+          "label": "JWKS公開鍵で署名検証"
+        }
+      ],
+      "caption": "認証と認可を分離し、トークンをオリジン・鍵所有に束縛。PKIが署名検証と失効確認で全体の信頼を支える。弱点は素のコード/ベアラトークン。"
+    }
+  },
+  "questions": [
+    {
+      "id": 101,
+      "no": 1,
+      "tag": "PKCEの目的",
+      "q_jp": "OAuth 2.0 の認可コードフローに PKCE(Proof Key for Code Exchange)を適用する主目的として、最も適切なものはどれか。",
+      "choices_jp": [
+        "アクセストークンを JWT 形式にし、リソースサーバでの署名検証を可能にする。",
+        "認可サーバとリソースサーバ間の通信を相互 TLS で保護する。",
+        "悪意のあるアプリによる認可コードの横取りを防ぎ、正規クライアント(元の認可要求を出した主体)だけがトークンと交換できるようにする。",
+        "リフレッシュトークンの有効期限を延長し、再認可の頻度を下げる。"
+      ],
+      "q_en": "What is the primary purpose of applying PKCE (Proof Key for Code Exchange) to the OAuth 2.0 authorization code flow?",
+      "choices_en": [
+        "To make access tokens JWTs so the resource server can verify their signature.",
+        "To protect authorization-server-to-resource-server traffic with mutual TLS.",
+        "To prevent authorization code interception by malicious apps so that only the legitimate client that made the original request can exchange the code for a token.",
+        "To extend refresh-token lifetime and reduce how often re-authorization is needed."
+      ],
+      "intro_jp": "【導入】PKCEが守るのは何か——『検知』ではなく『交換の束縛(binding)』が本質である点に着目する。",
+      "related_regs": [
+        "RFC 7636",
+        "OAuth 2.0 Security BCP (RFC 9700)",
+        "RFC 6749"
+      ],
+      "answer_letters": [
+        "ウ"
+      ],
+      "answer_jp": "悪意のあるアプリによる認可コードの横取りを防ぎ、正規クライアント(元の認可要求を出した主体)だけがトークンと交換できるようにする。",
+      "explain_jp": "PKCE(RFC 7636)は主にネイティブ/SPA など公開クライアントでの認可コード横取り(Authorization Code Interception)対策である。クライアントが認可要求ごとに高エントロピー乱数 code_verifier を生成し、そのハッシュ code_challenge(通常 S256)を認可要求時に送付、トークン交換時に元の code_verifier を提示する。認可サーバがハッシュ照合することで、コードを横取りした第三者は code_verifier を知らずトークン交換できない。本質は『検知』ではなく『交換の阻止(binding)』である。アはトークン形式、イはmTLS、エはリフレッシュトークン運用の話でいずれもPKCEの目的ではないため誤り。",
+      "explain_en": "PKCE (RFC 7636) protects public clients from authorization code interception. The client sends a hash (code_challenge, S256) of a random code_verifier at request time and presents the verifier at token exchange, so an attacker who steals the code cannot exchange it. It binds exchange to the original client rather than merely detecting misuse.",
+      "sky": [
+        "ネイティブ/SPA など公開クライアントが増えている",
+        "認可コードは横取りされ得る",
+        "PKCEはcode_verifierとcode_challengeを使う",
+        "トークン交換時に元のverifierを提示する"
+      ],
+      "rain": [
+        "PKCEの狙いは横取りコードの再利用阻止",
+        "ハッシュ照合で正規クライアントに交換を束縛",
+        "『検知』ではなく『binding(阻止)』が本質",
+        "ア・イ・エはPKCEの目的ではない"
+      ],
+      "umbrella": [
+        "公開クライアントには必ずPKCE(S256)を適用",
+        "plainではなくS256を選ぶ",
+        "リダイレクトURIは完全一致で登録",
+        "認可サーバでcode_challengeの照合を必須化"
+      ],
+      "options": [
+        {
+          "letter": "ア",
+          "correct": false,
+          "reason": "トークンをJWT化して署名検証可能にするのはトークン形式の話でPKCEの目的ではない。"
+        },
+        {
+          "letter": "イ",
+          "correct": false,
+          "reason": "認可サーバとリソースサーバ間のmTLS保護はPKCEと無関係。"
+        },
+        {
+          "letter": "ウ",
+          "correct": true,
+          "reason": "認可コード横取りを防ぎ正規クライアントだけがトークン交換できるよう束縛するのがPKCEの主目的。"
+        },
+        {
+          "letter": "エ",
+          "correct": false,
+          "reason": "リフレッシュトークンの有効期限延長はPKCEの目的ではない。"
+        }
+      ],
+      "hint_jp": "💡PKCEは『コードを盗んでも鍵(verifier)がなきゃ交換できない』束縛。検知ではなく阻止。",
+      "bank_notes": [
+        "① モバイル/SPAの認可コードフローはPKCE(S256)を標準必須とし、plainは禁止する。",
+        "② PKCE未対応のレガシークライアントは棚卸しし、移行計画に載せる。",
+        "③ 認可サーバ側でcode_challengeの記録とトークン交換時の照合を強制する設定を確認。",
+        "④ code_verifierは十分なエントロピー(43〜128文字)を確保し、ログに残さない。",
+        "⑤ リダイレクトURIは完全一致登録とセットで運用し横取り経路を塞ぐ。",
+        "⑥ Implicitフローは廃止し認可コード+PKCEへ移行(OAuth Security BCP準拠)。",
+        "⑦ ネイティブアプリはカスタムスキーム乗っ取りに備えClaimed HTTPS Redirect等を検討。"
+      ],
+      "diagram": {
+        "title": "PKCEによる認可コード横取り防止",
+        "layers": [
+          [
+            {
+              "id": "cli",
+              "label": "正規クライアント",
+              "role": "主体"
+            }
+          ],
+          [
+            {
+              "id": "as",
+              "label": "認可サーバ",
+              "role": "発行/照合"
+            }
+          ],
+          [
+            {
+              "id": "code",
+              "label": "認可コード",
+              "role": "受け渡し"
+            },
+            {
+              "id": "atk",
+              "label": "横取りアプリ",
+              "role": "攻撃者",
+              "danger": true
+            }
+          ],
+          [
+            {
+              "id": "tok",
+              "label": "アクセストークン",
+              "role": "成果"
+            }
+          ]
+        ],
+        "edges": [
+          {
+            "from": "cli",
+            "to": "as",
+            "label": "code_challenge(S256)送付"
+          },
+          {
+            "from": "as",
+            "to": "code",
+            "label": "コード発行"
+          },
+          {
+            "from": "code",
+            "to": "atk",
+            "label": "コード横取り",
+            "danger": true
+          },
+          {
+            "from": "atk",
+            "to": "as",
+            "label": "verifier不明で交換失敗",
+            "danger": true
+          },
+          {
+            "from": "cli",
+            "to": "tok",
+            "label": "verifier提示で交換成功"
+          }
+        ],
+        "caption": "攻撃者がコードを横取りしてもcode_verifierを知らないため交換できず、正規クライアントだけがトークンを得る。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "『トークンをJWTにする』『mTLSで保護』など別技術の目的を混ぜた選択肢に注意。PKCEはコード横取り対策。",
+      "mnemonic": "PKCE=『Proof Key』で正規クライアントに交換を証明させる。",
+      "related": "問5(送信者制約トークン)と同じく『鍵所有による束縛』の思想。午後問2設問3(リダイレクトURI完全一致)と連動。",
+      "case": "SPAでImplicitフローを使い認可コードが漏えい・悪用された事例を機に、認可コード+PKCEへ全面移行。",
+      "reg_detail": [
+        {
+          "reg": "RFC 7636",
+          "point": "code_verifier/code_challenge(plain/S256)の仕様。公開クライアントの横取り対策。"
+        },
+        {
+          "reg": "OAuth 2.0 Security BCP (RFC 9700)",
+          "point": "全クライアントでPKCE適用、Implicit廃止、リダイレクトURI完全一致を推奨。"
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "no": 2,
+      "tag": "WebAuthnのフィッシング耐性",
+      "q_jp": "FIDO2/WebAuthn によるパスキー認証がフィッシングに耐性をもつ根本的な理由として、最も適切なものはどれか。",
+      "choices_jp": [
+        "認証のたびにワンタイムパスワードを生成し、一定時間で失効させるため。",
+        "署名対象データにアクセス先のオリジン情報がバインドされ、RP(リライングパーティ)がオリジンの一致を検証するため、偽ドメインでは署名検証が成立しない。",
+        "秘密鍵をサーバ側にも複製保管し、突合により本人性を確認するため。",
+        "利用者が入力したパスワードをソルト付きハッシュで保存するため。"
+      ],
+      "q_en": "What is the fundamental reason FIDO2/WebAuthn passkey authentication is phishing-resistant?",
+      "choices_en": [
+        "It generates a one-time password each time that expires after a short period.",
+        "The origin of the accessed site is bound into the signed data and the relying party verifies the origin matches, so signature verification fails on a spoofed domain.",
+        "The private key is also copied and stored on the server for identity matching.",
+        "It stores the user's entered password as a salted hash."
+      ],
+      "intro_jp": "【導入】フィッシング耐性の本質は『鍵が漏れないこと』ではなく『オリジンの署名バインドとRP検証』にある点に注目する。",
+      "related_regs": [
+        "W3C WebAuthn",
+        "FIDO2 CTAP",
+        "NIST SP 800-63B"
+      ],
+      "answer_letters": [
+        "イ"
+      ],
+      "answer_jp": "署名対象データにアクセス先のオリジン情報がバインドされ、RP(リライングパーティ)がオリジンの一致を検証するため、偽ドメインでは署名検証が成立しない。",
+      "explain_jp": "WebAuthn ではブラウザが生成する clientData に乱数チャレンジとオリジンが含まれ、認証器はそのハッシュ(および rpIdHash を含む authenticatorData)に署名する。RP は署名検証時に、clientData 内のオリジンおよび authenticatorData 内の rpIdHash が期待値と一致するかを検証するため、オリジンの異なる偽サイトでは検証に失敗する。加えてブラウザは資格情報を rpId に紐づくオリジンでしか呼び出さない。ウは誤りで秘密鍵は認証器内に留まりサーバへ渡らない。OTP やパスワードハッシュ(ア・エ)はフィッシング耐性の本質ではない(AiTM 中継で OTP は突破され得る)。",
+      "explain_en": "In WebAuthn the browser's clientData includes the challenge and the origin, and the authenticator signs over its hash and the authenticatorData (with rpIdHash). The RP verifies the origin and rpIdHash match, so a spoofed-domain site fails verification. OTPs and password hashes are not the basis of phishing resistance, and the private key never leaves the authenticator.",
+      "sky": [
+        "AiTMフィッシングでOTPは中継突破され得る",
+        "WebAuthnはclientDataにオリジンを含む",
+        "認証器がそのハッシュに署名する",
+        "秘密鍵は認証器内に留まる"
+      ],
+      "rain": [
+        "偽ドメインではオリジン不一致で署名検証が失敗",
+        "RPがオリジンとrpIdHashを検証するのが要点",
+        "『鍵が漏れない』はフィッシング耐性の理由ではない",
+        "OTP/パスワードハッシュは本質でない"
+      ],
+      "umbrella": [
+        "フィッシング対策はパスキー(FIDO2)への移行が最有効",
+        "AiTM対策としてSMS OTP依存を脱する",
+        "RP実装でorigin/rpIdHash検証を必須化",
+        "attestationとユーザ検証(UV)ポリシーを設計"
+      ],
+      "options": [
+        {
+          "letter": "ア",
+          "correct": false,
+          "reason": "OTPの生成・失効はAiTM中継で突破され得るためフィッシング耐性の本質ではない。"
+        },
+        {
+          "letter": "イ",
+          "correct": true,
+          "reason": "オリジンを署名対象にバインドしRPが一致を検証するため偽サイトでは検証が成立しない。これが根本理由。"
+        },
+        {
+          "letter": "ウ",
+          "correct": false,
+          "reason": "秘密鍵は認証器内に留まりサーバへ渡らない。複製保管という前提が誤り。"
+        },
+        {
+          "letter": "エ",
+          "correct": false,
+          "reason": "パスワードのソルト付きハッシュ保存は漏えい耐性の話でフィッシング耐性ではない。"
+        }
+      ],
+      "hint_jp": "💡パスキーは『偽サイトでは鍵が反応しない』。オリジンを署名に焼き込みRPが照合。",
+      "bank_notes": [
+        "① AiTM(中間者)フィッシングはOTPごと窃取するため、SMS/TOTP依存からパスキーへ移行する。",
+        "② RP実装で clientDataJSON の origin と authenticatorData の rpIdHash 検証を必須化する。",
+        "③ synced passkey採用時は同期クラウドアカウントの認証強度・回復手段が防御境界になる点を管理。",
+        "④ device-bound passkeyは可用性(機種変更)対策として代替登録手段を用意する。",
+        "⑤ challengeの一意性・使い捨てとリプレイ検出(signCount)を運用で確認する。",
+        "⑥ attestationの要否とユーザ検証(UV)ポリシーを業務リスクに応じて設計する。",
+        "⑦ パスキー登録・回復フロー自体がフィッシング標的になり得るため保護する。"
+      ],
+      "diagram": {
+        "title": "WebAuthnのオリジン署名バインド",
+        "layers": [
+          [
+            {
+              "id": "usr",
+              "label": "利用者+認証器",
+              "role": "署名"
+            }
+          ],
+          [
+            {
+              "id": "real",
+              "label": "正規サイト(origin一致)",
+              "role": "検証成功"
+            },
+            {
+              "id": "fake",
+              "label": "偽サイト(origin不一致)",
+              "role": "検証失敗",
+              "danger": true
+            }
+          ],
+          [
+            {
+              "id": "rp",
+              "label": "RP(origin/rpIdHash検証)",
+              "role": "検証"
+            }
+          ]
+        ],
+        "edges": [
+          {
+            "from": "usr",
+            "to": "real",
+            "label": "origin付き署名"
+          },
+          {
+            "from": "usr",
+            "to": "fake",
+            "label": "偽originでは鍵が反応せず",
+            "danger": true
+          },
+          {
+            "from": "real",
+            "to": "rp",
+            "label": "origin一致で成立"
+          },
+          {
+            "from": "fake",
+            "to": "rp",
+            "label": "origin不一致で失敗",
+            "danger": true
+          }
+        ],
+        "caption": "署名にオリジンが焼き込まれRPが一致を検証するため、偽ドメインでは認証が成立しない。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "『秘密鍵が漏れない/認証器から出ない』を理由に選ぶと減点。それは鍵漏えい耐性で別論点。",
+      "mnemonic": "パスキー=『オリジンを署名に刻む』からフィッシング不能。",
+      "related": "午後問1設問1と同一論点。問5(トークンの鍵バインド)と『所有の証明』で通底。",
+      "case": "AiTMフィッシングでパスワード+SMS OTPが突破されセッションクッキーを窃取された事例からパスキーへ移行。",
+      "reg_detail": [
+        {
+          "reg": "W3C WebAuthn",
+          "point": "clientDataのorigin/challengeとauthenticatorDataのrpIdHash検証を規定。"
+        },
+        {
+          "reg": "NIST SP 800-63B",
+          "point": "フィッシング耐性認証(AAL2/AAL3)として暗号認証器を位置づけ。"
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "no": 3,
+      "tag": "OIDC IDトークンの検証",
+      "q_jp": "OpenID Connect(OIDC)における ID トークンに関する記述のうち、適切なものはどれか。",
+      "choices_jp": [
+        "ID トークンは JWS で署名された JWT であり、iss・aud・exp・(要求時は)nonce 等のクレームを検証して初めて認証結果として信頼できる。",
+        "ID トークンは認可(アクセス権の委譲)そのものを表し、リソースアクセスに直接使用する。",
+        "ID トークンの署名検証には、クライアントとサーバで事前共有した対称鍵のみを用いる。",
+        "ID トークンは平文の JSON であり、TLS 上で送るため署名は不要である。"
+      ],
+      "q_en": "Which statement about the ID token in OpenID Connect (OIDC) is correct?",
+      "choices_en": [
+        "The ID token is a JWS-signed JWT and can be trusted as an authentication result only after verifying claims such as iss, aud, exp, and (when requested) nonce.",
+        "The ID token represents authorization (delegation of access rights) itself and is used directly to access resources.",
+        "ID token signature verification uses only a symmetric key pre-shared between client and server.",
+        "The ID token is plaintext JSON and, since it is sent over TLS, needs no signature."
+      ],
+      "intro_jp": "【導入】認証(IDトークン)と認可(アクセストークン)の役割分離、そしてJWT検証項目の理解を問う。",
+      "related_regs": [
+        "OpenID Connect Core 1.0",
+        "RFC 7519 (JWT)",
+        "RFC 7515 (JWS)"
+      ],
+      "answer_letters": [
+        "ア"
+      ],
+      "answer_jp": "ID トークンは JWS で署名された JWT であり、iss・aud・exp・(要求時は)nonce 等のクレームを検証して初めて認証結果として信頼できる。",
+      "explain_jp": "OIDC は OAuth 2.0 上に構築した『認証』層で、ID トークン(JWT)により『誰が認証されたか』を伝える。受信側(クライアント/RP)は署名(公開クライアントでは通常 RS256、JWKS から kid で公開鍵取得)と iss(発行者)/aud(自分宛か)/exp(期限)を必ず検証し、リプレイ防止のため要求時は nonce も照合する。したがってアが正しい。イはアクセストークンの役割で認証と認可の混同、ウは非対称鍵(RS256/ES256 等)が一般的で『対称鍵のみ』は誤り、エは改ざん検知のため署名が必須で誤り。",
+      "explain_en": "OIDC is an authentication layer on top of OAuth 2.0; the ID token (JWT) conveys who was authenticated. The RP must verify the signature and claims iss/aud/exp (and nonce when requested), so option A is correct. B confuses it with the access token, C wrongly restricts to symmetric keys (asymmetric RS256/ES256 is typical), and D is wrong because a signature is required for tamper detection.",
+      "sky": [
+        "OIDCはOAuth2上の認証層",
+        "IDトークンはJWSで署名されたJWT",
+        "RS256等の非対称署名が一般的",
+        "JWKSからkidで公開鍵を取得する"
+      ],
+      "rain": [
+        "iss/aud/exp(要求時nonce)+署名の検証が必須",
+        "IDトークンは認証結果でありAPIアクセス用ではない",
+        "『対称鍵のみ』『署名不要』は誤り",
+        "検証を怠ると偽トークン受理につながる"
+      ],
+      "umbrella": [
+        "RP実装でiss/aud/exp/nonceと署名を必ず検証",
+        "JWKSのkidで正しい公開鍵を選択",
+        "alg=none/対称鍵混同攻撃を防ぐ許可algの固定",
+        "IDトークンとアクセストークンの用途を分離"
+      ],
+      "options": [
+        {
+          "letter": "ア",
+          "correct": true,
+          "reason": "JWS署名JWTでありiss/aud/exp/nonce等を検証して初めて認証結果として信頼できる。正しい。"
+        },
+        {
+          "letter": "イ",
+          "correct": false,
+          "reason": "リソースアクセスに使うのはアクセストークン。IDトークンは認証結果であり認可の委譲そのものではない。"
+        },
+        {
+          "letter": "ウ",
+          "correct": false,
+          "reason": "署名検証は非対称鍵(RS256/ES256)が一般的で『対称鍵のみ』は誤り。"
+        },
+        {
+          "letter": "エ",
+          "correct": false,
+          "reason": "改ざん検知のため署名が必須。TLS上でも署名不要という前提が誤り。"
+        }
+      ],
+      "hint_jp": "💡IDトークン=『誰か』を運ぶ。使う前にiss/aud/exp/nonce+署名を必ず検証。",
+      "bank_notes": [
+        "① RP実装ではiss/aud/exp/nonceと署名検証を漏れなく実装し、署名検証のみで受理しない。",
+        "② 許可するalgをRS256/ES256等に固定し、alg=noneや対称鍵混同(HS256すり替え)を拒否する。",
+        "③ JWKSはキャッシュTTLを設けkidで公開鍵を選択、鍵ローテーションに追従する。",
+        "④ nonceはセッションに紐づけリプレイ検出に用いる。",
+        "⑤ IDトークンをAPI認可に流用しない(用途はアクセストークン)よう設計・レビューする。",
+        "⑥ 時刻同期(NTP)を確保しexp/nbf/iatの検証を正確に行う。",
+        "⑦ IDトークン漏えい時の影響範囲(認証結果の再利用)を評価しログ監査する。"
+      ],
+      "diagram": {
+        "title": "OIDC IDトークンの検証項目",
+        "layers": [
+          [
+            {
+              "id": "op",
+              "label": "OP(認可サーバ)",
+              "role": "発行"
+            }
+          ],
+          [
+            {
+              "id": "idt",
+              "label": "IDトークン(JWS/JWT)",
+              "role": "認証結果"
+            }
+          ],
+          [
+            {
+              "id": "chk",
+              "label": "iss/aud/exp/nonce+署名検証",
+              "role": "検証"
+            },
+            {
+              "id": "skip",
+              "label": "署名のみ/未検証",
+              "role": "危険",
+              "danger": true
+            }
+          ],
+          [
+            {
+              "id": "rp",
+              "label": "RP(信頼)",
+              "role": "受理"
+            }
+          ]
+        ],
+        "edges": [
+          {
+            "from": "op",
+            "to": "idt",
+            "label": "kid付き署名で発行"
+          },
+          {
+            "from": "idt",
+            "to": "chk",
+            "label": "JWKSで検証"
+          },
+          {
+            "from": "chk",
+            "to": "rp",
+            "label": "全検証合格で信頼"
+          },
+          {
+            "from": "idt",
+            "to": "skip",
+            "label": "検証不足だと偽トークン受理",
+            "danger": true
+          },
+          {
+            "from": "skip",
+            "to": "rp",
+            "label": "なりすまし成立",
+            "danger": true
+          }
+        ],
+        "caption": "IDトークンは署名だけでなくiss/aud/exp/nonceを検証して初めて信頼できる。検証不足は認証迂回を招く。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "『IDトークンでリソースアクセス』という認証/認可の混同、『対称鍵のみ』『署名不要』の誤りに注意。",
+      "mnemonic": "IDトークンは『誰か』、アクセストークンは『何ができるか』。使う前にiss/aud/exp/nonce。",
+      "related": "午後問2設問1(JWTのaud/exp検証)と直結。問1(認可)と対で認証を担う。",
+      "case": "RPが署名検証のみでaud未検証だったため他RP向けトークンを誤受理しかけた設計を是正。",
+      "reg_detail": [
+        {
+          "reg": "OpenID Connect Core 1.0",
+          "point": "IDトークンの必須クレーム(iss/sub/aud/exp/iat)と検証手順、nonce照合を規定。"
+        },
+        {
+          "reg": "RFC 7515 (JWS)",
+          "point": "JWTの署名(alg指定)と検証。alg=none受理は脆弱性となる。"
+        }
+      ]
+    },
+    {
+      "id": 104,
+      "no": 4,
+      "tag": "OCSPステープリング",
+      "q_jp": "電子証明書の失効確認方式である OCSP と、そのプライバシ・可用性上の課題を改善する OCSP ステープリングに関する記述のうち、適切なものはどれか。",
+      "choices_jp": [
+        "OCSP ステープリングでは、クライアントが検証対象サーバごとに OCSP レスポンダへ直接問い合わせるため、利用者のアクセス先が OCSP レスポンダに漏れる。",
+        "OCSP ステープリングでは、サーバがあらかじめ取得した有効期限付きの署名済み OCSP レスポンスを TLS ハンドシェイク時にクライアントへ提示する。",
+        "OCSP は CRL 全体をダウンロードして失効を確認する方式であり、証明書ごとの個別問い合わせはできない。",
+        "OCSP ステープリングを用いると、失効情報の署名者は当該 Web サーバ自身になる。"
+      ],
+      "q_en": "Which statement about OCSP and OCSP stapling (which improves its privacy and availability issues) is correct?",
+      "choices_en": [
+        "With OCSP stapling, the client queries the OCSP responder directly for each server, so the user's destination leaks to the responder.",
+        "With OCSP stapling, the server presents a pre-fetched, time-limited, signed OCSP response to the client during the TLS handshake.",
+        "OCSP checks revocation by downloading the entire CRL and cannot query per-certificate.",
+        "With OCSP stapling, the signer of the revocation information becomes the web server itself."
+      ],
+      "intro_jp": "【導入】ステープリングは『サーバが署名済み応答を提示』が核。署名者はCAのままである点に注意。",
+      "related_regs": [
+        "RFC 6960 (OCSP)",
+        "RFC 6066 (TLS Certificate Status Request)",
+        "RFC 5280 (CRL)"
+      ],
+      "answer_letters": [
+        "イ"
+      ],
+      "answer_jp": "OCSP ステープリングでは、サーバがあらかじめ取得した有効期限付きの署名済み OCSP レスポンスを TLS ハンドシェイク時にクライアントへ提示する。",
+      "explain_jp": "OCSP ステープリングは、サーバが CA(OCSP レスポンダ)から取得した署名済みレスポンスを TLS ハンドシェイクに添付(staple)し、Certificate Status として提示する方式である。クライアントがレスポンダへ直接問い合わせないため、アクセス先の漏えい(アはステープリングでない従来 OCSP の課題)を防ぎ、レスポンダの負荷・可用性依存も下げる。よってイが正しい。ウは CRL の説明であり OCSP は証明書ごとの個別問い合わせが可能な点で誤り、エは署名者はあくまで CA(OCSP レスポンダ)であり Web サーバではないので誤り。",
+      "explain_en": "OCSP stapling has the server attach a signed OCSP response (obtained from the CA/responder) to the TLS handshake as the certificate status, so the client need not query the responder directly, preserving privacy and reducing availability dependence. C describes CRLs, and D is wrong because the signer remains the CA (OCSP responder), not the web server.",
+      "sky": [
+        "従来OCSPはクライアントが直接問い合わせる",
+        "アクセス先がレスポンダに漏れる課題がある",
+        "ステープリングはサーバが応答を添付する",
+        "応答には有効期限がある"
+      ],
+      "rain": [
+        "ステープリングはサーバ提示型で秘匿性を改善",
+        "レスポンダへの直接問い合わせが不要",
+        "署名者はあくまでCA(レスポンダ)",
+        "ウはCRL、エは署名者取り違えで誤り"
+      ],
+      "umbrella": [
+        "TLSサーバでOCSP Staplingを有効化",
+        "Must-Staple証明書でステープル欠落を検出",
+        "ステープル応答のキャッシュ更新・失効を運用監視",
+        "CRL/OCSP/ステープリングの使い分けを設計"
+      ],
+      "options": [
+        {
+          "letter": "ア",
+          "correct": false,
+          "reason": "直接問い合わせでアクセス先が漏れるのは従来OCSPの課題。ステープリングではサーバが提示するため漏れない。"
+        },
+        {
+          "letter": "イ",
+          "correct": true,
+          "reason": "サーバが事前取得した署名済み応答をTLSハンドシェイクで提示するのがステープリング。正しい。"
+        },
+        {
+          "letter": "ウ",
+          "correct": false,
+          "reason": "CRL全体ダウンロードはCRLの説明。OCSPは証明書ごとの個別問い合わせが可能。"
+        },
+        {
+          "letter": "エ",
+          "correct": false,
+          "reason": "署名者はCA(OCSPレスポンダ)でありWebサーバ自身ではない。"
+        }
+      ],
+      "hint_jp": "💡ステープリング=『サーバがCA署名の失効証明を貼って出す』。署名者はCAのまま。",
+      "bank_notes": [
+        "① 公開WebサーバでOCSP Staplingを有効化しレスポンダ依存と秘匿性課題を軽減する。",
+        "② OCSP Must-Staple(証明書拡張)でステープル欠落を検出・拒否できる構成を検討。",
+        "③ ステープル応答のキャッシュ更新間隔とnextUpdate切れを監視しfail時挙動を定義する。",
+        "④ 大規模・多ドメインではCRLDP/OCSP/ステープリングの使い分けをアーキ設計で決める。",
+        "⑤ OCSPレスポンダの可用性はサービス継続に影響するため冗長化・監視対象にする。",
+        "⑥ 内部PKIでも失効確認手段(CRL配布/OCSP)を定義しクライアント設定を統一する。",
+        "⑦ 短命証明書(ACME自動更新)とのトレードオフ(失効依存低減)も検討する。"
+      ],
+      "diagram": {
+        "title": "OCSPステープリングの流れ",
+        "layers": [
+          [
+            {
+              "id": "ca",
+              "label": "CA/OCSPレスポンダ(署名者)",
+              "role": "失効情報"
+            }
+          ],
+          [
+            {
+              "id": "srv",
+              "label": "Webサーバ",
+              "role": "事前取得・提示"
+            }
+          ],
+          [
+            {
+              "id": "cli",
+              "label": "クライアント",
+              "role": "検証"
+            }
+          ],
+          [
+            {
+              "id": "direct",
+              "label": "従来:直接問い合わせ",
+              "role": "漏えい",
+              "danger": true
+            }
+          ]
+        ],
+        "edges": [
+          {
+            "from": "ca",
+            "to": "srv",
+            "label": "署名済み応答を提供"
+          },
+          {
+            "from": "srv",
+            "to": "cli",
+            "label": "TLSハンドシェイクで提示(staple)"
+          },
+          {
+            "from": "cli",
+            "to": "direct",
+            "label": "ステープリングなら不要",
+            "danger": true
+          },
+          {
+            "from": "direct",
+            "to": "ca",
+            "label": "アクセス先が漏れる",
+            "danger": true
+          }
+        ],
+        "caption": "サーバがCA署名の失効応答を提示するため、クライアントはレスポンダへ直接問い合わせず秘匿性・可用性が向上。署名者はCAのまま。"
+      },
+      "freq": 2,
+      "importance": "★★",
+      "trap": "『署名者がWebサーバになる』(エ)、『クライアントが直接問い合わせる』(ア)の取り違えに注意。",
+      "mnemonic": "Staple=『CA署名の失効証明をサーバが貼る』。署名者はCA。",
+      "related": "問3(JWKSでの公開鍵検証)と同じくPKIの信頼検証。証明書失効の可用性設計。",
+      "case": "OCSPレスポンダ障害でTLS接続が不安定化した経験からステープリング+Must-Stapleを導入。",
+      "reg_detail": [
+        {
+          "reg": "RFC 6960 (OCSP)",
+          "point": "証明書単位の失効状態問い合わせ。応答はCA(レスポンダ)が署名する。"
+        },
+        {
+          "reg": "RFC 6066",
+          "point": "TLS Certificate Status Request拡張によりサーバがOCSP応答をステープルする。"
+        }
+      ]
+    },
+    {
+      "id": 105,
+      "no": 5,
+      "tag": "送信者制約トークン(mTLS/RFC8705)",
+      "q_jp": "サーバ間 API 通信で mTLS(相互 TLS)と、証明書にバインドしたアクセストークン(certificate-bound token, RFC 8705)を組み合わせる主目的として、最も適切なものはどれか。",
+      "choices_jp": [
+        "トークンが漏えいしても、対応するクライアント証明書の秘密鍵を持たない第三者は当該トークンを使えないようにする。",
+        "トークンのペイロードを暗号化し、リソースサーバ以外が内容を読めないようにする。",
+        "トークンの有効期限を無期限にし、再発行を不要にする。",
+        "クライアントがパスワードを送信することで多要素認証を実現する。"
+      ],
+      "q_en": "What is the primary purpose of combining mTLS with a certificate-bound access token (RFC 8705) in server-to-server API communication?",
+      "choices_en": [
+        "So that even if the token leaks, a third party without the corresponding client certificate's private key cannot use it.",
+        "To encrypt the token payload so that no one but the resource server can read its contents.",
+        "To make the token's lifetime unlimited so reissuance is unnecessary.",
+        "To achieve multi-factor authentication by having the client send a password."
+      ],
+      "intro_jp": "【導入】ベアラトークンの弱点は『持てば使える』こと。鍵所有への束縛でリプレイを封じる狙いを問う。",
+      "related_regs": [
+        "RFC 8705 (mTLS/cnf x5t#S256)",
+        "RFC 9449 (DPoP)",
+        "ゼロトラスト(NIST SP 800-207)"
+      ],
+      "answer_letters": [
+        "ア"
+      ],
+      "answer_jp": "トークンが漏えいしても、対応するクライアント証明書の秘密鍵を持たない第三者は当該トークンを使えないようにする。",
+      "explain_jp": "certificate-bound token(RFC 8705)は、アクセストークンを mTLS で提示したクライアント証明書のサムプリント(確認方法クレーム cnf の x5t#S256)に束縛する。リソースサーバはトークン提示時の mTLS 証明書のハッシュと cnf を照合するため、トークンを盗まれても正規クライアント証明書の秘密鍵がなければ利用できず、ベアラトークンの盗難再利用(トークンリプレイ)を防ぐ。ゼロトラストのサービス間通信で有効である。よってアが正しい。イ(ペイロード暗号化)・ウ(無期限化)・エ(パスワード送信)はいずれも目的ではない。",
+      "explain_en": "A certificate-bound token (RFC 8705) binds the access token to the thumbprint (cnf x5t#S256) of the client certificate presented over mTLS. The resource server matches the presented certificate's hash against cnf, so a stolen token is useless without the legitimate client's private key, preventing bearer-token replay. Encryption, unlimited lifetime, and password sending are not the purpose.",
+      "sky": [
+        "ベアラトークンは持てば使える弱点がある",
+        "サービス間通信ではトークン窃取リスクがある",
+        "mTLSはクライアント証明書を提示する",
+        "cnf(x5t#S256)に証明書ハッシュを束縛する"
+      ],
+      "rain": [
+        "トークンを鍵所有に束縛し盗用再利用を防ぐ",
+        "秘密鍵を持たない第三者はトークンを使えない",
+        "リプレイ対策が主目的",
+        "暗号化・無期限化・パスワードは目的でない"
+      ],
+      "umbrella": [
+        "サービス間APIはmTLS+証明書バインドトークンを採用",
+        "ブラウザ経由はDPoP(RFC 9449)で鍵束縛",
+        "リソースサーバでcnfと提示証明書の照合を必須化",
+        "ゼロトラストで最小権限+短命トークンを併用"
+      ],
+      "options": [
+        {
+          "letter": "ア",
+          "correct": true,
+          "reason": "トークンを証明書の鍵所有に束縛し、鍵を持たない第三者の盗用再利用を防ぐのが主目的。正しい。"
+        },
+        {
+          "letter": "イ",
+          "correct": false,
+          "reason": "ペイロード暗号化(機密性)は目的ではない。束縛は所有証明による再利用防止。"
+        },
+        {
+          "letter": "ウ",
+          "correct": false,
+          "reason": "有効期限の無期限化は目的でなく、むしろセキュリティ上望ましくない。"
+        },
+        {
+          "letter": "エ",
+          "correct": false,
+          "reason": "パスワード送信による多要素認証はcertificate-bound tokenの目的ではない。"
+        }
+      ],
+      "hint_jp": "💡証明書バインド=『鍵を持つ者しか使えないトークン』。盗んでも鍵がなければ無効。",
+      "bank_notes": [
+        "① ゼロトラストのサービス間通信はmTLS+証明書バインドトークンでベアラ再利用を封じる。",
+        "② ブラウザ/公開クライアントはDPoP(RFC 9449)で鍵所有証明を付与する選択肢を検討。",
+        "③ リソースサーバでcnf(x5t#S256)と提示クライアント証明書のハッシュ照合を必須化する。",
+        "④ クライアント証明書の秘密鍵はHSM/セキュアストアで保護し持ち出しを防ぐ。",
+        "⑤ 証明書ローテーションとトークンのcnf更新の整合を運用手順に含める。",
+        "⑥ 送信者制約でもトークン有効期限は短命化し、被害窓を最小化する。",
+        "⑦ mTLS終端(LB/プロキシ)での証明書情報の受け渡し(検証結果の信頼)を安全に設計する。"
+      ],
+      "diagram": {
+        "title": "証明書バインドトークンによる盗用防止",
+        "layers": [
+          [
+            {
+              "id": "as",
+              "label": "認可サーバ",
+              "role": "発行"
+            }
+          ],
+          [
+            {
+              "id": "tok",
+              "label": "アクセストークン(cnf=証明書ハッシュ)",
+              "role": "束縛"
+            }
+          ],
+          [
+            {
+              "id": "cli",
+              "label": "正規クライアント(秘密鍵所有)",
+              "role": "利用可"
+            },
+            {
+              "id": "thief",
+              "label": "窃取者(鍵なし)",
+              "role": "利用不可",
+              "danger": true
+            }
+          ],
+          [
+            {
+              "id": "rs",
+              "label": "リソースサーバ(cnf照合)",
+              "role": "検証"
+            }
+          ]
+        ],
+        "edges": [
+          {
+            "from": "as",
+            "to": "tok",
+            "label": "cnfに証明書ハッシュを束縛"
+          },
+          {
+            "from": "cli",
+            "to": "rs",
+            "label": "mTLS証明書+トークン提示→照合成功"
+          },
+          {
+            "from": "thief",
+            "to": "rs",
+            "label": "鍵なしでmTLS不成立→拒否",
+            "danger": true
+          }
+        ],
+        "caption": "トークンをmTLS証明書の鍵所有に束縛。窃取者は秘密鍵がなくmTLSを張れずトークンを再利用できない。"
+      },
+      "freq": 2,
+      "importance": "★★★",
+      "trap": "『ペイロード暗号化』『無期限化』など機密性・利便性の話にすり替える選択肢に注意。目的はリプレイ防止。",
+      "mnemonic": "PoP(所有証明)=『鍵を持つ者だけが使えるトークン』。",
+      "related": "問1(PKCE)・問2(WebAuthn)と同じ『所有・束縛』思想。午後問1設問2と直結。",
+      "case": "APIのベアラトークンが漏えいし再利用された事例から、mTLS+証明書バインドトークンへ移行。",
+      "reg_detail": [
+        {
+          "reg": "RFC 8705",
+          "point": "mTLSクライアント証明書のx5t#S256をcnfに束縛し送信者制約トークンを実現。"
+        },
+        {
+          "reg": "RFC 9449 (DPoP)",
+          "point": "アプリ層でDPoP鍵の所有証明によりトークンを束縛する代替方式。"
+        }
+      ]
+    },
+    {
+      "id": 106,
+      "no": 6,
+      "tag": "耐量子計算機暗号(PQC)への移行",
+      "q_jp": "耐量子計算機暗号(PQC)への移行に関する記述のうち、最も適切なものはどれか。",
+      "choices_jp": [
+        "現行の RSA や楕円曲線暗号(ECC)による鍵交換・署名は、量子計算機のショアのアルゴリズムにより危殆化する恐れがあるため、格子ベース等の PQC への移行が検討されている。",
+        "PQC は情報理論的安全性をもち、計算能力に依存せず解読不能であることが数学的に保証されている。",
+        "移行期には安全性の観点から、従来暗号と PQC を併用するハイブリッド鍵交換は避け、PQC 単独に一括で切り替えるべきである。",
+        "共通鍵暗号 AES-256 はグローバ(Grover)の探索により実質的な安全性が完全に失われるため、PQC 移行では真っ先に廃止される。"
+      ],
+      "q_en": "Which statement about migration to post-quantum cryptography (PQC) is most appropriate?",
+      "choices_en": [
+        "Current RSA and ECC key exchange and signatures may be broken by Shor's algorithm on a quantum computer, so migration to lattice-based and other PQC is being considered.",
+        "PQC has information-theoretic security and is mathematically guaranteed unbreakable regardless of computing power.",
+        "During migration, hybrid key exchange combining classical and PQC should be avoided in favor of a wholesale switch to PQC alone.",
+        "AES-256 completely loses its practical security to Grover's search, so it is retired first in PQC migration."
+      ],
+      "intro_jp": "【導入】危殆化するのは公開鍵(RSA/ECC)か共通鍵か、PQCの安全性の根拠、移行戦略の3点を切り分ける。",
+      "related_regs": [
+        "NIST FIPS 203 (ML-KEM)",
+        "NIST FIPS 204 (ML-DSA)",
+        "CRYPTREC"
+      ],
+      "answer_letters": [
+        "ア"
+      ],
+      "answer_jp": "現行の RSA や楕円曲線暗号(ECC)による鍵交換・署名は、量子計算機のショアのアルゴリズムにより危殆化する恐れがあるため、格子ベース等の PQC への移行が検討されている。",
+      "explain_jp": "ショアのアルゴリズムは素因数分解・離散対数を多項式時間で解くため、RSA/ECC など公開鍵暗号が危殆化する。対策として NIST 標準化(ML-KEM(FIPS 203)/ML-DSA(FIPS 204)等の格子ベース)や CRYPTREC の検討が進むため、アが正しい。イは誤りで、PQC の安全性は格子問題等の計算量的仮定に依存し、情報理論的安全ではない。ウは逆で、実装バグや PQC 自体の未成熟に備え移行期はハイブリッド鍵交換(従来+PQC の両方を破らないと解けない構成)が推奨される。エは誤りで、グローバは探索計算量を平方根に下げる(実効鍵長が半減=AES-256 は約 128 ビット相当)にとどまり、AES-256 なら量子環境でも十分安全とされる。",
+      "explain_en": "Shor's algorithm solves factoring and discrete logs in polynomial time, endangering public-key crypto like RSA/ECC, so migration to lattice-based PQC (ML-KEM/ML-DSA) is underway (A). PQC relies on computational assumptions, not information-theoretic security (B is wrong); hybrid key exchange is recommended during migration (C is reversed); and Grover only halves the effective key length, so AES-256 remains strong (D is wrong).",
+      "sky": [
+        "ショアは素因数分解・離散対数を多項式時間で解く",
+        "RSA/ECCは公開鍵暗号",
+        "NISTがML-KEM/ML-DSAを標準化",
+        "グローバは探索を平方根に高速化する"
+      ],
+      "rain": [
+        "危殆化するのは公開鍵(RSA/ECC)でPQC移行が必要",
+        "PQCの安全性は計算量的仮定で情報理論的安全ではない",
+        "移行期はハイブリッド鍵交換が推奨",
+        "AES-256は実効鍵長半減にとどまり量子でも安全"
+      ],
+      "umbrella": [
+        "公開鍵基盤(TLS/署名/証明書)からPQC移行計画を立てる",
+        "移行期はハイブリッド鍵交換で両方の安全性を確保",
+        "harvest-now-decrypt-later対策として長期機密は早期にPQC化",
+        "共通鍵はAES-256等で鍵長を確保(危殆化は限定的)"
+      ],
+      "options": [
+        {
+          "letter": "ア",
+          "correct": true,
+          "reason": "RSA/ECCがショアで危殆化するため格子ベース等PQCへの移行が検討されている。正しい。"
+        },
+        {
+          "letter": "イ",
+          "correct": false,
+          "reason": "PQCの安全性は格子問題等の計算量的仮定に依存し、情報理論的安全ではない。"
+        },
+        {
+          "letter": "ウ",
+          "correct": false,
+          "reason": "移行期はハイブリッド鍵交換が推奨。PQC単独一括切替を避けよという記述は逆で誤り。"
+        },
+        {
+          "letter": "エ",
+          "correct": false,
+          "reason": "グローバは実効鍵長を半減させるにとどまりAES-256は量子環境でも十分安全。真っ先に廃止は誤り。"
+        }
+      ],
+      "hint_jp": "💡ショアは公開鍵の敵、グローバは共通鍵に軽い一撃。移行期はハイブリッドで両立。",
+      "bank_notes": [
+        "① 暗号インベントリを作成しRSA/ECC依存箇所(TLS・署名・証明書・VPN)を洗い出す。",
+        "② 長期機密はharvest-now-decrypt-later対策として優先的にPQC/ハイブリッド化する。",
+        "③ 移行期はハイブリッド鍵交換で従来+PQCの双方を要求し実装未成熟リスクに備える。",
+        "④ NIST FIPS 203/204やCRYPTRECの動向を追い標準アルゴリズムを採用する。",
+        "⑤ 共通鍵はAES-256等で鍵長を確保(グローバの影響は実効半減にとどまる)。",
+        "⑥ 証明書・鍵のライフサイクルが長い基盤ほど移行リードタイムを見込む(暗号アジリティ)。",
+        "⑦ ライブラリ・HSM・機器のPQC対応状況を調達要件に反映する。"
+      ],
+      "diagram": {
+        "title": "量子脅威と暗号方式の影響範囲",
+        "layers": [
+          [
+            {
+              "id": "q",
+              "label": "量子計算機",
+              "role": "脅威"
+            }
+          ],
+          [
+            {
+              "id": "shor",
+              "label": "ショア(素因数分解/離散対数)",
+              "role": "公開鍵を破る",
+              "danger": true
+            },
+            {
+              "id": "grover",
+              "label": "グローバ(探索高速化)",
+              "role": "共通鍵に限定影響"
+            }
+          ],
+          [
+            {
+              "id": "pubkey",
+              "label": "RSA/ECC(公開鍵)",
+              "role": "危殆化",
+              "danger": true
+            },
+            {
+              "id": "aes",
+              "label": "AES-256(共通鍵)",
+              "role": "実効半減で十分安全"
+            }
+          ],
+          [
+            {
+              "id": "pqc",
+              "label": "PQC(ML-KEM/ML-DSA)+ハイブリッド",
+              "role": "移行先"
+            }
+          ]
+        ],
+        "edges": [
+          {
+            "from": "q",
+            "to": "shor",
+            "label": "多項式時間"
+          },
+          {
+            "from": "q",
+            "to": "grover",
+            "label": "平方根加速"
+          },
+          {
+            "from": "shor",
+            "to": "pubkey",
+            "label": "危殆化",
+            "danger": true
+          },
+          {
+            "from": "grover",
+            "to": "aes",
+            "label": "実効鍵長半減"
+          },
+          {
+            "from": "pubkey",
+            "to": "pqc",
+            "label": "移行が必要"
+          }
+        ],
+        "caption": "危殆化するのは公開鍵(RSA/ECC)。AES-256はグローバでも実効半減にとどまり安全。移行期はハイブリッドで両立。"
+      },
+      "freq": 2,
+      "importance": "★★",
+      "trap": "『PQCは情報理論的に安全』『AES-256が真っ先に危殆化』『ハイブリッドは避ける』はいずれも誤りの定番。",
+      "mnemonic": "ショア=公開鍵キラー、グローバ=共通鍵に半減パンチ。移行期はハイブリッド。",
+      "related": "問4(PKI/証明書)と連動し暗号アジリティ・鍵ライフサイクル設計に波及。",
+      "case": "長期保存データのharvest-now-decrypt-laterを懸念し、TLSをハイブリッド鍵交換へ先行移行した事例。",
+      "reg_detail": [
+        {
+          "reg": "NIST FIPS 203/204",
+          "point": "ML-KEM(鍵確立)/ML-DSA(署名)を標準化。格子ベースPQCの実装指針。"
+        },
+        {
+          "reg": "CRYPTREC",
+          "point": "国内の暗号技術評価・移行に関する検討を推進。"
+        }
+      ]
+    }
+  ]
+}

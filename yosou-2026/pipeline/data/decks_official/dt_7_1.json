@@ -1,0 +1,346 @@
+{
+  "topic_jp": "AI駆動型サイバー攻撃・フロンティアAI",
+  "topic_en": "AI-driven Cyber Attacks & Frontier AI",
+  "shared": {
+    "glossary": [
+      {"term": "フロンティアAI", "term_en": "Frontier AI", "def": "汎用的で極めて高性能な最先端AIモデル。脆弱性の自律的発見や実証コード生成など、社会に重大な影響を及ぼしうる新規能力（危険能力）を持つ点が特徴。", "regs": "英国AI Safety Summit（Bletchley宣言）、NIST AI RMF、EU AI Act"},
+      {"term": "デュアルユース", "term_en": "Dual-use", "def": "同一技術が防御（自組織の診断・修正）にも攻撃（第三者への侵害）にも使える性質。能力が高いほど悪用時の被害が甚大になり、公開範囲の制限根拠となる。", "regs": "NIST AI RMF、OECD AI原則"},
+      {"term": "自律型攻撃エージェント", "term_en": "Autonomous Attack Agent", "def": "偵察・脆弱性発見・エクスプロイト生成・侵入までを人手を介さず連鎖実行するAIエージェント。発見から悪用までのリードタイムを大幅に短縮する。", "regs": "MITRE ATLAS、OWASP Top 10 for LLM"},
+      {"term": "human-in-the-loop", "term_en": "Human-in-the-loop (HITL)", "def": "AIの自動処理の要所に人間の判断・承認を挟む設計。影響の大きい対応（本番遮断等）で誤検知被害を防ぐガバナンスの中核。", "regs": "NIST AI RMF（Govern）、EU AI Act 第14条（人間による監督）"},
+      {"term": "リスクベース脆弱性管理", "term_en": "Risk-based Vulnerability Management", "def": "CVSS基本値だけでなく悪用可能性・露出・資産重要度を加味して修正の優先順位と適用期限を決める運用。攻撃の高速化に対応する。", "regs": "SSVC、CISA KEV、NIST SP800-40"},
+      {"term": "脆弱性の連鎖（チェーン）", "term_en": "Vulnerability Chaining", "def": "単体では低リスクな複数の脆弱性を組み合わせ、権限昇格など深刻な攻撃を成立させる手法。AIが攻撃経路探索を高速化し現実の脅威となる。", "regs": "CVSS v4.0、MITRE ATT&CK"},
+      {"term": "MITRE ATLAS", "term_en": "MITRE ATLAS", "def": "AIシステムへの攻撃と、AIを悪用した攻撃の戦術・技術を体系化した知識ベース。ATT&CKのAI版として脅威モデリングに用いる。", "regs": "MITRE ATLAS"},
+      {"term": "AIガバナンス", "term_en": "AI Governance", "def": "AIの開発・提供・利用に伴うリスクを特定・評価・低減し、説明責任と監査可能性を確保する統制の枠組み。攻撃・防御双方のAI化に不可欠。", "regs": "NIST AI RMF、EU AI Act、ISO/IEC 42001"}
+    ],
+    "comparison": [
+      {"concept": "高能力AIモデルの公開方針", "normal": "危険能力の評価を経て、防御目的組織へ限定アクセス。悪用リスクを低減して提供", "suspicious": "評価なしに攻撃コード生成能力を一般公開・無制限API提供し、攻撃者が武器化"},
+      {"concept": "脆弱性への対応サイクル", "normal": "悪用可能性・資産重要度に基づくリスクベースで適用を迅速化", "suspicious": "四半期一括などの固定サイクル固執。公表から適用まで無防備な空白期間が発生"},
+      {"concept": "低CVSS脆弱性の扱い", "normal": "自社構成上の攻撃経路・連鎖リスクを評価し対応要否を判断", "suspicious": "基本値の閾値未満は一律放置。AIによる連鎖悪用を見落とす"},
+      {"concept": "SOCのAI自動対応", "normal": "影響大の対応はhuman-in-the-loop、最小権限、判断根拠をログ記録・監査", "suspicious": "全対応を人間承認なしで自動実行し、管理者権限を常時付与。誤検知で本番停止"},
+      {"concept": "AI導入と体制整備", "normal": "AIは対応を高速化する手段。手順書・体制・訓練は引き続き整備", "suspicious": "AI導入でインシデント対応手順書や体制は不要と考える"}
+    ],
+    "reg_matrix": [
+      {"reg": "NIST AI RMF (AI 100-1)", "scope": "AIリスク管理の任意フレームワーク（国際的に参照）", "point": "Govern/Map/Measure/Manageの4機能。デュアルユース・危険能力の評価と人間による監督を要求"},
+      {"reg": "EU AI Act", "scope": "EU域内のAI規制（リスク階層）", "point": "高リスクAIに人間による監督（第14条）、ログ記録、透明性、汎用AIの体系的リスク評価を義務化"},
+      {"reg": "MITRE ATLAS / ATT&CK", "scope": "脅威の戦術・技術ナレッジベース", "point": "AI悪用・AIシステム攻撃を体系化。脅威モデリングと検知シナリオ設計の共通言語"},
+      {"reg": "OWASP Top 10 for LLM", "scope": "LLMアプリのセキュリティリスク", "point": "プロンプトインジェクション、過剰なエージェント権限（Excessive Agency）等を列挙。AIエージェント設計の指針"},
+      {"reg": "CISA KEV / SSVC", "scope": "悪用実績に基づく脆弱性優先度付け", "point": "実際に悪用が観測された脆弱性を優先。リスクベースで適用期限を決める根拠"}
+    ],
+    "map_nodes": [
+      "攻撃のAI化（発見〜悪用の自動化・高速化）",
+      "デュアルユースと公開範囲の制限",
+      "リスクベース脆弱性管理（連鎖・露出・重要度）",
+      "防御のAI化とhuman-in-the-loop",
+      "AIガバナンスと監査可能性"
+    ],
+    "map_summary": "本分野は、脆弱性発見〜悪用を自律化するフロンティアAIの登場を起点に、デュアルユース性ゆえの公開制限、悪用リードタイム短縮に対応するリスクベース脆弱性管理、防御側AIエージェントのhuman-in-the-loopと最小権限、判断根拠のログ記録による監査可能性までを一つの統制体系として理解する領域である。",
+    "exam_tips": [
+      "『デュアルユース＝防御にも攻撃にも使える』が公開制限の本質的理由。採算・データ・品質などは本質ではないと切る。",
+      "AI化の影響は『発見から悪用までのリードタイム短縮』。固定サイクルをやめリスクベースで迅速適用が正解筋。",
+      "低CVSSでも『連鎖（チェーン）で深刻化』し得る。基本値の閾値だけの選別・一律対応はいずれも誤り。",
+      "防御AIは『影響大＝人間承認（HITL）、最小権限、判断根拠のログ・監査』が三点セット。全自動・常時管理者権限・手順書不要は誤り。"
+    ],
+    "pitfalls": [
+      "公開制限の理由を推論コスト・個人情報・出力品質に求める誤り。核心はデュアルユースによる武器化リスク。",
+      "『AIは既知の脆弱性しか悪用できない／攻撃元IPが固定される』などAIの前提を矮小化する誤答に注意。ゼロデイ発見にも使われうる。",
+      "自動化＝完全無人と即断する誤り。影響度に応じてhuman-in-the-loopを組み込むのが正解で、AI導入後も体制整備は必要。"
+    ],
+    "concept_diagram": {
+      "title": "AI駆動型攻撃・防御の全体構造",
+      "layers": [
+        [{"id": "frontier", "label": "フロンティアAI（危険能力）", "role": "起点", "danger": true}],
+        [{"id": "attack", "label": "攻撃のAI化（自律発見・悪用）", "role": "脅威", "danger": true}, {"id": "defense", "label": "防御のAI化（SOC自動対応）", "role": "対抗"}],
+        [{"id": "vm", "label": "リスクベース脆弱性管理", "role": "対策"}, {"id": "hitl", "label": "human-in-the-loop/最小権限", "role": "対策"}, {"id": "gov", "label": "AIガバナンス・監査可能性", "role": "統制"}]
+      ],
+      "edges": [
+        {"from": "frontier", "to": "attack", "label": "武器化（デュアルユース）", "danger": true},
+        {"from": "frontier", "to": "defense", "label": "防御活用（限定提供）"},
+        {"from": "attack", "to": "vm", "label": "リードタイム短縮への対応"},
+        {"from": "defense", "to": "hitl", "label": "誤検知被害の抑止"},
+        {"from": "hitl", "to": "gov", "label": "ログ記録・監査"},
+        {"from": "vm", "to": "gov", "label": "優先度付けの説明責任"}
+      ],
+      "caption": "フロンティアAIを起点に攻撃・防御双方がAI化。脆弱性管理・HITL・ガバナンスで武器化リスクを制御する。"
+    }
+  },
+  "questions": [
+    {
+      "id": 701,
+      "no": 1,
+      "tag": "デュアルユースと公開制限",
+      "q_jp": "ソフトウェア脆弱性の自律的な発見と実証コード（エクスプロイト）生成において人間の専門家を上回る能力をもつAIモデルについて、開発元が一般公開やAPI提供を行わず、防御目的の組織に限定してアクセスを許可する運用を採ることがある。この判断の主な理由はどれか。",
+      "choices_jp": [
+        "モデルの推論コストが高く、一般提供では採算が取れないため。",
+        "防御にも攻撃にも利用できるデュアルユース性をもち、攻撃者の手に渡った場合に脆弱性の武器化が大規模かつ高速に行われるおそれがあるため。",
+        "学習データに個人情報が含まれており、個人情報保護法の第三者提供制限に抵触するため。",
+        "生成する攻撃コードの品質が低く、誤検知を誘発して防御側の運用を妨げるため。"
+      ],
+      "q_en": "A frontier AI model can autonomously discover vulnerabilities and generate proof-of-concept exploits better than human experts. Its developer restricts access to defense-oriented organizations rather than offering it publicly or via open API. What is the main reason?",
+      "choices_en": [
+        "Inference cost is high and public provision is not profitable.",
+        "It is dual-use—usable for both defense and attack—so if it reaches attackers, weaponization of vulnerabilities could occur at large scale and high speed.",
+        "The training data contains personal information, conflicting with third-party disclosure limits under privacy law.",
+        "The generated exploit code is low quality and induces false positives that hinder defenders."
+      ],
+      "intro_jp": "【導入】高能力AIの公開範囲を絞る根拠が、技術の本質（デュアルユース）にあるかを問う。",
+      "related_regs": ["NIST AI RMF", "EU AI Act（汎用AI・体系的リスク）", "OECD AI原則", "Bletchley宣言"],
+      "answer_letters": ["イ"],
+      "answer_jp": "防御にも攻撃にも利用できるデュアルユース性をもち、攻撃者の手に渡った場合に脆弱性の武器化が大規模かつ高速に行われるおそれがあるため。",
+      "explain_jp": "脆弱性発見・悪用能力の高いAIは、防御（自組織の診断・修正）にも攻撃（第三者への侵害）にも使えるデュアルユース技術である。能力が一定水準を超えると悪用時の被害が甚大かつ高速になるため、開発元がアクセスを防御目的の組織に限定するリスク低減策を採ることがある。よって正解はイ。アの推論コストや採算、ウの学習データ中の個人情報、エの出力品質の低さは、いずれも限定提供の本質的理由ではなく、能力の高さゆえの武器化リスクという核心を外している。技術の性能そのものが脅威となる点がフロンティアAI特有の論点である。",
+      "explain_en": "A highly capable vulnerability-finding AI is inherently dual-use, so releasing it broadly could let attackers weaponize vulnerabilities at scale and speed; hence developers may limit access to defenders (イ). Cost, training-data privacy, or output quality are not the essential reason.",
+      "sky": ["AIが脆弱性発見と攻撃コード生成で専門家を上回る", "開発元は一般公開せず防御目的組織に限定提供", "同じ能力が防御にも攻撃にも使える"],
+      "rain": ["能力が高いほど悪用時の被害が甚大・高速", "攻撃者に渡れば武器化が大規模化", "限定提供は武器化リスクの低減策"],
+      "umbrella": ["危険能力を評価してから提供範囲を決める", "防御目的に限定アクセスを付与", "悪用検知・監査のログを整備", "デュアルユース前提でガバナンスを設計"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "推論コストや採算は限定提供の本質的理由ではない。"},
+        {"letter": "イ", "correct": true, "reason": "デュアルユース性ゆえの武器化リスク低減が限定提供の核心。正解。"},
+        {"letter": "ウ", "correct": false, "reason": "個人情報保護は別論点で、能力提供制限の主要因ではない。"},
+        {"letter": "エ", "correct": false, "reason": "出力品質の低さは前提と矛盾し、限定の理由にならない。"}
+      ],
+      "hint_jp": "💡『両刃の剣（デュアルユース）だから絞る』が公開制限の合言葉。",
+      "bank_notes": [
+        "① 高能力AIツールを社内で扱う場合も、防御用途に限定しアクセス権を最小化する。",
+        "② デュアルユースツールの利用ログ・目的を記録し、悪用の内部監査に備える。",
+        "③ 外部提供・共有時は相手組織の正当性（防御目的）を確認する運用を定める。",
+        "④ 危険能力の評価結果を根拠に提供可否を決めるガバナンス（NIST AI RMF）を整備。",
+        "⑤ 脆弱性診断でAIを使う際は診断範囲・権限を契約と手順で明確化する。",
+        "⑥ 攻撃コード生成能力の取り扱いは、データ持出し禁止・隔離環境での実行を徹底。",
+        "⑦ ベンダーのモデル提供ポリシー（限定アクセス）を調達要件に反映する。"
+      ],
+      "diagram": {
+        "title": "デュアルユースAIの公開範囲判断",
+        "layers": [
+          [{"id": "model", "label": "高能力AI（脆弱性発見・悪用）", "role": "対象", "danger": true}],
+          [{"id": "def", "label": "防御用途（診断・修正）", "role": "許容"}, {"id": "atk", "label": "攻撃用途（武器化）", "role": "脅威", "danger": true}],
+          [{"id": "limit", "label": "限定アクセス（防御組織のみ）", "role": "低減策"}]
+        ],
+        "edges": [
+          {"from": "model", "to": "def", "label": "防御に有用"},
+          {"from": "model", "to": "atk", "label": "悪用で大規模被害", "danger": true},
+          {"from": "model", "to": "limit", "label": "リスク低減のため制限"},
+          {"from": "limit", "to": "atk", "label": "攻撃者流出を抑止"}
+        ],
+        "caption": "同一能力が防御にも攻撃にも使えるため、提供を防御目的に限定して武器化リスクを下げる。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "採算・個人情報・出力品質など、もっともらしいが本質でない理由に誘導する選択肢に注意。",
+      "mnemonic": "強い刃物ほど渡す相手を選ぶ＝デュアルユースは限定提供。",
+      "related": "問2（攻撃のAI化がもたらすリードタイム短縮）の前提となる能力論。",
+      "case": "2026年、脆弱性の自律発見・攻撃コード生成に長けた高性能AIの登場で『攻撃と防御のAI化』が現実論点化した。",
+      "reg_detail": [
+        {"reg": "NIST AI RMF", "point": "危険能力の評価と提供範囲の統制（Govern/Map）を促す。"},
+        {"reg": "EU AI Act", "point": "汎用AIの体系的リスク評価・緩和措置を義務化。"}
+      ]
+    },
+    {
+      "id": 702,
+      "no": 2,
+      "tag": "悪用リードタイム短縮への対応",
+      "q_jp": "攻撃側がAIを活用して脆弱性の発見から悪用までを自動化・高速化する状況が、企業の脆弱性管理に与える影響として、最も適切なものはどれか。",
+      "choices_jp": [
+        "攻撃の試行頻度が下がるため、IPSのシグネチャ更新頻度を下げてよい。",
+        "脆弱性公表から悪用開始までのリードタイムが短縮するため、修正プログラム適用までの許容時間を見直し、悪用可能性に基づく優先順位付けと適用の迅速化が必要になる。",
+        "AIは既知の脆弱性しか悪用できないため、ゼロデイ攻撃への対策は不要になる。",
+        "攻撃が自動化されると攻撃元IPアドレスが固定されるため、IPアドレスブロックだけで十分な防御となる。"
+      ],
+      "q_en": "Attackers use AI to automate and accelerate everything from vulnerability discovery to exploitation. What is the most appropriate impact on enterprise vulnerability management?",
+      "choices_en": [
+        "Attack attempts decrease, so IPS signature update frequency can be reduced.",
+        "The lead time from disclosure to exploitation shrinks, so the tolerated time-to-patch must be revised, with exploitability-based prioritization and faster application.",
+        "AI can only exploit known vulnerabilities, so zero-day countermeasures become unnecessary.",
+        "Automated attacks fix the source IP, so IP blocking alone is sufficient defense."
+      ],
+      "intro_jp": "【導入】攻撃自動化の本質的影響が『リードタイム短縮』にあることを見抜けるか。",
+      "related_regs": ["CISA KEV", "SSVC", "NIST SP800-40", "NIST SP800-30"],
+      "answer_letters": ["イ"],
+      "answer_jp": "脆弱性公表から悪用開始までのリードタイムが短縮するため、修正プログラム適用までの許容時間を見直し、悪用可能性に基づく優先順位付けと適用の迅速化が必要になる。",
+      "explain_jp": "AIによる攻撃自動化の本質的影響は『発見から悪用までのリードタイム短縮』である。従来の月次・四半期のような固定パッチサイクルでは公表から適用までに無防備な空白期間が生じ、間に合わなくなる。したがって、悪用可能性（KEV等）や資産の重要度に基づくリスクベースの優先順位付けと、適用サイクルの短縮が求められる。よって正解はイ。アは試行頻度が下がる前提が誤り。ウは逆で、AIは未知の脆弱性（ゼロデイ）の発見にも用いられ得る。エは攻撃元IPが固定されるという前提が成り立たず、IPブロックだけでは不十分である。",
+      "explain_en": "AI-driven automation shrinks the lead time from disclosure to exploitation, so fixed patch cycles leave dangerous gaps; enterprises must revise tolerated time-to-patch and prioritize by exploitability and asset importance (イ). The other options rest on false premises about attack frequency, zero-days, and fixed source IPs.",
+      "sky": ["AIが発見から悪用までを自動化・高速化", "従来は四半期など固定サイクルで一括適用", "公表から悪用開始までの時間が縮む"],
+      "rain": ["固定サイクルでは適用まで無防備な空白が生じる", "悪用可能性・資産重要度で優先順位を決める必要", "適用の迅速化が不可欠"],
+      "umbrella": ["リスクベースで優先度付け（KEV/SSVC）", "重要資産・外部公開資産を先に適用", "許容時間（SLA）を見直し短縮", "緊急パッチの臨時適用フローを整備"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "攻撃頻度は下がらず、シグネチャ更新を緩めるのは危険。"},
+        {"letter": "イ", "correct": true, "reason": "リードタイム短縮に対しリスクベースで迅速適用が必要。正解。"},
+        {"letter": "ウ", "correct": false, "reason": "AIはゼロデイ発見にも使われ得るため対策不要は誤り。"},
+        {"letter": "エ", "correct": false, "reason": "攻撃元IPは固定されず、IPブロックのみでは不十分。"}
+      ],
+      "hint_jp": "💡『公表→悪用が速くなる＝待てない』。固定サイクルを捨ててリスクベース即応。",
+      "bank_notes": [
+        "① 修正適用SLAを重大度・露出度別に定義し、緊急枠を設ける。",
+        "② CISA KEV・悪用観測情報を取り込み、優先度付けを自動化する。",
+        "③ 外部公開資産（Web/VPN）は最優先で監視・適用対象とする。",
+        "④ 定期メンテを待たない臨時パッチ適用の承認フローを事前整備。",
+        "⑤ 仮想パッチ（WAF/IPSシグネチャ）で適用までの空白を暫定的に埋める。",
+        "⑥ 資産インベントリと構成情報を最新化し露出資産を即特定できる状態に保つ。",
+        "⑦ 脅威インテリジェンスとパッチ運用を連携し公表から適用の時間を計測・短縮。"
+      ],
+      "diagram": {
+        "title": "リードタイム短縮とリスクベース適用",
+        "layers": [
+          [{"id": "disc", "label": "脆弱性公表", "role": "起点"}],
+          [{"id": "ai", "label": "AIによる自動悪用", "role": "脅威", "danger": true}, {"id": "old", "label": "固定サイクル適用", "role": "旧運用", "danger": true}],
+          [{"id": "rbvm", "label": "リスクベース優先適用", "role": "対策"}]
+        ],
+        "edges": [
+          {"from": "disc", "to": "ai", "label": "悪用まで短時間", "danger": true},
+          {"from": "disc", "to": "old", "label": "次回適用まで空白", "danger": true},
+          {"from": "disc", "to": "rbvm", "label": "露出・重要度で即応"},
+          {"from": "rbvm", "to": "ai", "label": "空白を縮小し先回り"}
+        ],
+        "caption": "公表から悪用までが縮むため、固定サイクルを捨てリスクベースで適用を迅速化する。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "『AIは既知脆弱性のみ』『攻撃元IPが固定』など、AIの前提を矮小化する誤答に注意。",
+      "mnemonic": "速い攻撃には速い適用。KEVで優先、SLAは短く。",
+      "related": "問3（連鎖リスク）と合わせて『リスクベース脆弱性管理』を構成。",
+      "case": "四半期一括適用のK社が、AI化を受け悪用可能性ベースの迅速適用へ体制見直しを迫られた（午後問1）。",
+      "reg_detail": [
+        {"reg": "CISA KEV", "point": "実際に悪用された脆弱性を優先適用する根拠。"},
+        {"reg": "SSVC", "point": "悪用状況・影響で対応判断を段階化する意思決定手法。"}
+      ]
+    },
+    {
+      "id": 703,
+      "no": 3,
+      "tag": "脆弱性の連鎖（チェーン）",
+      "q_jp": "AIによる脆弱性分析では、単体ではCVSS基本値が低い複数の脆弱性を組み合わせて（チェーンして）権限昇格などの深刻な攻撃を成立させる能力が示されている。この状況を踏まえた脆弱性対応の考え方として、最も適切なものはどれか。",
+      "choices_jp": [
+        "CVSS基本値が一定値以上の脆弱性のみを対応対象とすれば十分である。",
+        "低重要度の脆弱性は悪用されないので、対応を恒久的に見送ってよい。",
+        "個々のスコアだけでなく、自社システムの構成における攻撃経路（複数脆弱性の連鎖を含む）を考慮して対応の優先順位を決める。",
+        "すべての脆弱性に対して、重要度にかかわらず同一の期限で一律に対応する。"
+      ],
+      "q_en": "AI can chain multiple individually low-CVSS vulnerabilities to achieve serious attacks such as privilege escalation. What is the most appropriate approach to vulnerability response?",
+      "choices_en": [
+        "Handling only vulnerabilities above a fixed CVSS base score threshold is sufficient.",
+        "Low-severity vulnerabilities are never exploited, so response can be deferred permanently.",
+        "Prioritize based not only on individual scores but also on attack paths in your own system configuration, including chains of multiple vulnerabilities.",
+        "Handle all vulnerabilities within the same deadline regardless of severity."
+      ],
+      "intro_jp": "【導入】単体スコア主義の限界と、自社構成での攻撃経路（連鎖）評価の必要性を問う。",
+      "related_regs": ["CVSS v4.0", "MITRE ATT&CK", "SSVC", "NIST SP800-30"],
+      "answer_letters": ["ウ"],
+      "answer_jp": "個々のスコアだけでなく、自社システムの構成における攻撃経路（複数脆弱性の連鎖を含む）を考慮して対応の優先順位を決める。",
+      "explain_jp": "単体では低リスクに見える脆弱性でも、組み合わせる（チェーンする）ことで権限昇格などの深刻な侵害が成立し得る。したがって、CVSS基本値の閾値のみで選別するア、低重要度を恒久的に放置するイは、連鎖リスクを見落とすため誤り。一方でリソースは有限であり、重要度を無視した一律対応のエは現実的でなく非効率である。適切なのは、個々のスコアに加えて自社固有の構成・攻撃経路（連鎖シナリオを含む）を評価して優先順位を決めるウである。AIが攻撃経路探索を高速化する時代には、点（単体スコア）ではなく線・面（構成上の経路）で脆弱性を捉える発想が要点となる。",
+      "explain_en": "Individually low-severity flaws can be chained into serious attacks like privilege escalation, so threshold-only selection (ア) or permanently ignoring low-severity issues (イ) miss chain risk, and uniform deadlines (エ) are impractical. The right approach is to prioritize using attack paths in one's own configuration, including chains (ウ).",
+      "sky": ["AIが低スコア脆弱性を連鎖させ深刻化", "単体CVSSは低くても組合せで権限昇格", "対応リソースは有限"],
+      "rain": ["閾値のみの選別は連鎖を見落とす", "低重要度の恒久放置は危険", "一律対応は非効率で現実的でない"],
+      "umbrella": ["自社構成の攻撃経路を可視化・評価", "連鎖シナリオを考慮して優先順位付け", "重要資産に至る経路上の脆弱性を優先", "ATT&CK等で経路を脅威モデリング"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "基本値の閾値のみでは連鎖による深刻化を見落とす。"},
+        {"letter": "イ", "correct": false, "reason": "低重要度でも連鎖で悪用され得るため恒久放置は誤り。"},
+        {"letter": "ウ", "correct": true, "reason": "自社構成の攻撃経路（連鎖含む）で優先順位付けが適切。正解。"},
+        {"letter": "エ", "correct": false, "reason": "重要度無視の一律対応は有限リソースで非現実的。"}
+      ],
+      "hint_jp": "💡『点で見ず経路で見る』。低スコアも連鎖で牙をむく。",
+      "bank_notes": [
+        "① 単体CVSSだけでなく攻撃経路・連鎖を評価する運用（脅威モデリング）を導入。",
+        "② 重要資産へ到達する経路上の脆弱性を優先度で加点する仕組みを設ける。",
+        "③ ペネトレーションテスト・攻撃経路分析でチェーンの実在性を検証する。",
+        "④ 低スコアでも外部公開・認証前アクセス可なものは連鎖起点として重点管理。",
+        "⑤ 構成管理（CMDB）と脆弱性情報を突合し経路探索を自動化する。",
+        "⑥ CVSS環境評価値・SSVCで自社文脈を反映した優先度に補正する。",
+        "⑦ 一律対応は避け、経路と資産重要度に基づく合理的な優先順位を文書化。"
+      ],
+      "diagram": {
+        "title": "低スコア脆弱性の連鎖リスク",
+        "layers": [
+          [{"id": "v1", "label": "低CVSS脆弱性A", "role": "起点"}, {"id": "v2", "label": "低CVSS脆弱性B", "role": "中継"}],
+          [{"id": "chain", "label": "攻撃経路の連鎖", "role": "評価軸", "danger": true}],
+          [{"id": "priv", "label": "権限昇格・深刻侵害", "role": "結果", "danger": true}, {"id": "prio", "label": "経路ベース優先順位付け", "role": "対策"}]
+        ],
+        "edges": [
+          {"from": "v1", "to": "chain", "label": "組合せ"},
+          {"from": "v2", "to": "chain", "label": "組合せ"},
+          {"from": "chain", "to": "priv", "label": "連鎖で深刻化", "danger": true},
+          {"from": "chain", "to": "prio", "label": "経路を評価し優先"}
+        ],
+        "caption": "単体低スコアでも連鎖で深刻化。自社構成の攻撃経路を評価して優先順位を決める。"
+      },
+      "freq": 2,
+      "importance": "★★★",
+      "trap": "『閾値以上のみ対応』『低重要度は放置』『一律対応』はいずれも極端で誤り。中庸のウが正解。",
+      "mnemonic": "小さな穴も連なれば大穴。経路で優先せよ。",
+      "related": "問2（リードタイム短縮）と合わせリスクベース脆弱性管理を形成。",
+      "case": "単体では低評価の脆弱性を連鎖させ権限昇格に至る攻撃をAIが高速に構成し得る（午後問1設問3）。",
+      "reg_detail": [
+        {"reg": "CVSS v4.0", "point": "基本値に加え環境・脅威指標で自社文脈を反映。"},
+        {"reg": "MITRE ATT&CK", "point": "攻撃経路（戦術・技術の連鎖）を脅威モデリング。"}
+      ]
+    },
+    {
+      "id": 704,
+      "no": 4,
+      "tag": "防御AIエージェントのガバナンス",
+      "q_jp": "SOCにおいて、検知から遮断までを自律的に実行するAIエージェントを導入する場合の留意点として、最も適切なものはどれか。",
+      "choices_jp": [
+        "AIの判断は常に人間より正確なので、遮断の実行に人間の承認を挟む必要はない。",
+        "誤検知によって正常業務が停止するリスクがあるため、影響の大きい対応（本番システムの遮断等）には人間の承認を組み込み、AIの判断根拠を記録・監査できるようにする。",
+        "AIエージェントには管理者権限を常時付与し、あらゆる対応を即時実行できるようにすべきである。",
+        "AIエージェントを導入すれば、インシデント対応手順書や体制の整備は不要になる。"
+      ],
+      "q_en": "When introducing an AI agent in a SOC that autonomously executes from detection to blocking, what is the most appropriate consideration?",
+      "choices_en": [
+        "AI judgment is always more accurate than humans, so no human approval is needed for blocking actions.",
+        "Because false positives can halt normal operations, high-impact actions (e.g., blocking production systems) should require human approval, and the AI's rationale should be logged and auditable.",
+        "The AI agent should always hold administrator privileges to execute any action instantly.",
+        "Introducing an AI agent makes incident response procedures and organizational structures unnecessary."
+      ],
+      "intro_jp": "【導入】防御自動化の要点＝影響度に応じたhuman-in-the-loop・最小権限・監査可能性を選べるか。",
+      "related_regs": ["NIST AI RMF", "EU AI Act 第14条（人間による監督）", "OWASP Top 10 for LLM（Excessive Agency）", "SOAR運用指針"],
+      "answer_letters": ["イ"],
+      "answer_jp": "誤検知によって正常業務が停止するリスクがあるため、影響の大きい対応（本番システムの遮断等）には人間の承認を組み込み、AIの判断根拠を記録・監査できるようにする。",
+      "explain_jp": "防御の自動化は対応の高速化に有効だが、誤検知時に正常業務を止めてしまうリスクを伴う。したがって、影響度に応じてhuman-in-the-loop（人間の承認）を組み込み、AIには最小権限のみを付与し、判断根拠のログ記録と監査可能性を確保することが、AIエージェント運用のガバナンスの要点である。よって正解はイ。アはAIが常に正確という前提が誤りで、承認省略は誤検知被害を招く。ウは常時管理者権限の付与が最小権限の原則に反し、誤動作・乗っ取り時の被害を拡大する。エはAI導入後も手順書・体制・訓練の整備は不可欠であり、不要とするのは誤り。影響が限定的な対応は自動、影響大は承認、という切り分けが実務の定石である。",
+      "explain_en": "Defense automation speeds response but can halt normal operations on false positives, so high-impact actions need human-in-the-loop approval, agents should have least privilege, and rationale must be logged and auditable (イ). AI is not always correct, blanket admin rights violate least privilege, and procedures/structure remain necessary.",
+      "sky": ["AIエージェントが検知から遮断まで自律実行", "誤検知が起こり得る", "本番システム遮断は業務影響が大きい"],
+      "rain": ["誤検知の自動遮断で正常業務が停止する恐れ", "影響度に応じ承認の要否を分けるべき", "判断根拠の記録が事後検証に必要"],
+      "umbrella": ["影響大＝human-in-the-loopで承認", "影響小＝自動実行で高速化", "エージェントは最小権限に限定", "判断根拠・実行内容をログ記録し監査可能に"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "AIが常に正確という前提は誤りで、承認省略は誤検知被害を招く。"},
+        {"letter": "イ", "correct": true, "reason": "影響大は人間承認、最小権限、判断根拠の記録・監査が要点。正解。"},
+        {"letter": "ウ", "correct": false, "reason": "常時管理者権限は最小権限に反し被害範囲を拡大する。"},
+        {"letter": "エ", "correct": false, "reason": "AI導入後も手順書・体制整備は不可欠で不要化しない。"}
+      ],
+      "hint_jp": "💡『速さ』は自動、『重さ』は承認。最小権限＋ログで監査。",
+      "bank_notes": [
+        "① 対応アクションを影響度で分類し、本番遮断など高影響は承認必須に設計。",
+        "② AIエージェントに付与する権限は最小権限とし、常時管理者権限を避ける。",
+        "③ 検知内容・入力情報・実行内容・時刻・承認者をログに残し監査可能にする。",
+        "④ 端末隔離など低影響対応は自動化し、初動の高速化を図る。",
+        "⑤ AI導入後もインシデント対応手順書・体制・訓練（演習）は継続整備する。",
+        "⑥ 誤検知率・自動対応の影響をKPIで監視し、閾値・自動化範囲を定期見直し。",
+        "⑦ エージェントの乗っ取り・誤動作を想定し、緊急停止（キルスイッチ）を用意。"
+      ],
+      "diagram": {
+        "title": "SOC自動対応のhuman-in-the-loop設計",
+        "layers": [
+          [{"id": "detect", "label": "AIエージェント検知", "role": "入力"}],
+          [{"id": "low", "label": "低影響対応（端末隔離等）", "role": "自動"}, {"id": "high", "label": "高影響対応（本番遮断等）", "role": "要承認", "danger": true}],
+          [{"id": "auto", "label": "自動実行", "role": "高速化"}, {"id": "hitl", "label": "人間の承認", "role": "統制"}, {"id": "log", "label": "判断根拠ログ・監査", "role": "説明責任"}]
+        ],
+        "edges": [
+          {"from": "detect", "to": "low", "label": "影響小に振分け"},
+          {"from": "detect", "to": "high", "label": "影響大に振分け", "danger": true},
+          {"from": "low", "to": "auto", "label": "そのまま実行"},
+          {"from": "high", "to": "hitl", "label": "承認を経て実行"},
+          {"from": "hitl", "to": "log", "label": "根拠・承認者を記録"},
+          {"from": "auto", "to": "log", "label": "実行内容を記録"}
+        ],
+        "caption": "影響度で自動と承認を切り分け、最小権限と判断根拠ログで誤検知被害と乗っ取りに備える。"
+      },
+      "freq": 2,
+      "importance": "★★★",
+      "trap": "『AIは常に正確』『常時管理者権限』『手順書不要』の極論はすべて誤り。バランスのイが正解。",
+      "mnemonic": "自動化しても最後は人・最小権限・ログの三点セット。",
+      "related": "午後問2（S社SOCのAIエージェント活用とガバナンス）と同一論点。",
+      "case": "金融S社が勘定系の誤遮断を懸念し、影響大の対応に承認を組み込む設計を採用（午後問2）。",
+      "reg_detail": [
+        {"reg": "NIST AI RMF", "point": "人間による監督とログ・監査可能性（Govern/Manage）を要求。"},
+        {"reg": "OWASP Top 10 for LLM", "point": "Excessive Agency（過剰なエージェント権限）を主要リスクとして警告。"}
+      ]
+    }
+  ]
+}

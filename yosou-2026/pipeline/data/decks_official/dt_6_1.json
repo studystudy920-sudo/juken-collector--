@@ -1,0 +1,422 @@
+{
+  "topic_jp": "セキュリティマネジメント・法規",
+  "topic_en": "Security Management & Law",
+  "shared": {
+    "glossary": [
+      {"term": "リスク対応", "term_en": "Risk Treatment", "def": "リスクを修正するプロセス。回避(リスク源除去)、低減(起こりやすさ・結果の変更)、共有/移転、保有/受容の選択肢から選定・実施する。リスクアセスメント(特定・分析・評価)の後段に位置づく活動。", "regs": "JIS Q 27000:2019, ISO/IEC 27005"},
+      {"term": "残留リスク", "term_en": "Residual Risk", "def": "リスク対応を実施した後になお残るリスク。受容にはリスク所有者(リスクオーナー)の承認が必要となる。対応前の固有リスクとは区別される。", "regs": "JIS Q 27000:2019, ISO/IEC 27005"},
+      {"term": "リスク選好", "term_en": "Risk Appetite", "def": "組織がその目的達成のため進んで受容又は追求しようとするリスクの量及び種類。個々の残留リスク受容可否を判断する上位の基準として機能する。", "regs": "ISO 31000, JIS Q 31000"},
+      {"term": "要配慮個人情報", "term_en": "Special Care-Required Personal Information", "def": "本人の人種・信条・病歴・犯罪歴など、不当な差別・偏見が生じ得る記述等を含む個人情報。取得には原則あらかじめ本人同意が必要で、オプトアウトによる第三者提供は認められない。", "regs": "個人情報保護法 第2条第3項, 第20条第2項"},
+      {"term": "SBOM", "term_en": "Software Bill of Materials", "def": "ソフトウェアを構成する部品(コンポーネント名・版数・依存関係・ライセンス等)を機械可読形式で一覧化した部品表。脆弱性公表時に影響を受ける製品の迅速な特定に用いる。", "regs": "NTIA Minimum Elements, ISO/IEC 5962(SPDX), OWASP CycloneDX"},
+      {"term": "SLSA", "term_en": "Supply-chain Levels for Software Artifacts", "def": "ビルドプロセスの改ざん耐性と来歴(プロベナンス)の保証度合いをレベルで示す、ソフトウェアサプライチェーン完全性のためのフレームワーク。段階的に来歴生成・検証を要求する。", "regs": "OpenSSF SLSA, NIST SSDF(SP 800-218)"},
+      {"term": "情報セキュリティマネジメントシステム(ISMS)", "term_en": "ISMS", "def": "リスクアセスメントに基づき情報資産の機密性・完全性・可用性を維持するための管理の枠組み。PDCAで継続的改善を行い、適用宣言書で管理策の採否を明示する。", "regs": "JIS Q 27001:2023, JIS Q 27002:2022"},
+      {"term": "サプライチェーン攻撃", "term_en": "Supply Chain Attack", "def": "取引先やOSSなど外部の弱点を経由して標的組織を侵害する攻撃類型。ソフトウェア構成部品や更新配布経路の改ざん、typosquatting等が典型手口。", "regs": "NIST SP 800-161, CISA/NTIA ガイダンス"}
+    ],
+    "comparison": [
+      {"concept": "OSSの管理体制", "normal": "利用OSSの名称・版数・依存関係をSBOMで組織横断に一元管理", "suspicious": "各チーム判断で導入し一覧がなく、脆弱性公表時に影響製品を特定できない"},
+      {"concept": "個人情報の取得(要配慮)", "normal": "取得前に本人のあらかじめの同意を得る", "suspicious": "同意なく病歴等を取得、オプトアウトで第三者提供する"},
+      {"concept": "リスク対応後の判断", "normal": "残留リスクをリスク所有者が承認し記録する", "suspicious": "残留リスクの評価・承認をせず対応済みとみなす"},
+      {"concept": "OSSの依存関係評価", "normal": "推移的(間接)依存まで含めて影響範囲を評価", "suspicious": "直接依存のみ確認し間接依存の脆弱性を見落とす"},
+      {"concept": "配布物の真正性", "normal": "cosign等で署名・検証し来歴を確認して受け入れる", "suspicious": "類似名パッケージ(typosquatting)を検証せず導入する"}
+    ],
+    "reg_matrix": [
+      {"reg": "JIS Q 27000:2019", "scope": "ISMS 用語", "point": "リスクアセスメント(特定・分析・評価)とリスク対応、残留リスク等の用語を定義"},
+      {"reg": "JIS Q 27001:2023 / 27002:2022", "scope": "ISMS 要求事項・管理策", "point": "リスクベースの管理策選定、適用宣言書、継続的改善(PDCA)を要求"},
+      {"reg": "個人情報保護法(2022年4月全面施行)", "scope": "国内・個人情報の保護", "point": "漏えい等報告・本人通知の義務化、要配慮個人情報、仮名加工情報、越境移転の情報提供"},
+      {"reg": "SPDX / CycloneDX", "scope": "SBOM 標準フォーマット", "point": "SPDXはISO/IEC 5962でライセンス管理に強く、CycloneDXはOWASP発で脆弱性・供給網用途に強い"},
+      {"reg": "SLSA / SSDF(NIST SP 800-218)", "scope": "ソフトウェア供給網の完全性", "point": "ビルド来歴の生成・検証と改ざん耐性を段階的に要求し安全な開発を促す"}
+    ],
+    "map_nodes": [
+      "ISMSとリスクマネジメント(特定→分析→評価→対応)",
+      "残留リスクとリスク受容(リスク所有者の承認)",
+      "個人情報保護法(要配慮・漏えい報告・越境移転)",
+      "サプライチェーン/SBOM/SLSA(依存関係と来歴)",
+      "外部経由の攻撃を踏まえたリスク再評価"
+    ],
+    "map_summary": "ISMSのリスクマネジメント用語(特定・分析・評価・対応・残留リスク)を土台に、個人情報保護法の実務要点(要配慮個人情報・漏えい報告・越境移転)と、SBOM/SLSA等のソフトウェアサプライチェーン管理を結び付け、外部弱点経由の攻撃に備える全体像を整理する分野である。",
+    "exam_tips": [
+      "JIS Q 27000のリスク用語は『特定・分析・評価=アセスメント』『対応=修正(回避/低減/移転/受容)』で切り分ける。定義文の主語を照合する。",
+      "残留リスクは対応後・要オーナー承認、固有リスクは対応前、二次リスクは対応が生む新リスク、リスク選好は上位基準、と並べて暗記する。",
+      "改正個人情報保護法は『漏えい報告義務化』『要配慮は事前同意・オプトアウト不可』『越境移転は移転先国情報の提供必要』『開示は電磁的記録も選択可』が頻出。",
+      "SBOMは影響範囲の迅速特定が本旨、SLSAは来歴保証、cosign(Sigstore)はコンテナ含め署名検証、typosquattingは紛らわしい名称の悪意パッケージ、と手口と対策を対応づける。"
+    ],
+    "pitfalls": [
+      "リスク対応(修正)とリスク評価(基準との比較)、リスク分析(レベル決定)の定義すり替えに注意。設問の動詞で判別する。",
+      "要配慮個人情報の相違点として『安全管理措置を講じる』等の通常個人情報にも共通する記述を挙げてしまう誤り。事前同意・オプトアウト不可が本質。",
+      "OSSは直接依存だけ確認すれば足りるとの思い込み。推移的(間接)依存まで影響範囲に含める必要がある。"
+    ],
+    "concept_diagram": {
+      "title": "セキュリティマネジメント・法規の中核構造",
+      "layers": [
+        [{"id": "isms", "label": "ISMS(27001)", "role": "枠組み"}],
+        [{"id": "risk", "label": "リスクマネジメント", "role": "中核ハブ"}],
+        [{"id": "assess", "label": "リスクアセスメント(特定/分析/評価)", "role": "前段"}, {"id": "treat", "label": "リスク対応(回避/低減/移転/受容)", "role": "後段"}, {"id": "law", "label": "個人情報保護法", "role": "法規"}, {"id": "sc", "label": "サプライチェーン管理", "role": "技術・供給網"}],
+        [{"id": "residual", "label": "残留リスク(要承認)", "role": "対応の結果"}, {"id": "sensitive", "label": "要配慮個人情報", "role": "法規要点"}, {"id": "sbom", "label": "SBOM/SLSA", "role": "供給網要点", "danger": true}]
+      ],
+      "edges": [
+        {"from": "isms", "to": "risk", "label": "PDCAで運用"},
+        {"from": "risk", "to": "assess", "label": "まず評価"},
+        {"from": "risk", "to": "treat", "label": "次に対応"},
+        {"from": "risk", "to": "law", "label": "法令順守を統合"},
+        {"from": "risk", "to": "sc", "label": "外部リスクを評価"},
+        {"from": "treat", "to": "residual", "label": "対応後に残る", "danger": true},
+        {"from": "law", "to": "sensitive", "label": "特に厳格な取扱い"},
+        {"from": "sc", "to": "sbom", "label": "部品可視化・来歴保証", "danger": true}
+      ],
+      "caption": "ISMSを枠組みとしてリスクマネジメントをハブに据え、アセスメント/対応/法規/供給網の各論点が連なる。残留リスク・要配慮情報・SBOMが到達点。"
+    }
+  },
+  "questions": [
+    {
+      "id": 601,
+      "no": 1,
+      "tag": "リスク対応の定義",
+      "q_jp": "JIS Q 27000:2019(情報セキュリティマネジメントシステム-用語)における「リスク対応」の説明として,適切なものはどれか。",
+      "choices_jp": [
+        "リスクの重大性を評価するために,算定されたリスクを与えられたリスク基準と比較するプロセス",
+        "リスクを発見,認識及び記述するプロセスであり,リスク源,事象,それらの原因及び起こり得る結果の特定を含む",
+        "リスクを修正するプロセスであり,リスクの回避,低減,共有(移転)及び保有(受容)などの選択肢を含む",
+        "リスクの特質を理解し,リスクレベルを決定するプロセス"
+      ],
+      "q_en": "In JIS Q 27000:2019 (ISMS - Vocabulary), which is the appropriate description of \"risk treatment\"?",
+      "choices_en": [
+        "A process of comparing estimated risk against given risk criteria to evaluate the significance of the risk",
+        "A process of finding, recognizing and describing risks, including identification of sources, events, causes and potential consequences",
+        "A process of modifying risk, including options such as avoiding, reducing, sharing (transferring) and retaining (accepting) the risk",
+        "A process of comprehending the nature of risk and determining the level of risk"
+      ],
+      "intro_jp": "【導入】リスクマネジメント用語のうち、リスク対応(修正)とアセスメント3要素(特定・分析・評価)の定義を切り分けられるかを問う。",
+      "related_regs": ["JIS Q 27000:2019", "ISO/IEC 27005", "JIS Q 31000"],
+      "answer_letters": ["ウ"],
+      "answer_jp": "リスクを修正するプロセスであり,リスクの回避,低減,共有(移転)及び保有(受容)などの選択肢を含む",
+      "explain_jp": "リスク対応(risk treatment)は「リスクを修正するプロセス」であり,リスクの回避,除去(リスク源の除去),起こりやすさ・結果の変更(低減),他者との共有(移転),リスク保有(受容)などの選択肢の選定・実施を含むため,ウが正解である。アはリスク評価(リスク分析の結果をリスク基準と比較し重大性を判断するプロセス),イはリスク特定,エはリスク分析の定義であり,これら三つはいずれもリスクアセスメントの構成要素である点でリスク対応とは異なる。設問は定義文の動詞と対象(修正するのか、比較するのか、特定するのか)で機械的に切り分けるのが解法の要である。",
+      "explain_en": "Risk treatment is the process of modifying risk, including options such as avoidance, reduction, sharing/transfer and retention/acceptance, so choice ウ is correct. The others define risk evaluation, risk identification and risk analysis respectively, which are all components of risk assessment, not treatment.",
+      "sky": ["4つの定義文が並ぶ", "JIS Q 27000のリスク用語が論点", "『修正するプロセス』というキーワード", "回避・低減・移転・受容が列挙"],
+      "rain": ["『修正』『回避/低減/移転/受容』はリスク対応の定義に合致", "アは基準との比較=評価", "イは発見・記述=特定", "エはレベル決定=分析"],
+      "umbrella": ["定義文の動詞で切り分ける(修正=対応)", "アセスメント3要素(特定・分析・評価)と対応を区別", "対応の4選択肢(回避/低減/移転/受容)をセットで暗記"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "算定リスクをリスク基準と比較するのは『リスク評価』の定義であり対応ではない。"},
+        {"letter": "イ", "correct": false, "reason": "リスクの発見・認識・記述は『リスク特定』の定義。"},
+        {"letter": "ウ", "correct": true, "reason": "リスクを修正し回避・低減・移転・受容の選択肢を含むのはリスク対応の正しい定義。"},
+        {"letter": "エ", "correct": false, "reason": "リスクの特質理解とレベル決定は『リスク分析』の定義。"}
+      ],
+      "hint_jp": "💡『修正=対応』。回避・低減・移転・受容が並んだら対応と判断。",
+      "bank_notes": [
+        "① 現場ではリスクアセスメント(特定→分析→評価)の後にリスク対応計画を策定し、採用管理策を適用宣言書に反映する。",
+        "② 対応の4選択肢は排他ではなく、低減しつつ残余を移転(保険)する等の組み合わせが実務的。",
+        "③ 移転(共有)しても説明責任は自組織に残る点を運用ルールに明記する。",
+        "④ 受容を選ぶ場合はリスク所有者の承認と根拠の記録を必須とする。",
+        "⑤ 対応後は必ず残留リスクを再評価し、受容可能水準か確認する。",
+        "⑥ 用語のブレは監査指摘の原因になるためJIS Q 27000の定義を社内標準として統一する。",
+        "⑦ 対応策の有効性はKRI等でモニタリングし、PDCAで見直す。"
+      ],
+      "diagram": {
+        "title": "リスクマネジメントの流れと『対応』の位置",
+        "layers": [
+          [{"id": "id", "label": "リスク特定(イ)", "role": "アセスメント"}, {"id": "an", "label": "リスク分析(エ)", "role": "アセスメント"}, {"id": "ev", "label": "リスク評価(ア)", "role": "アセスメント"}],
+          [{"id": "tr", "label": "リスク対応(ウ)=修正", "role": "対応(正解)"}],
+          [{"id": "res", "label": "残留リスク", "role": "結果", "danger": true}]
+        ],
+        "edges": [
+          {"from": "id", "to": "an", "label": "特定→分析"},
+          {"from": "an", "to": "ev", "label": "分析→評価"},
+          {"from": "ev", "to": "tr", "label": "評価→対応"},
+          {"from": "tr", "to": "res", "label": "対応後に残る", "danger": true}
+        ],
+        "caption": "ア・イ・エはアセスメントの各要素、ウのみが後段の『対応(修正)』。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "アの『基準と比較』を対応と誤認しやすい。比較は評価、修正が対応。",
+      "mnemonic": "対応=修正=『避・減・移・受』の4手。",
+      "related": "問2(残留リスク)は本問の対応の後段に接続。",
+      "case": "評価で受容不可としたリスクに管理策を適用(低減)し、残余を保険で移転した対応事例。",
+      "reg_detail": [
+        {"reg": "JIS Q 27000:2019", "point": "リスク対応・評価・分析・特定の各用語を明確に定義。"},
+        {"reg": "ISO/IEC 27005", "point": "対応選択肢の選定と残留リスク受容の手順を規定。"}
+      ]
+    },
+    {
+      "id": 602,
+      "no": 2,
+      "tag": "残留リスク",
+      "q_jp": "組織が受容できないと判断したリスクについて,追加の管理策を導入した後になお残るリスクを表す用語はどれか。",
+      "choices_jp": [
+        "固有リスク",
+        "残留リスク",
+        "二次リスク",
+        "リスク選好"
+      ],
+      "q_en": "Which term represents the risk that still remains after additional controls have been implemented for a risk the organization judged unacceptable?",
+      "choices_en": [
+        "Inherent risk",
+        "Residual risk",
+        "Secondary risk",
+        "Risk appetite"
+      ],
+      "intro_jp": "【導入】リスク対応後に残るリスクの呼称を問う。固有・二次・選好との概念差を切り分ける。",
+      "related_regs": ["JIS Q 27000:2019", "ISO/IEC 27005", "JIS Q 31000"],
+      "answer_letters": ["イ"],
+      "answer_jp": "残留リスク",
+      "explain_jp": "残留リスク(residual risk)はリスク対応後になお残るリスクを指し,その受容にはリスク所有者(リスクオーナー)の承認が必要となるため,イが正解である。アの固有リスクは管理策適用前(対応前)のリスク,ウの二次リスクはある対応策の実施自体が新たに生じさせるリスク,エのリスク選好(risk appetite)は組織が進んで受容又は追求しようとするリスクの量・種類であり,いずれも残留リスクとは概念が異なる。設問の『追加の管理策を導入した後になお残る』が残留リスクの定義そのものである点を押さえる。",
+      "explain_en": "Residual risk is the risk remaining after risk treatment, and its acceptance requires the risk owner's approval, so choice イ is correct. Inherent risk is the risk before controls, secondary risk is newly created by a treatment itself, and risk appetite is the amount and type of risk an organization is willing to accept or pursue.",
+      "sky": ["4つのリスク用語が並ぶ", "『管理策導入後になお残る』が論点", "対応の前後・派生・選好を区別する必要"],
+      "rain": ["対応後に残る=残留リスク", "固有=対応前", "二次=対応が生む新リスク", "選好=受容の上位基準"],
+      "umbrella": ["時系列で整理(前=固有→対応→後=残留)", "残留リスクの受容はオーナー承認が必須", "二次リスクとリスク選好は別概念として排除"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "固有リスクは管理策適用『前』のリスクであり、対応後に残るものではない。"},
+        {"letter": "イ", "correct": true, "reason": "リスク対応後になお残るリスクが残留リスク。受容にはオーナー承認が必要で正解。"},
+        {"letter": "ウ", "correct": false, "reason": "二次リスクは対応策の実施自体が新たに生む別のリスクで、定義が異なる。"},
+        {"letter": "エ", "correct": false, "reason": "リスク選好は組織が進んで受容/追求するリスクの量・種類で、残るリスクの呼称ではない。"}
+      ],
+      "hint_jp": "💡『対応しても残る』=残留リスク。対応前は固有、対応が生む新リスクは二次。",
+      "bank_notes": [
+        "① 残留リスクは対応の都度に再評価し、受容水準を超えないか確認する運用が必要。",
+        "② 受容判断はリスク所有者が行い、承認記録(誰が・いつ・根拠)を保存する。",
+        "③ 固有リスクと残留リスクの両方を台帳に記録し、管理策の効果(低減量)を可視化する。",
+        "④ 二次リスクは対応計画の副作用として事前に洗い出し、必要なら追加対応する。",
+        "⑤ 個々の残留リスク受容可否はリスク選好(上位基準)に照らして判断する。",
+        "⑥ 受容した残留リスクも定期的にモニタリングし、環境変化で再対応する。",
+        "⑦ 監査では残留リスクの承認プロセスの妥当性が確認ポイントとなる。"
+      ],
+      "diagram": {
+        "title": "リスク対応前後とリスク用語の関係",
+        "layers": [
+          [{"id": "inh", "label": "固有リスク(対応前)", "role": "前"}],
+          [{"id": "ctrl", "label": "追加の管理策(対応)", "role": "処置"}],
+          [{"id": "resid", "label": "残留リスク(対応後)", "role": "後・正解", "danger": true}, {"id": "sec", "label": "二次リスク(対応が生む)", "role": "派生", "danger": true}],
+          [{"id": "app", "label": "リスク選好(受容の上位基準)", "role": "基準"}]
+        ],
+        "edges": [
+          {"from": "inh", "to": "ctrl", "label": "対応を適用"},
+          {"from": "ctrl", "to": "resid", "label": "なお残る", "danger": true},
+          {"from": "ctrl", "to": "sec", "label": "副作用で発生", "danger": true},
+          {"from": "app", "to": "resid", "label": "受容可否を判断"}
+        ],
+        "caption": "固有リスクに対応を施すと残留リスクが残り、その受容可否はリスク選好で判断する。"
+      },
+      "freq": 2,
+      "importance": "★★★",
+      "trap": "固有リスク(対応前)と残留リスク(対応後)の取り違え。時系列で判定する。",
+      "mnemonic": "残る=残留。前=固有、生む=二次、基準=選好。",
+      "related": "問1(リスク対応)の直後に接続する概念。",
+      "case": "多要素認証を導入(低減)後もフィッシングによる侵害可能性が残り、これを残留リスクとしてCISOが受容承認した事例。",
+      "reg_detail": [
+        {"reg": "JIS Q 27000:2019", "point": "残留リスク・固有リスク等の用語を定義。"},
+        {"reg": "ISO/IEC 27005", "point": "残留リスクの受容とリスク所有者の承認手順を規定。"}
+      ]
+    },
+    {
+      "id": 603,
+      "no": 3,
+      "tag": "改正個人情報保護法",
+      "q_jp": "2022年4月に全面施行された改正個人情報保護法に関する記述のうち,適切なものはどれか。",
+      "choices_jp": [
+        "取り扱う個人情報の量にかかわらず,一定の要件を満たす漏えい等が発生した場合,個人情報保護委員会への報告及び本人への通知が原則として義務化された。",
+        "仮名加工情報は,他の情報と照合しない限り特定の個人を識別できないように加工した情報であり,第三者への自由な提供が認められている。",
+        "外国にある第三者へ個人データを提供する場合,本人の同意があれば移転先国の制度に関する情報提供は不要である。",
+        "保有個人データの開示請求において,本人は書面による交付のみを請求でき,電磁的記録による提供を求めることはできない。"
+      ],
+      "q_en": "Which statement about the amended Act on the Protection of Personal Information (fully enforced in April 2022) is appropriate?",
+      "choices_en": [
+        "Regardless of the volume of personal information handled, when a leak meeting certain requirements occurs, reporting to the PPC and notifying the individual became mandatory in principle.",
+        "Pseudonymously processed information is processed so that a specific individual cannot be identified unless collated with other information, and its free provision to third parties is permitted.",
+        "When providing personal data to a third party in a foreign country, if the individual consents, providing information about the destination country's system is unnecessary.",
+        "In a disclosure request for retained personal data, the individual may request only delivery in writing and cannot request provision by electromagnetic record."
+      ],
+      "intro_jp": "【導入】2020年改正(2022年4月全面施行)の主要論点(漏えい報告義務化・仮名加工・越境移転・開示方法)を横断的に問う。",
+      "related_regs": ["個人情報保護法", "個人情報保護委員会 ガイドライン", "施行規則"],
+      "answer_letters": ["ア"],
+      "answer_jp": "取り扱う個人情報の量にかかわらず,一定の要件を満たす漏えい等が発生した場合,個人情報保護委員会への報告及び本人への通知が原則として義務化された。",
+      "explain_jp": "改正法で漏えい等報告・本人通知が法的義務化されたためアが正解である。報告義務の対象は,(1)要配慮個人情報の漏えい等,(2)財産的被害のおそれがある漏えい等,(3)不正の目的による(おそれを含む)漏えい等,(4)本人の数が1,000人を超える漏えい等であり,(1)~(3)は人数によらず対象となる。イの仮名加工情報は原則として第三者提供が禁止(委託・事業承継・共同利用の場合を除く)であり誤り。ウは越境移転にあたり同意取得時に移転先国の制度等に関する情報提供が必要であるため誤り。エは本人が電磁的記録による提供を含め開示方法を指定できるようになったため誤り。",
+      "explain_en": "Choice ア is correct: the amendment made reporting leaks to the PPC and notifying individuals mandatory in principle. Categories (1)-(3) apply regardless of the number of individuals. Pseudonymously processed information is in principle prohibited from third-party provision (except delegation, succession, joint use), cross-border transfer requires providing destination-country system information even with consent, and individuals may now designate disclosure by electromagnetic record.",
+      "sky": ["改正個人情報保護法の4記述", "漏えい報告・仮名加工・越境移転・開示方法が論点", "『原則義務化』というキーワード"],
+      "rain": ["アは漏えい報告義務化の正しい記述", "イは仮名加工情報を自由提供可としており誤り", "ウは越境移転の情報提供を不要とし誤り", "エは開示方法を書面のみとし誤り"],
+      "umbrella": ["改正の4大論点を1つずつ照合", "仮名加工は原則第三者提供不可を暗記", "越境移転は移転先国情報の提供が必要", "開示は電磁的記録も本人が選択可"],
+      "options": [
+        {"letter": "ア", "correct": true, "reason": "改正で漏えい等報告(PPC)と本人通知が原則義務化され、人数によらない類型もある。正しい。"},
+        {"letter": "イ", "correct": false, "reason": "仮名加工情報は原則第三者提供禁止(委託・承継・共同利用を除く)であり、自由提供は認められない。"},
+        {"letter": "ウ", "correct": false, "reason": "越境移転では同意取得時に移転先国の制度等の情報提供が必要で、不要とするのは誤り。"},
+        {"letter": "エ", "correct": false, "reason": "改正で本人は電磁的記録による提供も指定でき、書面のみに限られない。"}
+      ],
+      "hint_jp": "💡改正の柱『漏えい報告義務化・仮名加工は原則提供不可・越境は情報提供必要・開示は電子も可』。",
+      "bank_notes": [
+        "① 漏えい等を認知したら速報(概ね3~5日以内)と確報(原則30日以内、不正目的は60日以内)の二段階でPPCに報告する体制を整える。",
+        "② 本人通知が困難な場合は公表等の代替措置を検討する運用を定める。",
+        "③ 要配慮個人情報や不正目的の漏えいは1件でも報告対象になり得るため、件数だけで判断しない。",
+        "④ 仮名加工情報は内部分析用途が中心で、第三者提供制限・識別行為禁止・連絡先利用禁止を遵守する。",
+        "⑤ 越境移転では移転先国名・当該国の制度・移転先の措置を本人に情報提供する手順を用意する。",
+        "⑥ 開示請求には電磁的記録での交付にも対応できるよう受付・出力プロセスを整備する。",
+        "⑦ 委託先で漏えいが起きた場合の報告主体・連絡フローを契約とプレイブックで明確化する。"
+      ],
+      "diagram": {
+        "title": "改正個人情報保護法の主要論点",
+        "layers": [
+          [{"id": "amend", "label": "2022年4月全面施行の改正法", "role": "ハブ"}],
+          [{"id": "report", "label": "漏えい等報告・本人通知(ア)", "role": "義務化・正解"}, {"id": "pseudo", "label": "仮名加工情報(イ)", "role": "原則提供不可", "danger": true}, {"id": "cross", "label": "越境移転(ウ)", "role": "情報提供必要", "danger": true}, {"id": "disc", "label": "開示方法(エ)", "role": "電子も可"}]
+        ],
+        "edges": [
+          {"from": "amend", "to": "report", "label": "原則義務化"},
+          {"from": "amend", "to": "pseudo", "label": "第三者提供を制限", "danger": true},
+          {"from": "amend", "to": "cross", "label": "移転先国情報の提供", "danger": true},
+          {"from": "amend", "to": "disc", "label": "電磁的記録を選択可"}
+        ],
+        "caption": "改正法をハブに4論点が接続。アが正しい記述、イ・ウ・エは各論点の誤り。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "仮名加工情報を『匿名加工情報』と混同し自由提供可と誤認。仮名は原則第三者提供不可。",
+      "mnemonic": "改正=『報告・仮名は出せぬ・越境は伝える・開示は電子も』。",
+      "related": "午後問題の[b]要配慮個人情報(問4系)と法規で連動。",
+      "case": "1,001人分の顧客データ流出で、要件該当としてPPC速報・確報と本人通知を実施した事例。",
+      "reg_detail": [
+        {"reg": "個人情報保護法(漏えい等報告)", "point": "一定要件の漏えい等はPPC報告・本人通知を義務化。"},
+        {"reg": "個人情報保護法(仮名加工情報)", "point": "原則第三者提供禁止、識別行為・連絡利用を禁止。"},
+        {"reg": "個人情報保護法(越境移転)", "point": "同意取得時に移転先国の制度等の情報提供を要求。"},
+        {"reg": "個人情報保護法(開示)", "point": "本人が電磁的記録を含め開示方法を指定可能。"}
+      ]
+    },
+    {
+      "id": 604,
+      "no": 4,
+      "tag": "SBOM",
+      "q_jp": "ソフトウェアの構成要素を一覧化するSBOMに関する記述のうち,適切なものはどれか。",
+      "choices_jp": [
+        "SPDXとCycloneDXはいずれもSBOMの標準フォーマットであり,CycloneDXは脆弱性やサプライチェーンのセキュリティ用途に強みをもつ。",
+        "SBOMは実行時のメモリ上のプロセスを動的に監視し,不審な通信をリアルタイムで検知する仕組みである。",
+        "SBOMを整備しても,Log4jのような脆弱性が新たに公表された際に影響を受ける製品を特定する用途には利用できない。",
+        "SBOMは最終成果物のバイナリのハッシュ値のみを記録するものであり,含まれるコンポーネントの名称や版数,依存関係は記録の対象外である。"
+      ],
+      "q_en": "Which statement about SBOM, which lists software components, is appropriate?",
+      "choices_en": [
+        "SPDX and CycloneDX are both standard SBOM formats, and CycloneDX has strengths in vulnerability and supply-chain security use cases.",
+        "SBOM is a mechanism that dynamically monitors runtime processes in memory and detects suspicious communications in real time.",
+        "Even if an SBOM is maintained, it cannot be used to identify products affected when a vulnerability such as Log4j is newly disclosed.",
+        "SBOM records only the hash value of the final binary artifact, and the names, versions and dependencies of included components are out of scope."
+      ],
+      "intro_jp": "【導入】SBOMの本旨(部品と依存関係の可視化による影響範囲の迅速特定)と代表フォーマットを問う。EDR等との混同を排除できるか。",
+      "related_regs": ["NTIA Minimum Elements", "ISO/IEC 5962(SPDX)", "OWASP CycloneDX", "NIST SP 800-161"],
+      "answer_letters": ["ア"],
+      "answer_jp": "SPDXとCycloneDXはいずれもSBOMの標準フォーマットであり,CycloneDXは脆弱性やサプライチェーンのセキュリティ用途に強みをもつ。",
+      "explain_jp": "SBOMはソフトウェア部品表であり,代表フォーマットとしてSPDX(ISO/IEC 5962として標準化,ライセンス管理に強い)とCycloneDX(OWASP発,脆弱性・サプライチェーンのセキュリティ用途に強い)があるため,アが正解である。イはEDR等による実行時の動的監視の説明であってSBOMとは無関係であり誤り。ウはSBOMの主要な利点そのものを否定しており,新たな脆弱性公表時に依存関係(推移的依存を含む)をたどって影響範囲を迅速に特定できる点に反するため誤り。エはSBOMがコンポーネントの名称・版数・依存関係の記録を本旨とする点に反しており誤り。",
+      "explain_en": "Choice ア is correct: SPDX (standardized as ISO/IEC 5962, strong in license management) and CycloneDX (from OWASP, strong in vulnerability and supply-chain security) are both standard SBOM formats. Choice イ describes dynamic runtime monitoring (e.g., EDR), unrelated to SBOM; choice ウ denies SBOM's key benefit of quickly identifying affected products via dependencies; and choice エ contradicts SBOM's purpose of recording component names, versions and dependencies.",
+      "sky": ["SBOMに関する4記述", "フォーマット・用途・記録内容が論点", "SPDX/CycloneDXの名称"],
+      "rain": ["アはSPDX/CycloneDXの正しい説明", "イはEDRの動的監視でSBOMではない", "ウはSBOMの利点を否定し誤り", "エは記録内容を誤って限定"],
+      "umbrella": ["SBOM=部品と依存関係の静的な可視化と理解", "代表2フォーマット(SPDX/CycloneDX)の特徴を暗記", "動的監視(EDR)との違いを切り分け", "利点=脆弱性公表時の影響範囲の迅速特定"],
+      "options": [
+        {"letter": "ア", "correct": true, "reason": "SPDXとCycloneDXは標準フォーマットで、CycloneDXは脆弱性・供給網用途に強い。正しい。"},
+        {"letter": "イ", "correct": false, "reason": "実行時プロセスの動的監視はEDR等の説明で、静的な部品表であるSBOMとは異なる。"},
+        {"letter": "ウ", "correct": false, "reason": "SBOMは脆弱性公表時に影響製品を特定する用途にこそ有効で、否定は誤り。"},
+        {"letter": "エ", "correct": false, "reason": "SBOMはコンポーネント名・版数・依存関係の記録が本旨で、ハッシュのみとするのは誤り。"}
+      ],
+      "hint_jp": "💡SBOM=『部品表』。SPDX(ライセンス)/CycloneDX(脆弱性)。動的監視はEDR。",
+      "bank_notes": [
+        "① 調達・開発の受入れ時にSBOM提出を要件化し、依存関係(推移的依存含む)を台帳化する。",
+        "② 新規CVE公表時はSBOMを横断検索し、影響製品・版数を即時に特定するプレイブックを整備する。",
+        "③ SPDX/CycloneDXいずれの形式でも取り込めるようツールチェーンを標準化する。",
+        "④ SBOMは静的可視化のため、EDRやWAF等の動的検知と役割を分けて組み合わせる。",
+        "⑤ SBOMの鮮度が命であり、ビルドのたびに自動生成・更新する仕組みにする。",
+        "⑥ ライセンス条項もSBOMで把握し、OSSライセンス違反リスクを管理する。",
+        "⑦ VEX(脆弱性の悪用可否情報)と併用し、実際に影響する脆弱性へ対応を集中する。"
+      ],
+      "diagram": {
+        "title": "SBOMの本旨と誤答の所在",
+        "layers": [
+          [{"id": "sbom", "label": "SBOM(部品表)", "role": "ハブ"}],
+          [{"id": "fmt", "label": "標準フォーマット SPDX/CycloneDX(ア)", "role": "正解"}, {"id": "use", "label": "影響範囲の迅速特定", "role": "利点"}, {"id": "content", "label": "名称・版数・依存関係を記録", "role": "記録内容"}],
+          [{"id": "edr", "label": "動的監視=EDR(イ)", "role": "別物", "danger": true}, {"id": "wrong", "label": "利点否定(ウ)/ハッシュのみ(エ)", "role": "誤り", "danger": true}]
+        ],
+        "edges": [
+          {"from": "sbom", "to": "fmt", "label": "2大形式"},
+          {"from": "sbom", "to": "use", "label": "脆弱性公表時に活用"},
+          {"from": "sbom", "to": "content", "label": "本旨"},
+          {"from": "sbom", "to": "edr", "label": "混同注意(役割が違う)", "danger": true},
+          {"from": "content", "to": "wrong", "label": "ウ・エは本旨に反する", "danger": true}
+        ],
+        "caption": "SBOMは部品・依存関係の静的可視化。アが正しく、イは動的監視、ウ・エは本旨に反する誤り。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "SBOMを動的監視(EDR)や単なるハッシュ記録と混同する罠。SBOMは静的な部品・依存関係の一覧。",
+      "mnemonic": "SBOM=部品表。SPDX=ライセンス、CycloneDX=脆弱性。",
+      "related": "問5(SLSA/供給網完全性)と午後の[a]SBOMに直結。",
+      "case": "Log4Shell公表時、SBOMを整備済みの組織が数分で影響製品を特定できた事例。",
+      "reg_detail": [
+        {"reg": "NTIA Minimum Elements", "point": "SBOMに含めるべき最小要素(名称・版数・依存関係・作成者等)を定義。"},
+        {"reg": "ISO/IEC 5962(SPDX)", "point": "SPDXを国際標準として規定、ライセンス管理に強み。"},
+        {"reg": "OWASP CycloneDX", "point": "脆弱性・サプライチェーンセキュリティ用途に適した形式。"}
+      ]
+    },
+    {
+      "id": 605,
+      "no": 5,
+      "tag": "サプライチェーン完全性/SLSA",
+      "q_jp": "ソフトウェアサプライチェーンの完全性を確保する取組みに関する記述のうち,適切なものはどれか。",
+      "choices_jp": [
+        "SLSAは,ビルドプロセスの改ざん耐性・来歴(プロベナンス)の保証度合いをレベルで示す,サプライチェーン完全性のためのフレームワークである。",
+        "typosquattingは,正規パッケージの署名鍵を窃取して同一名で改ざん版を公開する攻撃を指す。",
+        "cosign(Sigstore)は,配布物への電子署名と検証を行うが,コンテナイメージには適用できない。",
+        "OSSの依存ライブラリに脆弱性が発見された場合,直接依存だけを確認すれば推移的依存の影響は考慮不要である。"
+      ],
+      "q_en": "Which statement about efforts to ensure software supply-chain integrity is appropriate?",
+      "choices_en": [
+        "SLSA is a framework for supply-chain integrity that expresses, by levels, the degree of assurance of build-process tamper-resistance and provenance.",
+        "Typosquatting refers to an attack that steals the signing key of a legitimate package and publishes a tampered version under the same name.",
+        "Cosign (Sigstore) performs electronic signing and verification of distributed artifacts but cannot be applied to container images.",
+        "When a vulnerability is found in an OSS dependency, it is sufficient to check only direct dependencies, and the impact of transitive dependencies need not be considered."
+      ],
+      "intro_jp": "【導入】供給網完全性の要素(SLSA・typosquatting・cosign・推移的依存)の正誤を切り分ける。用語の定義すり替えを見抜けるか。",
+      "related_regs": ["OpenSSF SLSA", "Sigstore(cosign)", "NIST SP 800-218(SSDF)", "NIST SP 800-161"],
+      "answer_letters": ["ア"],
+      "answer_jp": "SLSAは,ビルドプロセスの改ざん耐性・来歴(プロベナンス)の保証度合いをレベルで示す,サプライチェーン完全性のためのフレームワークである。",
+      "explain_jp": "SLSA(Supply-chain Levels for Software Artifacts)はビルド由来の保証度合いをレベル化する枠組みで,来歴情報の生成・検証やビルド環境の改ざん耐性を段階的に要求するため,アが正解である。イのtyposquattingは正規名に酷似した紛らわしい名称の悪意あるパッケージを公開して誤インストールを狙う攻撃であり,署名鍵の窃取(こちらは正規アカウント/署名鍵の侵害に該当)とは別物であるため誤り。cosign(Sigstore)はコンテナイメージや任意の成果物に署名・検証できるためウは誤り。OSSでは推移的(間接)依存も影響範囲に含めて評価すべきであり,直接依存だけで足りるとするエも誤りである。",
+      "explain_en": "Choice ア is correct: SLSA levels the assurance of build provenance, progressively requiring provenance generation/verification and build-environment tamper resistance. Typosquatting publishes maliciously named packages resembling legitimate ones (not signing-key theft), cosign can sign and verify container images and arbitrary artifacts, and transitive dependencies must also be assessed—so イ, ウ and エ are wrong.",
+      "sky": ["供給網完全性に関する4記述", "SLSA・typosquatting・cosign・依存関係が論点", "『レベルで示すフレームワーク』というキーワード"],
+      "rain": ["アはSLSAの正しい定義", "イはtyposquattingの定義すり替え(鍵窃取は別)", "ウはcosignの適用範囲を誤って限定", "エは推移的依存を無視し誤り"],
+      "umbrella": ["SLSA=ビルド来歴の保証度合いをレベル化と理解", "typosquatting=紛らわしい名称の悪意パッケージ", "cosignはコンテナ含め署名・検証可能", "依存は推移的(間接)まで評価する"],
+      "options": [
+        {"letter": "ア", "correct": true, "reason": "SLSAはビルドの改ざん耐性・来歴保証をレベル化する供給網完全性フレームワーク。正しい。"},
+        {"letter": "イ", "correct": false, "reason": "typosquattingは紛らわしい名称の悪意パッケージ公開であり、署名鍵窃取とは別の攻撃。"},
+        {"letter": "ウ", "correct": false, "reason": "cosign(Sigstore)はコンテナイメージや任意成果物に署名・検証でき、適用不可とするのは誤り。"},
+        {"letter": "エ", "correct": false, "reason": "推移的(間接)依存の脆弱性も影響範囲であり、直接依存のみで足りるとするのは誤り。"}
+      ],
+      "hint_jp": "💡SLSA=来歴のレベル保証。typo=名前そっくり詐称。cosign=コンテナも署名可。依存は間接も見る。",
+      "bank_notes": [
+        "① CI/CDでSLSAレベルに沿った来歴(プロベナンス)を自動生成・保存し、デプロイ前に検証する。",
+        "② パッケージ導入は正確な名称・配布元・署名を確認し、typosquattingによる誤インストールを防ぐ。",
+        "③ cosignでコンテナイメージや成果物に署名し、レジストリpull時に検証を強制する。",
+        "④ 依存関係は推移的依存まで解析し、SBOMと組み合わせて影響範囲を評価する。",
+        "⑤ ビルド環境(ランナー・鍵管理)の隔離と最小権限でビルド改ざんリスクを下げる。",
+        "⑥ 署名鍵はHSM/KMSで保護し、鍵漏えい時の失効・ローテーション手順を用意する。",
+        "⑦ 内部/外部の依存を含めてSSDF(NIST SP 800-218)に沿った安全な開発プロセスを整備する。"
+      ],
+      "diagram": {
+        "title": "サプライチェーン完全性の要素と誤答",
+        "layers": [
+          [{"id": "sc", "label": "供給網完全性", "role": "ハブ"}],
+          [{"id": "slsa", "label": "SLSA=来歴保証レベル(ア)", "role": "正解"}, {"id": "cosign", "label": "cosign 署名・検証(コンテナ可)", "role": "対策"}, {"id": "dep", "label": "推移的依存まで評価", "role": "対策"}],
+          [{"id": "typo", "label": "typosquatting=名称詐称(イは定義誤り)", "role": "脅威", "danger": true}, {"id": "wrong", "label": "ウ:cosign不可/エ:直接依存のみ", "role": "誤り", "danger": true}]
+        ],
+        "edges": [
+          {"from": "sc", "to": "slsa", "label": "来歴を保証"},
+          {"from": "sc", "to": "cosign", "label": "真正性を検証"},
+          {"from": "sc", "to": "dep", "label": "依存を評価"},
+          {"from": "sc", "to": "typo", "label": "名称詐称の脅威", "danger": true},
+          {"from": "dep", "to": "wrong", "label": "ウ・エは誤り", "danger": true}
+        ],
+        "caption": "SLSA・cosign・推移的依存評価が対策軸。アが正しく、イは定義すり替え、ウ・エは範囲の誤り。"
+      },
+      "freq": 2,
+      "importance": "★★★",
+      "trap": "typosquattingを『署名鍵窃取』と定義すり替える罠。実際は紛らわしい名称での悪意パッケージ公開。",
+      "mnemonic": "SLSA=来歴のレベル。typo=名前そっくり。cosign=何でも署名。依存は孫まで。",
+      "related": "問4(SBOM)と併せて供給網管理を構成。午後の外部弱点経由攻撃に接続。",
+      "case": "人気npmパッケージに酷似した名称の悪意版が公開され、誤インストールで認証情報が窃取された事例。",
+      "reg_detail": [
+        {"reg": "OpenSSF SLSA", "point": "ビルド来歴と改ざん耐性の保証度合いをレベルで規定。"},
+        {"reg": "Sigstore(cosign)", "point": "コンテナイメージ・成果物への署名と検証を提供。"},
+        {"reg": "NIST SP 800-218(SSDF)", "point": "安全な開発の実践を体系化し供給網リスクを低減。"}
+      ]
+    }
+  ]
+}

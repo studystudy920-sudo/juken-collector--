@@ -17,7 +17,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DECK_DIR = os.path.join(ROOT, "data", "decks_official")
 PROG = os.path.join(ROOT, "data", "study_progress.json")
 
-DOMAIN_NAME = {"1":"暗号・認証・PKI","2":"NW・クラウド・ゼロトラスト","3":"Web/アプリ脆弱性","4":"AIセキュリティ・LLM","5":"攻撃手法・IR","6":"マネジメント・法規","7":"AI駆動型攻撃"}
+DOMAIN_NAME = {"1":"暗号・認証・PKI","2":"NW・クラウド・ゼロトラスト","3":"Webアプリ脆弱性","4":"AIセキュリティ・LLM","5":"攻撃手法・IR","6":"マネジメント・法規","7":"AI駆動型攻撃"}
 STATUS_JP = {"strong":"得意","weak":"苦手","learning":"学習中","unseen":"未学習"}
 
 def load_prog():

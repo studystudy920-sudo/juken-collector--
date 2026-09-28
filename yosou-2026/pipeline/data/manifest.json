@@ -1,0 +1,65 @@
+[
+ {
+  "subcat": "1",
+  "json": "dt_1_1.json",
+  "domain_folder": "1_暗号・認証・PKI",
+  "subcat_folder": "1_暗号認証PKI",
+  "out_filename": "SC_1_暗号認証PKI.pptx",
+  "label": "1 暗号・認証・PKI",
+  "n_questions": 6
+ },
+ {
+  "subcat": "2",
+  "json": "dt_2_1.json",
+  "domain_folder": "2_ネットワーク・クラウド・ゼロトラスト",
+  "subcat_folder": "2_NWゼロトラスト",
+  "out_filename": "SC_2_NWゼロトラスト.pptx",
+  "label": "2 ネットワーク・クラウド・ゼロトラスト",
+  "n_questions": 6
+ },
+ {
+  "subcat": "3",
+  "json": "dt_3_1.json",
+  "domain_folder": "3_Web/アプリケーション脆弱性",
+  "subcat_folder": "3_Webアプリ脆弱性",
+  "out_filename": "SC_3_Webアプリ脆弱性.pptx",
+  "label": "3 Web/アプリケーション脆弱性",
+  "n_questions": 6
+ },
+ {
+  "subcat": "4",
+  "json": "dt_4_1.json",
+  "domain_folder": "4_AIセキュリティ・LLM",
+  "subcat_folder": "4_AIセキュリティ",
+  "out_filename": "SC_4_AIセキュリティ.pptx",
+  "label": "4 AIセキュリティ・LLM",
+  "n_questions": 7
+ },
+ {
+  "subcat": "5",
+  "json": "dt_5_1.json",
+  "domain_folder": "5_マルウェア・攻撃手法・インシデント対応",
+  "subcat_folder": "5_攻撃手法IR",
+  "out_filename": "SC_5_攻撃手法IR.pptx",
+  "label": "5 マルウェア・攻撃手法・インシデント対応",
+  "n_questions": 6
+ },
+ {
+  "subcat": "6",
+  "json": "dt_6_1.json",
+  "domain_folder": "6_セキュリティマネジメント・法規",
+  "subcat_folder": "6_マネジメント法規",
+  "out_filename": "SC_6_マネジメント法規.pptx",
+  "label": "6 セキュリティマネジメント・法規",
+  "n_questions": 5
+ },
+ {
+  "subcat": "7",
+  "json": "dt_7_1.json",
+  "domain_folder": "7_AI駆動型サイバー攻撃・フロンティアAI",
+  "subcat_folder": "7_AI駆動型攻撃",
+  "out_filename": "SC_7_AI駆動型攻撃.pptx",
+  "label": "7 AI駆動型サイバー攻撃・フロンティアAI",
+  "n_questions": 4
+ }
+]

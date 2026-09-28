@@ -1,0 +1,427 @@
+{
+  "topic_jp": "Web/アプリケーション脆弱性",
+  "topic_en": "Web & Application Vulnerabilities",
+  "shared": {
+    "glossary": [
+      {"term": "サーバサイドリクエストフォージェリ（SSRF）", "term_en": "Server-Side Request Forgery", "def": "利用者が指定した宛先へサーバ自身にHTTPリクエストを送らせ、内部システムやクラウドのメタデータ(169.254.169.254)から情報や認証情報を窃取させる攻撃。", "regs": "OWASP Top 10 2021 A10、CWE-918"},
+      {"term": "SQLインジェクション", "term_en": "SQL Injection", "def": "入力値をSQL文の構文要素として解釈させ、不正なクエリを実行させる攻撃。プレースホルダ（バインド機構）で入力を値として扱うことが根本対策。", "regs": "OWASP Top 10 2021 A03（Injection）、CWE-89"},
+      {"term": "クロスサイトスクリプティング（XSS）", "term_en": "Cross-Site Scripting", "def": "Webページに不正なスクリプトを注入し閲覧者のブラウザで実行させる攻撃。反射型・格納型・DOM Basedに分類され、出力時のエスケープ/サニタイズで防ぐ。", "regs": "OWASP Top 10 2021 A03、CWE-79"},
+      {"term": "クロスサイトリクエストフォージェリ（CSRF）", "term_en": "Cross-Site Request Forgery", "def": "認証済み利用者のブラウザから意図しない状態変更リクエストを送らせる攻撃。推測困難なトークン照合とSameSite属性で防ぐ。", "regs": "OWASP CSRF、CWE-352、RFC6265bis（SameSite）"},
+      {"term": "ディレクトリトラバーサル", "term_en": "Directory/Path Traversal", "def": "「../」等でパスを遡り公開範囲外のファイルを不正参照する脆弱性。識別子経由の解決や正規化後の基準ディレクトリ配下検証が根本対策。", "regs": "OWASP、CWE-22"},
+      {"term": "プレースホルダ（バインド機構）", "term_en": "Prepared Statement / Parameterized Query", "def": "SQL文の構文構造を事前に確定し、後からバインドする値を常にデータとして扱う仕組み。SQLインジェクションを構造的に防ぐ本質的対策。", "regs": "OWASP Cheat Sheet、IPA安全なウェブサイトの作り方"},
+      {"term": "SameSite属性", "term_en": "SameSite Cookie Attribute", "def": "クロスサイト由来のリクエストへのCookie自動送信を抑制（Lax/Strict）するCookie属性。CSRFの緩和に寄与するがトークン照合の代替ではない。", "regs": "RFC6265bis、OWASP"},
+      {"term": "インスタンスメタデータサービス（IMDS）", "term_en": "Instance Metadata Service", "def": "クラウドインスタンスが自身の設定や一時認証情報を取得するリンクローカルの内部エンドポイント。SSRFの標的となり、トークン必須のIMDSv2化で悪用を困難にする。", "regs": "CSPベストプラクティス、CWE-918関連"}
+    ],
+    "comparison": [
+      {"concept": "SQL文の組み立て", "normal": "プレースホルダに入力を値としてバインドし構文を固定する", "suspicious": "入力を文字列連結でSQLに埋め込み、引用符やSQL断片が構文として解釈される"},
+      {"concept": "利用者入力のHTML出力", "normal": "出力時にHTMLエスケープ、装飾許可時は許可リスト型サニタイズを適用", "suspicious": "利用者入力のHTMLをそのまま保存・出力し onerror 等が発火する"},
+      {"concept": "セッションIDの受け渡し", "normal": "HttpOnly+Secure付きCookieで受け渡し、ログイン直後に再発行する", "suspicious": "セッションIDをURLクエリに載せ Referer・履歴・ログから漏えいする"},
+      {"concept": "外部URLへのサーバ側アクセス", "normal": "許可リスト(FQDN)＋名前解決後IP検査で内部/リンクローカル宛てを遮断", "suspicious": "利用者指定URLへ無検証でリクエストし 169.254.169.254 等へ到達する"},
+      {"concept": "ファイルパスの扱い", "normal": "識別子で解決するか正規化後に基準ディレクトリ配下か検証する", "suspicious": "「../」の単純除去のみで多重エンコードにより公開範囲外を参照される"}
+    ],
+    "reg_matrix": [
+      {"reg": "OWASP Top 10 2021", "scope": "Webアプリの代表的リスク10分類", "point": "A01アクセス制御不備、A03インジェクション(SQLi/XSS含む)、A10 SSRF等を優先度付きで提示"},
+      {"reg": "CWE（Common Weakness Enumeration）", "scope": "ソフトウェア脆弱性の共通分類", "point": "CWE-89 SQLi、CWE-79 XSS、CWE-352 CSRF、CWE-22 パストラバーサル、CWE-918 SSRF"},
+      {"reg": "RFC6265bis（Cookie）", "scope": "HTTP Cookieの仕様", "point": "Secure/HttpOnly/SameSite各属性の意味を定義。SameSiteでクロスサイト送信を制御"},
+      {"reg": "IPA『安全なウェブサイトの作り方』", "scope": "国内のセキュアコーディング実務指針", "point": "SQLi・XSS・CSRF・トラバーサル等の根本的解決と保険的対策を具体的に提示"},
+      {"reg": "NIST SP 800-53 / SSDF(800-218)", "scope": "セキュリティ管理策・セキュア開発", "point": "入力検証・出力符号化・最小権限などをセキュア開発ライフサイクルに組み込む要求"}
+    ],
+    "map_nodes": [
+      "入力の信頼境界を引く（すべての外部入力を疑う）",
+      "インジェクション対策（SQLi=バインド、XSS=出力符号化/サニタイズ）",
+      "セッション・リクエストの正当性担保（Cookie属性・CSRFトークン）",
+      "サーバ側の宛先/パス検証（SSRF・トラバーサル・許可リスト）",
+      "クラウド基盤の緩和（IMDSv2・最小権限IAM）"
+    ],
+    "map_summary": "本分野はWebアプリの外部入力を起点とする脆弱性を、入力の信頼境界→インジェクション対策(バインド/出力符号化)→セッション・CSRF対策→サーバ側の宛先・パス検証→クラウド基盤の緩和という層で体系化し、根本対策と保険的対策を切り分けて理解する領域である。",
+    "exam_tips": [
+      "対策の『本質』を問う問題は、危険文字除去などの表層策でなく、構造で防ぐ策（バインド=値扱い、許可リスト、正規化後検証）を選ぶ。",
+      "Cookie属性は目的で切り分ける。SameSite=CSRF緩和、HttpOnly=XSSによる窃取緩和、Secure=盗聴対策。",
+      "XSSは格納型/反射型/DOM Basedの発生経路の違い（サーバ永続化か・応答反映か・クライアント処理か）で分類する。",
+      "SSRFは169.254.169.254(リンクローカル)からの一時認証情報窃取が定番。名前解決後IP検査とIMDSv2化をセットで押さえる。"
+    ],
+    "pitfalls": [
+      "SameSite属性やReferer/Origin検証だけをCSRFの『根本対策』と誤認する（本質は推測困難なトークン照合）。",
+      "「../」の単純な文字列除去でトラバーサルを防げると誤認する（多重エンコード・正規化前検査で回避される）。",
+      "ブラックリストによる危険文字/タグ除去でXSSを防げると誤認する（許可リスト型サニタイズが正しい）。"
+    ],
+    "concept_diagram": {
+      "title": "Webアプリ脆弱性の防御レイヤ（外部入力ハブ）",
+      "layers": [
+        [{"id": "in", "label": "外部入力（URL/パラメタ/本文/Cookie）", "role": "信頼境界の外", "danger": true}],
+        [{"id": "inj", "label": "インジェクション面", "role": "SQLi/XSS"}, {"id": "sess", "label": "セッション/CSRF面", "role": "状態変更"}, {"id": "dst", "label": "宛先/パス面", "role": "SSRF/トラバーサル"}],
+        [{"id": "bind", "label": "バインド/出力符号化", "role": "根本対策"}, {"id": "tok", "label": "トークン照合+Cookie属性", "role": "根本+緩和"}, {"id": "allow", "label": "許可リスト+正規化/IP検査", "role": "根本対策"}],
+        [{"id": "cloud", "label": "クラウド基盤緩和（IMDSv2/最小権限）", "role": "多層防御"}]
+      ],
+      "edges": [
+        {"from": "in", "to": "inj", "label": "注入を試行", "danger": true},
+        {"from": "in", "to": "sess", "label": "偽リクエスト", "danger": true},
+        {"from": "in", "to": "dst", "label": "内部宛て誘導", "danger": true},
+        {"from": "inj", "to": "bind", "label": "値として扱い無害化"},
+        {"from": "sess", "to": "tok", "label": "正当性を照合"},
+        {"from": "dst", "to": "allow", "label": "宛先/パスを検証"},
+        {"from": "dst", "to": "cloud", "label": "到達しても被害低減"}
+      ],
+      "caption": "外部入力をハブに、注入・セッション・宛先の各面で根本対策を施し、クラウド基盤緩和で多層防御を構成する。"
+    }
+  },
+  "questions": [
+    {
+      "id": 301,
+      "no": 1,
+      "tag": "SSRF",
+      "q_jp": "Webアプリケーションにおいて、クラウド環境のインスタンスメタデータエンドポイント（例: 169.254.169.254）へアプリケーションサーバから意図しないHTTPリクエストを送信させ、一時的な認証情報を窃取する攻撃がある。この攻撃の名称はどれか。",
+      "choices_jp": ["クリックジャッキング", "サーバサイドリクエストフォージェリ（SSRF）", "セッションフィクセーション", "ディレクトリトラバーサル"],
+      "q_en": "An attacker makes the application server send an unintended HTTP request to a cloud instance metadata endpoint (e.g., 169.254.169.254) to steal temporary credentials. What is this attack called?",
+      "choices_en": ["Clickjacking", "Server-Side Request Forgery (SSRF)", "Session fixation", "Directory traversal"],
+      "intro_jp": "【導入】サーバ自身に任意宛先へリクエストを送らせ、クラウドの内部メタデータから認証情報を奪う攻撃の呼称を問う。",
+      "related_regs": ["OWASP Top 10 2021 A10", "CWE-918", "クラウドIMDSベストプラクティス"],
+      "answer_letters": ["イ"],
+      "answer_jp": "サーバサイドリクエストフォージェリ（SSRF）",
+      "explain_jp": "SSRFはサーバに任意の宛先へリクエストを送らせる攻撃で、クラウドのインスタンスメタデータサービス（IMDS。169.254.169.254はリンクローカルアドレス）から一時認証情報を窃取する経路として悪用される。対策はIMDSv2への移行、宛先の許可リスト化、名前解決後IPの検査による内部・リンクローカル宛て遮断である。アのクリックジャッキングは透過iframeでの誤クリック誘導、ウのセッションフィクセーションは攻撃者が用意したセッションIDを使わせる攻撃、エのディレクトリトラバーサルは「../」でパスを遡る攻撃であり、いずれもサーバに内部宛てリクエストを送らせて認証情報を窃取する本問の特徴に合致しない。",
+      "explain_en": "SSRF makes the server issue requests to arbitrary destinations and is abused to reach the cloud instance metadata service (169.254.169.254, a link-local address) and steal temporary credentials. Clickjacking, session fixation and directory traversal describe different attacks that do not match forcing the server to fetch an internal endpoint.",
+      "sky": ["サーバ自身がHTTPリクエストを送る機能がある", "宛先に169.254.169.254が指定された", "一時認証情報が返り窃取された", "宛先は攻撃者が制御できる入力"],
+      "rain": ["これはSSRFの典型シナリオである", "リンクローカル宛てはIMDSアクセスを意味する", "内部到達性が悪用されている"],
+      "umbrella": ["IMDSv2へ移行しトークン必須化する", "宛先FQDNを許可リスト化する", "名前解決後IPで内部・リンクローカル宛てを遮断する", "IAMロール権限を最小化する"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "クリックジャッキングは透過iframeで誤操作を誘う攻撃で、サーバによる内部宛てリクエストとは無関係。"},
+        {"letter": "イ", "correct": true, "reason": "サーバに任意宛先へリクエストさせIMDSから認証情報を窃取するのはSSRFそのもの。"},
+        {"letter": "ウ", "correct": false, "reason": "セッションフィクセーションは既知セッションIDを固定・利用させる攻撃で本問と異なる。"},
+        {"letter": "エ", "correct": false, "reason": "ディレクトリトラバーサルはパスを遡りファイルを参照する攻撃で、外部宛てリクエストの窃取ではない。"}
+      ],
+      "hint_jp": "💡『サーバに代わりに取りに行かせる』＋『169.254.169.254』＝SSRF。",
+      "bank_notes": [
+        "① 外部URLをサーバが取得する機能は必ずSSRF観点でレビューし、宛先検証の有無を確認する。",
+        "② 宛先はFQDN許可リストで限定し、それ以外は既定で拒否する（デフォルト拒否）。",
+        "③ リクエスト直前に名前解決後IPを検査し 127.0.0.0/8・169.254.0.0/16・10.0.0.0/8 等を遮断する。",
+        "④ 3xxリダイレクトの遷移先IPも都度再検証し、DNSリバインディング/TOCTOUを想定する。",
+        "⑤ http以外のスキーム（file:, gopher: 等）を拒否する。",
+        "⑥ クラウド側はIMDSv2を強制しIMDSv1を無効化、インスタンスのIAMロール権限を最小化する。",
+        "⑦ 送信元がアプリサーバの内部NWセグメントから内部宛てに出る通信を監視・アラートする。"
+      ],
+      "diagram": {
+        "title": "SSRFによるIMDS認証情報窃取",
+        "layers": [
+          [{"id": "atk", "label": "攻撃者（連携先URLを指定）", "role": "入力", "danger": true}],
+          [{"id": "app", "label": "アプリサーバ（URLへ代理送信）", "role": "被悪用"}],
+          [{"id": "imds", "label": "IMDS 169.254.169.254", "role": "内部エンドポイント", "danger": true}, {"id": "intapi", "label": "内部管理API localhost", "role": "非公開", "danger": true}],
+          [{"id": "cred", "label": "一時認証情報の漏えい", "role": "被害", "danger": true}]
+        ],
+        "edges": [
+          {"from": "atk", "to": "app", "label": "宛先URLを入力", "danger": true},
+          {"from": "app", "to": "imds", "label": "無検証で代理リクエスト", "danger": true},
+          {"from": "app", "to": "intapi", "label": "内部到達", "danger": true},
+          {"from": "imds", "to": "cred", "label": "認証情報を返す", "danger": true}
+        ],
+        "caption": "攻撃者入力の宛先へアプリが無検証でリクエストし、リンクローカルのIMDSから認証情報が漏えいする。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "『クラウド』『メタデータ』のキーワードに引かれず、攻撃の本質＝サーバに代理送信させる点でSSRFと判断する。",
+      "mnemonic": "SSRF＝Server が Send する Request の Forgery。169.254はIMDSの合図。",
+      "related": "午後問1のSSRF記述問題（連携先URL入力機能）と同一構図。",
+      "case": "クラウド上のURL取得機能で169.254.169.254を指定され一時認証情報が画面表示された診断事例。",
+      "reg_detail": [
+        {"reg": "OWASP Top 10 2021 A10", "point": "SSRFを独立カテゴリとして重要視し、宛先検証を要求。"},
+        {"reg": "CWE-918", "point": "サーバ側リクエスト偽造の弱点分類。宛先の制御可能性が要件。"},
+        {"reg": "IMDSベストプラクティス", "point": "IMDSv2強制とホップ制限でSSRF単独の悪用を困難化。"}
+      ]
+    },
+    {
+      "id": 302,
+      "no": 2,
+      "tag": "SQLインジェクション対策の本質",
+      "q_jp": "プレースホルダ（バインド機構）を用いたSQL文の組み立てが、SQLインジェクション対策として有効である最も本質的な理由はどれか。",
+      "choices_jp": ["SQL文が実行前に暗号化され、通信経路上で解読されないため", "入力値がSQL文の構文要素ではなくデータ（値）としてのみ扱われ、構文構造が変化しないため", "危険な文字列を検出した時点でDBMSがトランザクションをロールバックするため", "アプリケーションからDBへの接続がTLSで保護され改ざんが検知されるため"],
+      "q_en": "What is the most essential reason that using placeholders (bind mechanism) to build SQL statements is effective against SQL injection?",
+      "choices_en": ["The SQL statement is encrypted before execution and cannot be decoded in transit", "Input values are treated only as data, not as syntactic elements, so the statement structure does not change", "The DBMS rolls back the transaction the moment a dangerous string is detected", "The application-to-DB connection is protected by TLS so tampering is detected"],
+      "intro_jp": "【導入】バインド機構がなぜ本質的にSQLiを防ぐのか、対策の原理を問う。",
+      "related_regs": ["OWASP Top 10 2021 A03", "CWE-89", "IPA『安全なウェブサイトの作り方』"],
+      "answer_letters": ["イ"],
+      "answer_jp": "入力値がSQL文の構文要素ではなくデータ（値）としてのみ扱われ、構文構造が変化しないため",
+      "explain_jp": "プリペアドステートメントではSQL文の構文構造をあらかじめ確定（コンパイル）させ、後からバインドされる入力値は常にデータとして扱われる。ゆえに入力に含まれる引用符やSQL断片が構文として解釈されず、注入が成立しない。アプリ側のエスケープ処理に依存しない点が本質である（イ）。アの暗号化や、エのTLS保護は通信経路の秘匿・改ざん検知の話でSQLiの成立とは無関係。ウの『危険文字を検出してロールバック』はブラックリスト検知に依存する保険的発想であり、バインド機構の本質ではない。なお、テーブル名・列名など構文要素そのものを動的指定する箇所はバインドできないため、許可リストによる別途対処が必要である。",
+      "explain_en": "With prepared statements the SQL structure is fixed (compiled) in advance and bound values are always treated as data, so quotes or SQL fragments in the input are never parsed as syntax and injection fails. This does not rely on application-side escaping. Encryption/TLS concern transport confidentiality, and detect-and-rollback relies on blacklisting—none is the essence. Note that identifiers like table/column names cannot be bound and need allow-listing.",
+      "sky": ["バインド機構でSQLを組み立てている", "入力に引用符やSQL断片が含まれ得る", "問われているのは有効性の『本質的理由』"],
+      "rain": ["構文を先に確定し値は後からデータとして流す", "入力が構文として解釈されないため注入不成立", "エスケープの正しさに依存しない"],
+      "umbrella": ["原則すべての動的SQLでプレースホルダを使う", "識別子など束縛不可箇所は許可リストで検証", "アプリ側エスケープに頼らない設計にする"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "SQL文の暗号化はSQLiの成立可否と無関係。構文解釈の問題を解決しない。"},
+        {"letter": "イ", "correct": true, "reason": "入力が常にデータとして扱われ構文構造が変化しないことがバインド機構の本質。"},
+        {"letter": "ウ", "correct": false, "reason": "危険文字検出→ロールバックはブラックリスト依存の保険策で、バインド機構の原理ではない。"},
+        {"letter": "エ", "correct": false, "reason": "TLS保護は通信経路の改ざん・盗聴対策であり、注入の成立防止とは別問題。"}
+      ],
+      "hint_jp": "💡『値は値のまま、構文は動かさない』＝バインド機構の本質。エスケープ依存ではない。",
+      "bank_notes": [
+        "① 動的SQLは原則プレースホルダで実装し、文字列連結によるクエリ生成をコード規約で禁止する。",
+        "② テーブル名・列名・ORDER BY方向など束縛できない箇所は許可リストで検証する。",
+        "③ ORM利用時も生SQL/文字列補間の混入をレビューとSAST(静的解析)で検出する。",
+        "④ DBアカウントは最小権限とし、被害時の影響（DROP等）を限定する。",
+        "⑤ エラーメッセージにSQLや例外詳細を出さず、情報漏えいを防ぐ。",
+        "⑥ 既存コードの棚卸しで連結SQL箇所を洗い出し、パラメタ化へ移行する。"
+      ],
+      "diagram": {
+        "title": "バインド機構による構文/データの分離",
+        "layers": [
+          [{"id": "usr", "label": "利用者入力（値）", "role": "外部入力"}],
+          [{"id": "tmpl", "label": "SQLテンプレート（? で確定）", "role": "構文固定"}],
+          [{"id": "prep", "label": "プリペア/コンパイル", "role": "構文構造の確定"}],
+          [{"id": "bind", "label": "値としてバインド", "role": "データ扱い"}, {"id": "concat", "label": "文字列連結（危険）", "role": "構文に混入", "danger": true}]
+        ],
+        "edges": [
+          {"from": "usr", "to": "bind", "label": "常にデータとして流入"},
+          {"from": "tmpl", "to": "prep", "label": "先に構文を固定"},
+          {"from": "prep", "to": "bind", "label": "後から値を適用"},
+          {"from": "usr", "to": "concat", "label": "連結すると構文化", "danger": true}
+        ],
+        "caption": "構文を先に確定し値を後からデータとして流すため注入不成立。連結実装は入力が構文に混入し危険。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "『暗号化』『TLS』などもっともらしい選択肢に注意。SQLiは構文解釈の問題で、経路の秘匿とは無関係。",
+      "mnemonic": "『構文は先に固定、値は後からデータ』＝プリペアドステートメント。",
+      "related": "XSSの出力符号化（302はデータ/構文の分離という同じ発想の入力側版）。",
+      "case": "連結SQLの箇所だけをパラメタ化し忘れて注入された、いわゆる『一箇所の抜け』事例。",
+      "reg_detail": [
+        {"reg": "OWASP Top 10 2021 A03", "point": "Injection対策の第一選択としてパラメタ化クエリを推奨。"},
+        {"reg": "IPA『安全なウェブサイトの作り方』", "point": "SQLiの根本的解決策としてバインド機構利用を明示。"}
+      ]
+    },
+    {
+      "id": 303,
+      "no": 3,
+      "tag": "CSRF緩和とCookie属性",
+      "q_jp": "Cookieに設定する属性のうち、クロスサイトリクエストフォージェリ（CSRF）の緩和を主目的として、他サイトを起点とするクロスサイトリクエストにCookieを送信させないよう制御する属性はどれか。",
+      "choices_jp": ["Secure属性", "HttpOnly属性", "SameSite属性", "Domain属性"],
+      "q_en": "Which cookie attribute is aimed mainly at mitigating CSRF by preventing cookies from being sent on cross-site requests originating from other sites?",
+      "choices_en": ["Secure attribute", "HttpOnly attribute", "SameSite attribute", "Domain attribute"],
+      "intro_jp": "【導入】Cookie属性を目的別に切り分け、CSRF緩和を担う属性を選ばせる。",
+      "related_regs": ["RFC6265bis（SameSite）", "OWASP CSRF", "CWE-352"],
+      "answer_letters": ["ウ"],
+      "answer_jp": "SameSite属性",
+      "explain_jp": "SameSite属性（Lax/Strict）はクロスサイトのリクエストに対するCookieの自動送信を抑制し、CSRFの緩和に寄与する（ウ）。イのHttpOnlyはJavaScriptからのCookie読み取りを防ぐ属性で、XSSによるCookie窃取の緩和が目的。アのSecureはHTTPS接続時のみ送信する属性で盗聴対策。エのDomainはCookieの送信対象ホスト範囲を指定する属性で、いずれもクロスサイト送信自体を抑止する目的ではない。ただしSameSiteはあくまで緩和策であり、セッションごとに固有で推測困難なCSRFトークンによる照合を代替するものではない点に注意する。",
+      "explain_en": "SameSite (Lax/Strict) suppresses automatic cookie transmission on cross-site requests and mitigates CSRF. HttpOnly blocks JavaScript access to cookies (mitigating XSS theft), Secure restricts sending to HTTPS (against eavesdropping), and Domain sets the host scope—none of these curbs cross-site sending. SameSite is only mitigation and does not replace unpredictable per-session CSRF tokens.",
+      "sky": ["問われているのはCSRF緩和が主目的の属性", "『他サイト起点のリクエストにCookieを送らない』制御", "選択肢は4つのCookie属性"],
+      "rain": ["クロスサイト送信を抑制するのはSameSite", "他属性は目的が異なる（読取防止・HTTPS限定・スコープ）"],
+      "umbrella": ["SameSite=Lax/Strictを付与しCSRFを緩和", "本質対策としてCSRFトークン照合を併用", "HttpOnly/Secureも用途に応じ付与する"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "SecureはHTTPS接続時のみ送信する属性で、盗聴対策。CSRFのクロスサイト送信抑制が目的ではない。"},
+        {"letter": "イ", "correct": false, "reason": "HttpOnlyはJavaScriptからのCookie読取防止（XSS窃取の緩和）で、CSRF緩和が主目的ではない。"},
+        {"letter": "ウ", "correct": true, "reason": "SameSiteはクロスサイト由来リクエストへのCookie自動送信を抑制し、CSRF緩和を主目的とする。"},
+        {"letter": "エ", "correct": false, "reason": "DomainはCookie送信対象のホスト範囲指定で、クロスサイト送信の抑制目的ではない。"}
+      ],
+      "hint_jp": "💡『Same＝同一サイトのみ送る』でクロスサイト送信を抑制＝CSRF緩和。",
+      "bank_notes": [
+        "① セッションCookieにはSameSite=Lax（最低限）を付与し、更新系はStrict検討。",
+        "② SameSiteはあくまで緩和。状態変更系にはCSRFトークン照合を必須実装とする。",
+        "③ HttpOnly（XSS窃取緩和）とSecure（HTTPS限定）も併せて付与する多層防御。",
+        "④ 属性の目的を混同しない教育を行う（Secure=盗聴、HttpOnly=読取防止、SameSite=CSRF）。",
+        "⑤ 外部連携でクロスサイトPOSTが必要な場合はStrictの副作用（未送信）を考慮し設計する。",
+        "⑥ トークンはセッション単位で固有・推測困難とし、サーバ側で保持値と照合する。"
+      ],
+      "diagram": {
+        "title": "Cookie属性の目的マッピング",
+        "layers": [
+          [{"id": "goal", "label": "守りたい脅威", "role": "分類軸"}],
+          [{"id": "csrf", "label": "CSRF", "role": "偽リクエスト", "danger": true}, {"id": "xss", "label": "XSSでのCookie窃取", "role": "読取", "danger": true}, {"id": "eaves", "label": "盗聴", "role": "経路", "danger": true}],
+          [{"id": "same", "label": "SameSite", "role": "クロスサイト送信抑制"}, {"id": "http", "label": "HttpOnly", "role": "JS読取防止"}, {"id": "sec", "label": "Secure", "role": "HTTPS限定送信"}]
+        ],
+        "edges": [
+          {"from": "csrf", "to": "same", "label": "主目的で緩和"},
+          {"from": "xss", "to": "http", "label": "窃取を緩和"},
+          {"from": "eaves", "to": "sec", "label": "盗聴を防止"}
+        ],
+        "caption": "属性は脅威別に役割が分かれる。CSRF緩和はSameSiteが担い、トークン照合が本質対策。"
+      },
+      "freq": 3,
+      "importance": "★★★",
+      "trap": "HttpOnlyを『CSRF対策』と誤認しやすい。HttpOnlyはXSSによる読取防止であり用途が別。",
+      "mnemonic": "『SameSite＝同じサイトだけ』でクロスサイト送信を止める。",
+      "related": "午後問2(4)のCSRF根本対策（トークン照合＋SameSite補強）と接続。",
+      "case": "SameSiteだけに頼りトークン未実装で、GETベースの状態変更が突かれた事例。",
+      "reg_detail": [
+        {"reg": "RFC6265bis", "point": "SameSite=Lax/Strict/NoneのCookie送信条件を定義。"},
+        {"reg": "OWASP CSRF Cheat Sheet", "point": "トークン照合を主対策、SameSiteを多層防御の補強と位置付け。"}
+      ]
+    },
+    {
+      "id": 304,
+      "no": 4,
+      "tag": "格納型XSS",
+      "q_jp": "OWASP Top 10（2021）で「Injection」に分類されるクロスサイトスクリプティング（XSS）のうち、格納型（蓄積型）XSSの説明として適切なものはどれか。",
+      "choices_jp": ["攻撃者が仕込んだスクリプトがDBやログなどサーバ側に永続化され、当該データを閲覧した利用者のブラウザで実行される", "URLパラメタに含まれるスクリプトが応答にそのまま反映され、被害者がリンクを踏んだ際に実行される", "サーバへのスクリプト送信を伴わず、クライアント側JavaScriptが入力をDOMへ反映する過程でスクリプトが実行される", "正規サイトを透過的なiframeで覆い、利用者の操作を誘導してクリックさせる"],
+      "q_en": "Regarding cross-site scripting (XSS) classified under Injection in OWASP Top 10 (2021), which describes stored (persistent) XSS?",
+      "choices_en": ["A script planted by the attacker is persisted server-side (DB, logs) and runs in the browser of any user who views that data", "A script in a URL parameter is reflected as-is in the response and runs when the victim follows the link", "Without sending a script to the server, client-side JavaScript reflects input into the DOM and the script runs", "A legitimate site is overlaid with a transparent iframe to trick users into clicking"],
+      "intro_jp": "【導入】XSSの3分類（格納型・反射型・DOM Based）を発生経路で切り分け、格納型の説明を選ぶ。",
+      "related_regs": ["OWASP Top 10 2021 A03", "CWE-79"],
+      "answer_letters": ["ア"],
+      "answer_jp": "攻撃者が仕込んだスクリプトがDBやログなどサーバ側に永続化され、当該データを閲覧した利用者のブラウザで実行される",
+      "explain_jp": "格納型（蓄積型）XSSはスクリプトがサーバ側（DBやログ等）に永続化され、そのデータを閲覧した利用者へ継続的・無差別に配信・実行される点が特徴である（ア）。イはURLパラメタが応答に反映される『反射型XSS』の説明、ウはサーバ送信を伴わずクライアントのJavaScriptがDOMへ反映する過程で実行される『DOM Based XSS』の説明、エは透過iframeで誤クリックを誘う『クリックジャッキング』の説明であり、いずれも格納型の定義に合致しない。格納型は保存されたペイロードが閲覧のたびに発火するため被害が広範かつ継続的になりやすい。",
+      "explain_en": "Stored XSS is characterized by a script persisted on the server (DB/logs) that is continuously and indiscriminately delivered to and executed in the browsers of users who view that data. The other options describe reflected XSS, DOM-based XSS and clickjacking respectively, none matching stored XSS. Because the payload fires on every view, stored XSS tends to cause broad, ongoing damage.",
+      "sky": ["XSSの分類を問う設問", "格納型＝サーバ側に永続化される点が鍵", "他選択肢は反射型/DOM Based/クリックジャッキング"],
+      "rain": ["アはサーバ永続化＋閲覧で実行＝格納型の定義", "イは反射型、ウはDOM Based、エは別脅威"],
+      "umbrella": ["出力時に文脈に応じたエスケープを行う", "装飾許可時は許可リスト型サニタイズを適用", "保存前後で信頼できないHTMLをそのまま出力しない"],
+      "options": [
+        {"letter": "ア", "correct": true, "reason": "スクリプトがサーバ側に永続化され閲覧者のブラウザで実行される＝格納型XSSの定義そのもの。"},
+        {"letter": "イ", "correct": false, "reason": "URLパラメタが応答に反映され踏んだ時に実行されるのは反射型XSS。"},
+        {"letter": "ウ", "correct": false, "reason": "サーバ送信を伴わずクライアントJSがDOMに反映して実行するのはDOM Based XSS。"},
+        {"letter": "エ", "correct": false, "reason": "透過iframeで誤クリックを誘うのはクリックジャッキングでXSSではない。"}
+      ],
+      "hint_jp": "💡『保存されて何度も発火』＝格納型（蓄積型）。反射型は『踏んだ一回』。",
+      "bank_notes": [
+        "① 掲示板・プロフィール等の保存表示機能は格納型XSSの温床として重点レビュー。",
+        "② 出力時に文脈（HTML本文/属性/JS/URL）に応じた符号化を徹底する。",
+        "③ 装飾を許可する要件では許可リスト型サニタイズライブラリを用いる。",
+        "④ CSP（Content-Security-Policy）で外部スクリプト実行を制限し多層防御とする。",
+        "⑤ セッションCookieにHttpOnlyを付与し、XSS成立時のCookie窃取を緩和する。",
+        "⑥ 入力時の保険的検証と出力時の根本対策を役割分担して設計する。"
+      ],
+      "diagram": {
+        "title": "XSS3分類の発生経路",
+        "layers": [
+          [{"id": "payload", "label": "攻撃者ペイロード", "role": "入力", "danger": true}],
+          [{"id": "stored", "label": "格納型：サーバ保存", "role": "永続化", "danger": true}, {"id": "reflect", "label": "反射型：応答に反映", "role": "一過性", "danger": true}, {"id": "dom", "label": "DOM Based：クライアント処理", "role": "サーバ非経由", "danger": true}],
+          [{"id": "victim", "label": "被害者ブラウザで実行", "role": "被害", "danger": true}]
+        ],
+        "edges": [
+          {"from": "payload", "to": "stored", "label": "保存して繰返し配信", "danger": true},
+          {"from": "payload", "to": "reflect", "label": "リンク経由で反映", "danger": true},
+          {"from": "payload", "to": "dom", "label": "DOMへ反映", "danger": true},
+          {"from": "stored", "to": "victim", "label": "閲覧のたび発火", "danger": true},
+          {"from": "reflect", "to": "victim", "label": "踏むと実行", "danger": true},
+          {"from": "dom", "to": "victim", "label": "クライアントで実行", "danger": true}
+        ],
+        "caption": "格納型はサーバ保存により閲覧のたび発火。反射型は一過性、DOM Basedはサーバを経由しない。"
+      },
+      "freq": 2,
+      "importance": "★★★",
+      "trap": "エのクリックジャッキングをXSSの一種と誤認しない。XSSはスクリプト実行、クリックジャッキングはUI偽装。",
+      "mnemonic": "『貯まる＝格納型、跳ね返る＝反射型、DOMで＝DOM Based』。",
+      "related": "午後問2(1)の格納型XSSによるセッション乗っ取り記述問題と同一分類。",
+      "case": "プロフィール自己紹介文に保存されたonerror付きimgが閲覧者のCookieを窃取した事例。",
+      "reg_detail": [
+        {"reg": "OWASP Top 10 2021 A03", "point": "XSSをInjectionに統合分類。出力符号化を主対策とする。"},
+        {"reg": "CWE-79", "point": "格納型/反射型/DOM Basedを含むXSSの弱点分類。"}
+      ]
+    },
+    {
+      "id": 305,
+      "no": 5,
+      "tag": "セッション管理（不適切な実装）",
+      "q_jp": "利用者ブラウザに保存された正規のセッションIDが、XSSやセッションフィクセーションによって悪用されるのを防ぐ実装として、適切でないものはどれか。",
+      "choices_jp": ["ログイン成功の直後にセッションIDを再発行（regenerate）する", "セッションCookieにHttpOnly属性とSecure属性を付与する", "セッションIDをURLのクエリ文字列に付与して各画面間で受け渡す", "一定時間操作がない場合にセッションをタイムアウトさせる"],
+      "q_en": "Which implementation is NOT appropriate for preventing abuse of a legitimate session ID via XSS or session fixation?",
+      "choices_en": ["Regenerate the session ID immediately after successful login", "Set HttpOnly and Secure attributes on the session cookie", "Pass the session ID in the URL query string between screens", "Time out the session after a period of inactivity"],
+      "intro_jp": "【導入】セッション管理策のうち『適切でないもの』を選ぶ。誤りを選ばせる設問形式に注意。",
+      "related_regs": ["OWASP Session Management", "CWE-384（Session Fixation）", "RFC6265bis"],
+      "answer_letters": ["ウ"],
+      "answer_jp": "セッションIDをURLのクエリ文字列に付与して各画面間で受け渡す",
+      "explain_jp": "本問は『適切でないもの』を選ぶ設問である。URLにセッションIDを載せると（ウ）、Refererヘッダや閲覧履歴、プロキシ・アクセスログを通じて漏えいし、セッションハイジャックのリスクを高めるため適切でない。アのログイン直後の再発行はセッションフィクセーション対策、イのHttpOnly＋SecureはXSSによる窃取と盗聴の緩和、エのタイムアウトは放置端末からの悪用低減であり、いずれも適切なセッション管理策である。したがって不適切な実装はウであり、これが正解となる。",
+      "explain_en": "This asks for the inappropriate option. Putting the session ID in the URL (choice C/ウ) leaks it via Referer, browser history, and proxy/access logs, raising the hijacking risk, so it is not appropriate. Regenerating the ID after login (fixation defense), setting HttpOnly+Secure (theft/eavesdrop mitigation), and inactivity timeout are all sound. Hence the inappropriate one is the URL-based passing.",
+      "sky": ["設問は『適切でないもの』を1つ選ぶ形式", "ア・イ・エは既知の適切なセッション管理策", "ウはURLにセッションIDを載せる実装"],
+      "rain": ["URL付与はReferer・履歴・ログ経由で漏えいする", "他の3つは正当な緩和策", "よって不適切なのはウ"],
+      "umbrella": ["セッションIDはCookieで受け渡し、URLに載せない", "ログイン直後に再発行、HttpOnly/Secure付与、タイムアウト設定", "Refererやログへの機密混入を避ける"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "ログイン直後のセッションID再発行はセッションフィクセーションの適切な対策で、不適切ではない。"},
+        {"letter": "イ", "correct": false, "reason": "HttpOnly＋SecureはXSS窃取・盗聴の緩和として適切で、不適切ではない。"},
+        {"letter": "ウ", "correct": true, "reason": "URLにセッションIDを載せるとReferer・履歴・ログから漏えいし危険。これが『適切でない』実装で正解。"},
+        {"letter": "エ", "correct": false, "reason": "無操作タイムアウトは放置端末からの悪用低減として適切で、不適切ではない。"}
+      ],
+      "hint_jp": "💡『適切でないもの』を選ぶ問題。URLにセッションIDは漏えい経路が多く即NG。",
+      "bank_notes": [
+        "① セッションIDは必ずCookieで受け渡し、URLパラメタ・隠しフィールドへの露出を禁止する。",
+        "② ログイン・権限昇格の直後にセッションIDを再発行し、固定化攻撃を無効化する。",
+        "③ セッションCookieはHttpOnly＋Secure＋適切なSameSiteを付与する。",
+        "④ アイドルタイムアウトと絶対タイムアウトの双方を設定する。",
+        "⑤ Refererやアクセスログに機密情報が残らない設計・マスキングを行う。",
+        "⑥ 設問文の『適切でない/誤っているもの』を読み違えないよう解答時に確認する。"
+      ],
+      "diagram": {
+        "title": "セッションID受け渡しの漏えい経路",
+        "layers": [
+          [{"id": "sid", "label": "セッションID", "role": "秘匿対象"}],
+          [{"id": "cookie", "label": "Cookie（HttpOnly/Secure）", "role": "推奨"}, {"id": "url", "label": "URLクエリ付与", "role": "不適切", "danger": true}],
+          [{"id": "referer", "label": "Referer/履歴/プロキシログ", "role": "漏えい経路", "danger": true}],
+          [{"id": "hijack", "label": "セッションハイジャック", "role": "被害", "danger": true}]
+        ],
+        "edges": [
+          {"from": "sid", "to": "cookie", "label": "安全に保持"},
+          {"from": "sid", "to": "url", "label": "URLに載せる（危険）", "danger": true},
+          {"from": "url", "to": "referer", "label": "各所へ漏えい", "danger": true},
+          {"from": "referer", "to": "hijack", "label": "IDを奪取", "danger": true}
+        ],
+        "caption": "URL付与はReferer・履歴・ログへ漏えいしハイジャックを招く。Cookie受け渡しが正しい。"
+      },
+      "freq": 2,
+      "importance": "★★",
+      "trap": "『適切でないものはどれか』の否定形。適切策(ア・イ・エ)につられて選ばないこと。",
+      "mnemonic": "セッションIDは『Cookieに入れる・URLに出さない』。",
+      "related": "問3のCookie属性、問4のXSSによるCookie窃取と接続。",
+      "case": "URLにセッションIDを含めていたサイトで、外部サイト遷移時のRefererからID漏えいした事例。",
+      "reg_detail": [
+        {"reg": "OWASP Session Management Cheat Sheet", "point": "セッションIDのURL露出禁止、ログイン後の再発行を推奨。"},
+        {"reg": "CWE-384", "point": "セッションフィクセーションの弱点。認証後のID再発行で対策。"}
+      ]
+    },
+    {
+      "id": 306,
+      "no": 6,
+      "tag": "ディレクトリトラバーサルと根本対策",
+      "q_jp": "Webアプリが利用者からのパラメタで指定されたファイルパスを検証せずにサーバ上のファイルを読み込む実装がある。「../」などを含む入力で公開ディレクトリ外のファイルを不正に参照される脆弱性の名称と、その根本対策として適切な組合せはどれか。",
+      "choices_jp": ["OSコマンドインジェクション ― シェルを介さないAPIの利用", "ディレクトリトラバーサル ― 入力を識別子に限定し、正規化後に許可ディレクトリ配下か検証する", "HTTPヘッダインジェクション ― 改行コードの除去", "オープンリダイレクト ― リダイレクト先の許可リスト化"],
+      "q_en": "An app reads server files by a user-supplied path without validation, allowing files outside the public directory to be referenced via inputs containing '../'. Which pairs the vulnerability name with its correct fundamental countermeasure?",
+      "choices_en": ["OS command injection — use APIs that do not invoke a shell", "Directory traversal — restrict input to identifiers and, after canonicalization, verify it stays under the allowed directory", "HTTP header injection — strip newline characters", "Open redirect — allow-list redirect targets"],
+      "intro_jp": "【導入】「../」でパスを遡る脆弱性の名称と、その根本対策の正しい組合せを問う。",
+      "related_regs": ["OWASP", "CWE-22（Path Traversal）", "IPA『安全なウェブサイトの作り方』"],
+      "answer_letters": ["イ"],
+      "answer_jp": "ディレクトリトラバーサル ― 入力を識別子に限定し、正規化後に許可ディレクトリ配下か検証する",
+      "explain_jp": "パスの相対参照を悪用する脆弱性はディレクトリトラバーサル（パストラバーサル）であり、根本対策はファイル名を直接受け取らず識別子経由で解決するか、パスを正規化（canonicalize）したうえで基準ディレクトリ配下であることを検証することである（イ）。「../」の単純な文字列除去はエンコードや多重表現で回避され得るため不十分。アのOSコマンドインジェクション、ウのHTTPヘッダインジェクション、エのオープンリダイレクトは、それぞれ別の脆弱性であり、対策自体は妥当でも本問のパス遡り参照という現象には対応しないため、脆弱性名の組合せとして誤りである。",
+      "explain_en": "Exploiting relative paths is directory (path) traversal. The fundamental fix is to resolve files via identifiers rather than raw names, or to canonicalize the path and verify it stays under the base directory. Simply stripping '../' can be bypassed by encoding or multiple representations. The other options name different vulnerabilities that do not match the described path-traversal behavior, so their pairings are incorrect.",
+      "sky": ["「../」で公開範囲外のファイルを参照している", "パスを無検証で受け取っている", "問われるのは名称と根本対策の組合せ"],
+      "rain": ["現象はディレクトリトラバーサル", "根本対策は識別子経由/正規化後の配下検証", "単純な文字列除去は回避される"],
+      "umbrella": ["ファイル名を直接受け取らず識別子で解決する", "正規化後に基準ディレクトリ配下か検証する", "多重エンコード・シンボリックリンクも考慮する"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "OSコマンドインジェクションは別脆弱性。対策(シェル非経由API)は妥当だが本問のパス遡り参照には対応しない。"},
+        {"letter": "イ", "correct": true, "reason": "「../」でのパス遡りはディレクトリトラバーサルで、識別子化/正規化後の配下検証が根本対策。組合せが正しい。"},
+        {"letter": "ウ", "correct": false, "reason": "HTTPヘッダインジェクション(改行除去)は別脆弱性で、ファイルパス遡り参照の説明に合致しない。"},
+        {"letter": "エ", "correct": false, "reason": "オープンリダイレクト(遷移先許可リスト)は別脆弱性で、サーバ上ファイル参照の現象と対応しない。"}
+      ],
+      "hint_jp": "💡『../でファイルを遡る』＝トラバーサル。対策は『単純除去でなく正規化後の配下検証』。",
+      "bank_notes": [
+        "① ファイルアクセスはユーザ入力の生パスを使わず、識別子→サーバ側マップで解決する。",
+        "② やむを得ず名前を扱う場合は正規化(canonicalize)後に基準ディレクトリ配下かを検証する。",
+        "③ 「../」の単純除去や部分一致に頼らない（多重エンコード・null byte・シンボリックリンクを想定）。",
+        "④ 実行アカウントの権限を最小化し、参照可能範囲を物理的にも限定する。",
+        "⑤ アップロード/ダウンロード機能はファイル名検証とMIME/拡張子チェックを併用する。",
+        "⑥ 対策は根本(設計)と保険(検知/権限)を組み合わせ、単一策に依存しない。"
+      ],
+      "diagram": {
+        "title": "ディレクトリトラバーサルと根本対策",
+        "layers": [
+          [{"id": "input", "label": "利用者パス入力（../含む）", "role": "外部入力", "danger": true}],
+          [{"id": "weak", "label": "単純な文字列除去", "role": "回避される", "danger": true}, {"id": "canon", "label": "正規化＋配下検証", "role": "根本対策"}, {"id": "id", "label": "識別子経由の解決", "role": "根本対策"}],
+          [{"id": "base", "label": "基準ディレクトリ配下のみ許可", "role": "境界"}],
+          [{"id": "leak", "label": "公開範囲外ファイル漏えい", "role": "被害", "danger": true}]
+        ],
+        "edges": [
+          {"from": "input", "to": "weak", "label": "多重表現で突破", "danger": true},
+          {"from": "weak", "to": "leak", "label": "遡り成立", "danger": true},
+          {"from": "input", "to": "canon", "label": "正規化して検査"},
+          {"from": "input", "to": "id", "label": "IDで解決"},
+          {"from": "canon", "to": "base", "label": "配下か確認"},
+          {"from": "id", "to": "base", "label": "サーバ側マップで限定"}
+        ],
+        "caption": "単純除去は多重表現で突破される。識別子化または正規化後の配下検証が根本対策。"
+      },
+      "freq": 2,
+      "importance": "★★",
+      "trap": "対策文だけ見て妥当と判断しない。脆弱性名と現象（パス遡り参照）の一致まで確認する組合せ問題。",
+      "mnemonic": "『../＝トラバーサル、対策は正規化して配下チェック』。",
+      "related": "問1のSSRF同様、外部入力の宛先/パス検証という共通テーマ。",
+      "case": "「../」を除去していたが二重URLエンコードで回避され設定ファイルが読まれた事例。",
+      "reg_detail": [
+        {"reg": "CWE-22", "point": "パストラバーサルの弱点。正規化と基準ディレクトリ制約を要求。"},
+        {"reg": "IPA『安全なウェブサイトの作り方』", "point": "ファイル名を直接指定させず識別子で扱う根本的解決を提示。"}
+      ]
+    }
+  ]
+}

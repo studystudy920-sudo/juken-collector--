@@ -1,0 +1,445 @@
+{
+  "topic_jp": "マルウェア・攻撃手法・インシデント対応",
+  "topic_en": "Malware, Attack Techniques & Incident Response",
+  "shared": {
+    "glossary": [
+      {"term": "MITRE ATT&CK", "term_en": "MITRE ATT&CK", "def": "攻撃者の戦術(Tactics=目的)・技術(Techniques=手段)・手順(Procedures=具体的実装)を体系化した網羅的ナレッジベース。順序を前提としないマトリクス型で検知設計や脅威ハンティングに用いる。", "regs": "MITRE ATT&CK Enterprise, NIST SP800-53"},
+      {"term": "サイバーキルチェーン", "term_en": "Cyber Kill Chain", "def": "Lockheed Martinが提唱した、偵察から目的実行までを直線的な段階で示す攻撃モデル。攻撃の進行を時系列の『線』で捉え、各段階での遮断を狙う。", "regs": "Lockheed Martin Cyber Kill Chain"},
+      {"term": "二重脅迫", "term_en": "Double Extortion", "def": "ランサムウェアがデータ暗号化に加え、事前に窃取したデータの暴露を材料に金銭を要求する手口。バックアップ復旧でも情報漏えいの脅威が残る。", "regs": "NIST SP800-61, IPA 情報セキュリティ10大脅威"},
+      {"term": "Pass the Hash", "term_en": "Pass the Hash", "def": "窃取したNTLMハッシュを平文復元せず認証に再利用し他システムへ横展開する手法。ATT&CKではT1550.002、戦術はLateral Movement/Defense Evasion。", "regs": "MITRE ATT&CK T1550.002"},
+      {"term": "揮発性の順序", "term_en": "Order of Volatility", "def": "証拠保全でCPUレジスタ・キャッシュ・メモリなど失われやすい情報から順に取得する原則。電源断で消える活性状態を優先採取する。", "regs": "RFC 3227, NIST SP800-86"},
+      {"term": "EDR/XDR/MDR", "term_en": "EDR/XDR/MDR", "def": "EDRはエンドポイントの監視・検知・対応、XDRはNW/クラウド/メール/ID等へ拡張し横断相関、MDRはこれらの監視運用を専門ベンダが代行するサービス。", "regs": "NIST SP800-137, MITRE ATT&CK"},
+      {"term": "C2/コネクトバック通信", "term_en": "C2 / Connect-back", "def": "感染端末が自らC2サーバへ外向き接続を確立する通信形態。境界FWが内→外の通信を広く許可するため正規通信に紛れて通過しやすい。", "regs": "MITRE ATT&CK TA0011, NIST SP800-61"},
+      {"term": "Living off the Land", "term_en": "Living off the Land (LotL)", "def": "PowerShell等の正規ツールを悪用し攻撃を行う手口。シグネチャ照合を回避するため、プロセス連鎖の振る舞い検知が有効。", "regs": "MITRE ATT&CK T1059, NIST SP800-61"}
+    ],
+    "comparison": [
+      {"concept": "バックアップ保管", "normal": "書き換え・削除不可のイミュータブル/WORM保存、オフライン複製を3-2-1で分散", "suspicious": "本番と同一NAS上にオンライン保存、常時書き換え可能で暗号化被害が同時波及"},
+      {"concept": "VPN認証", "normal": "多要素認証(MFA)を必須化、単独アカウントの使い回しを禁止", "suspicious": "パスワードのみの単要素認証、他サービスと使い回された漏えい済み認証情報"},
+      {"concept": "外向き通信", "normal": "業務上必要な宛先への通信、宛先と時間帯が説明可能", "suspicious": "業務時間外に見慣れない外部IPへ一定間隔のコネクトバック(C2疑い)"},
+      {"concept": "スクリプト実行", "normal": "管理された配布・署名済みスクリプトの実行", "suspicious": "正規文書アプリから起動されたPowerShellが難読化スクリプトを実行"},
+      {"concept": "検知アプローチ", "normal": "既知シグネチャ+プロセス連鎖の振る舞い/ヒューリスティック検知を併用", "suspicious": "シグネチャ照合のみに依存し、未知亜種や正規ツール悪用を見逃す"}
+    ],
+    "reg_matrix": [
+      {"reg": "MITRE ATT&CK", "scope": "攻撃手法のナレッジベース", "point": "Tactics/Techniques/Proceduresの3階層で攻撃を整理。検知カバレッジの可視化にはNavigatorを用いる"},
+      {"reg": "サイバーキルチェーン", "scope": "攻撃進行の段階モデル", "point": "偵察〜目的実行を直線的段階で示し、各段階での遮断を狙う。ATT&CKと相補的に併用"},
+      {"reg": "NIST SP800-61", "scope": "インシデント対応ライフサイクル", "point": "準備・検知分析・封じ込め/根絶/復旧・事後対応の枠組みを規定"},
+      {"reg": "RFC 3227 / NIST SP800-86", "scope": "証拠保全・フォレンジック", "point": "揮発性の高い情報から順に保全する原則と、活性状態での証拠採取手順を規定"},
+      {"reg": "3-2-1ルール", "scope": "バックアップ運用", "point": "3世代・2媒体・1拠点分離。イミュータブル/エアギャップと組み合わせランサム対策とする"}
+    ],
+    "map_nodes": ["攻撃手法の体系(ATT&CK/キルチェーン)", "マルウェアと侵入・横展開手口", "検知(EDR/XDR/MDR・振る舞い検知)", "インシデント対応と証拠保全(フォレンジック)", "再発防止(バックアップ・MFA)"],
+    "map_summary": "攻撃者のTTPをATT&CKとキルチェーンで俯瞰し、ランサムやPass the Hash等の手口、EDR/XDR/MDRによる検知、フォレンジックの揮発性順序に基づく証拠保全、そしてMFAとイミュータブルバックアップによる再発防止までを一連の流れとして理解する分野である。",
+    "exam_tips": ["キルチェーンは『線(直線的段階)』、ATT&CKは『面(順序前提なしのマトリクス)』で対比する。", "Tactics=目的(What)、Techniques=手段(How)、Procedures=具体実装の3階層と識別子(TA/T番号)を区別。", "証拠保全はOrder of Volatilityでメモリ等の揮発性情報を最優先し、活性(ライブ)状態で採取する。", "検知カバレッジ可視化はATT&CK Navigator、EDR/XDR/MDRとSIEM/SOARの役割を混同しない。"],
+    "pitfalls": ["EDRとXDRの説明を逆に取り違える(XDRがエンドポイント外へ拡張する側)。", "Pass the Hashのハッシュ『取得(Credential Access)』と『再利用による横展開(Lateral Movement)』を混同する。", "二重脅迫を単なる『ランサムウェア』と答えてしまい、データ窃取・暴露の要素を落とす。"],
+    "concept_diagram": {
+      "title": "攻撃〜検知〜対応の全体像",
+      "layers": [
+        [{"id": "atk", "label": "攻撃手法体系(ATT&CK/キルチェーン)", "role": "土台"}],
+        [{"id": "intrusion", "label": "侵入・横展開", "role": "手口", "danger": true}, {"id": "malware", "label": "マルウェア(ランサム/C2)", "role": "手口", "danger": true}],
+        [{"id": "detect", "label": "検知(EDR/XDR/MDR)", "role": "防御"}, {"id": "forensic", "label": "証拠保全(揮発性順序)", "role": "対応"}],
+        [{"id": "recover", "label": "再発防止(MFA/イミュータブルBK)", "role": "改善"}]
+      ],
+      "edges": [
+        {"from": "atk", "to": "intrusion", "label": "手法を整理", "danger": false},
+        {"from": "atk", "to": "malware", "label": "手法を整理", "danger": false},
+        {"from": "intrusion", "to": "detect", "label": "検知対象", "danger": true},
+        {"from": "malware", "to": "forensic", "label": "調査対象", "danger": true},
+        {"from": "detect", "to": "recover", "label": "教訓を反映", "danger": false},
+        {"from": "forensic", "to": "recover", "label": "教訓を反映", "danger": false}
+      ],
+      "caption": "攻撃手法体系を土台に、侵入・マルウェアを検知とフォレンジックで捉え、再発防止へつなぐハブ&スポーク構造。"
+    }
+  },
+  "questions": [
+    {
+      "id": 501, "no": 1, "tag": "ATT&CKのTTP階層",
+      "q_jp": "MITRE ATT&CK(Enterprise)における Tactics、Techniques、Procedures(TTP)の関係の説明として、適切なものはどれか。",
+      "choices_jp": [
+        "Procedures は攻撃者の最終目的を表す最上位の分類であり、その下位に Tactics と Techniques が位置づけられる。",
+        "Tactics は攻撃者が達成しようとする目的(What)を表し、Techniques はその目的を達成する手段(How)を表す。個々の攻撃者による具体的な実装が Procedures である。",
+        "Techniques は個別の攻撃で観測された IP アドレスやファイルハッシュなどの侵害指標(IOC)そのものを指す。",
+        "Tactics は T 番号、Techniques は TA 番号で識別され、両者は 1 対 1 に対応する。"
+      ],
+      "q_en": "Which of the following correctly describes the relationship among Tactics, Techniques, and Procedures (TTP) in MITRE ATT&CK (Enterprise)?",
+      "choices_en": [
+        "Procedures is the top-level category representing the attacker's ultimate goal, with Tactics and Techniques positioned beneath it.",
+        "Tactics represent the goal (What) an adversary tries to achieve, Techniques represent the means (How) to achieve it, and Procedures are the concrete implementation by a specific adversary.",
+        "Techniques refer to indicators of compromise (IOCs) such as IP addresses or file hashes observed in individual attacks.",
+        "Tactics are identified by T-numbers and Techniques by TA-numbers, and the two correspond one-to-one."
+      ],
+      "intro_jp": "【導入】ATT&CKのTTP3階層(目的・手段・実装)と識別子の割当てを正確に区別できるかを問う基本問題。",
+      "related_regs": ["MITRE ATT&CK Enterprise", "NIST SP800-53"],
+      "answer_letters": ["イ"],
+      "answer_jp": "Tactics は攻撃者が達成しようとする目的(What)を表し、Techniques はその目的を達成する手段(How)を表す。個々の攻撃者による具体的な実装が Procedures である。",
+      "explain_jp": "ATT&CKの核心は、Tactics=目的(What)、Techniques=手段(How)、Procedures=特定の攻撃者による具体的な実装、という3階層である(イが正解)。IOCはProceduresよりさらに個別・低抽象度の指標であり、汎用的な手法分類であるTechniquesとは異なるため、ウは誤り。識別子はTacticsがTA番号、TechniquesがT番号(サブテクニックはT####.###)で、エは番号の割当てが逆であり、かつ1つのTechniqueは複数のTacticsに属し得るため『1対1対応』も誤り。アはProceduresを最上位とする点で階層関係が逆転しており誤り。",
+      "explain_en": "The core of ATT&CK is the three tiers: Tactics = goal (What), Techniques = means (How), and Procedures = a specific adversary's concrete implementation, so (イ) is correct. IOCs are lower-level than Techniques, Tactics use TA-numbers while Techniques use T-numbers (choice エ reverses them and is not one-to-one), and choice ア inverts the hierarchy.",
+      "sky": ["ATT&CKは攻撃を3階層で整理する", "識別子にTA番号とT番号がある", "IOCという個別指標が別に存在する", "1つの技術が複数の目的に使われうる"],
+      "rain": ["目的(What)=Tactics、手段(How)=Techniques", "具体実装がProcedures", "IOCはTechniquesとは別の低抽象度指標"],
+      "umbrella": ["What/How/実装の対応で選択肢を切り分ける", "TA=Tactics、T=Techniquesと識別子を固定", "IOCとTechniquesを混同しない"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "Proceduresを最上位とする階層は誤り。最終目的に近いのはTacticsで、Proceduresは具体的実装。"},
+        {"letter": "イ", "correct": true, "reason": "Tactics=目的、Techniques=手段、Procedures=具体実装という3階層の定義に合致。正解。"},
+        {"letter": "ウ", "correct": false, "reason": "IOC(IP・ハッシュ等)はTechniquesではなく、より個別・低抽象度の侵害指標。"},
+        {"letter": "エ", "correct": false, "reason": "番号割当てが逆(Tactics=TA、Techniques=T)で、1対1対応でもない。"}
+      ],
+      "hint_jp": "💡Tactics=なぜ(What)、Techniques=どうやって(How)、Procedures=だれが具体的に。",
+      "bank_notes": [
+        "① 自社の検知ルールをATT&CKのTechnique(T番号)にマッピングし、カバレッジを台帳管理する。",
+        "② 脅威インテリジェンスはTTPで整理すると、単発のIOCより長期的に有効な検知が組める。",
+        "③ IOCは陳腐化が早い(IPやハッシュは変わる)ため、Techniqueレベルの検知を優先設計する。",
+        "④ SOCのアラート分類をTacticsで束ねると、攻撃段階(初期侵入〜目的実行)が可視化できる。",
+        "⑤ 脅威ハンティングの仮説はTechniqueを起点に立て、ログソースの過不足を点検する。",
+        "⑥ ベンダ製品の『ATT&CK対応』表記は、どのTechniqueをどの精度で検知するかまで確認する。",
+        "⑦ サブテクニック(T####.###)まで落として管理すると検知の粒度が上がる。"
+      ],
+      "diagram": {
+        "title": "ATT&CKのTTP階層",
+        "layers": [
+          [{"id": "ta", "label": "Tactics(目的/What・TA番号)", "role": "上位"}],
+          [{"id": "te", "label": "Techniques(手段/How・T番号)", "role": "中位"}],
+          [{"id": "pr", "label": "Procedures(具体実装)", "role": "下位", "danger": true}, {"id": "ioc", "label": "IOC(IP/ハッシュ)", "role": "最下位指標", "danger": true}]
+        ],
+        "edges": [
+          {"from": "ta", "to": "te", "label": "目的→手段", "danger": false},
+          {"from": "te", "to": "pr", "label": "手段→実装", "danger": false},
+          {"from": "pr", "to": "ioc", "label": "実装が生む痕跡", "danger": true}
+        ],
+        "caption": "上からTactics→Techniques→Proceduresと抽象度が下がり、IOCはさらに個別の痕跡。"
+      },
+      "freq": 3, "importance": "★★★",
+      "trap": "エの『TacticsはT番号』は番号が逆。また1対1対応も誤り(1技術が複数戦術に属す)。",
+      "mnemonic": "TA=狙い(Tactics)、T=技(Techniques)。",
+      "related": "問2(キルチェーンとの対比)、午後問2(検知カバレッジ可視化=Navigator)。",
+      "case": "IOCベースの検知はIP変更で即失効したが、TechniqueベースのふるまいルールがPass the Hashを継続検知した。",
+      "reg_detail": [
+        {"reg": "MITRE ATT&CK Enterprise", "point": "Tactics(TA)/Techniques(T)/Sub-techniques(T.###)の識別子体系を定義。"},
+        {"reg": "NIST SP800-53", "point": "検知(DE)統制の設計根拠として攻撃手法の体系的整理を後押し。"}
+      ]
+    },
+    {
+      "id": 502, "no": 2, "tag": "キルチェーンとATT&CKの対比",
+      "q_jp": "サイバーキルチェーン(Lockheed Martin)と MITRE ATT&CK の対比として、最も適切なものはどれか。",
+      "choices_jp": [
+        "いずれも攻撃を時系列の直線的な段階として順序づけたモデルであり、両者は同一の 7 段階から成る。",
+        "ATT&CK は経営層への全体像説明に、キルチェーンは SIEM/EDR の検知ルール設計にそれぞれ特化している。",
+        "キルチェーンは偵察から目的実行までを直線的な段階で示すモデルであり、ATT&CK は攻撃手法を網羅的に整理したマトリクス型のナレッジベースである。",
+        "ATT&CK は攻撃側、キルチェーンは防御側の対策をマッピングしたフレームワークであり、両者は排他的に使い分ける。"
+      ],
+      "q_en": "Which is the most appropriate comparison between the Lockheed Martin Cyber Kill Chain and MITRE ATT&CK?",
+      "choices_en": [
+        "Both are models that order attacks as linear time-sequenced stages and consist of the same seven stages.",
+        "ATT&CK specializes in explaining the big picture to executives, while the Kill Chain specializes in designing SIEM/EDR detection rules.",
+        "The Kill Chain is a model showing linear stages from reconnaissance to actions on objectives, while ATT&CK is a matrix-type knowledge base comprehensively organizing attack techniques.",
+        "ATT&CK maps offensive measures and the Kill Chain maps defensive measures, and the two are used mutually exclusively."
+      ],
+      "intro_jp": "【導入】『線(段階モデル)』と『面(マトリクス)』という両フレームワークの本質的な違いを問う。",
+      "related_regs": ["Lockheed Martin Cyber Kill Chain", "MITRE ATT&CK"],
+      "answer_letters": ["ウ"],
+      "answer_jp": "キルチェーンは偵察から目的実行までを直線的な段階で示すモデルであり、ATT&CK は攻撃手法を網羅的に整理したマトリクス型のナレッジベースである。",
+      "explain_jp": "キルチェーンは『線』(偵察〜目的実行の直線的7段階モデル)、ATT&CKは『面』(順序を前提としない網羅的な手法辞書/マトリクス)という整理が定番であり、ウが正解。アは『ATT&CKも同一7段階の直線モデル』とする点が誤り。イは役割が逆で、検知ルール設計や脅威ハンティングにこそATT&CKを用いる。エの『防御側対策のマッピング』に相当するのはD3FENDであり、両者を排他的に使い分けるという整理も誤り(実務では相補的に併用する)。",
+      "explain_en": "The standard framing is that the Kill Chain is a 'line' (a linear 7-stage model from reconnaissance to actions on objectives) while ATT&CK is a 'plane' (a comprehensive, order-agnostic matrix of techniques), so (ウ) is correct. ATT&CK—not the Kill Chain—suits detection design; defensive mapping corresponds to D3FEND; and the two are used complementarily.",
+      "sky": ["両者は攻撃を捉えるフレームワーク", "キルチェーンには7段階がある", "ATT&CKはマトリクス形式", "D3FENDという防御側フレームも存在"],
+      "rain": ["キルチェーン=直線的段階(線)", "ATT&CK=網羅的マトリクス(面)", "両者は相補的に併用する"],
+      "umbrella": ["『線か面か』で選択肢を切る", "検知設計・ハンティングはATT&CK", "防御対策のマッピングはD3FEND"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "ATT&CKは順序前提のない網羅マトリクスであり、同一7段階の直線モデルとするのは誤り。"},
+        {"letter": "イ", "correct": false, "reason": "役割が逆。検知ルール設計・脅威ハンティングにこそATT&CKを用いる。"},
+        {"letter": "ウ", "correct": true, "reason": "キルチェーン=直線的段階、ATT&CK=網羅的マトリクスという定番の対比。正解。"},
+        {"letter": "エ", "correct": false, "reason": "防御側対策のマッピングはD3FENDに相当。排他的使い分けも誤りで、実務は相補的に併用。"}
+      ],
+      "hint_jp": "💡キルチェーンは『線』、ATT&CKは『面』。防御側の対はD3FEND。",
+      "bank_notes": [
+        "① キルチェーンで攻撃段階を俯瞰し、ATT&CKで各段階の具体的Techniqueに落として検知を設計する。",
+        "② 経営報告は段階モデルで全体像を示し、SOC運用はATT&CKで詳細を管理すると噛み合う。",
+        "③ ATT&CK NavigatorでTechniqueの検知カバレッジとギャップを色分け可視化する。",
+        "④ D3FENDを併用すると、攻撃Technique(ATT&CK)に対する防御対策の対応関係を整理できる。",
+        "⑤ 単一フレームに固執せず、線(段階)と面(手法)を目的別に使い分ける。",
+        "⑥ 脅威レポートのマッピングはATT&CKのTechnique IDで統一すると横断比較が容易。",
+        "⑦ 検知の空白は段階(キルチェーン)と手法(ATT&CK)の両面から棚卸しする。"
+      ],
+      "diagram": {
+        "title": "線のキルチェーン vs 面のATT&CK",
+        "layers": [
+          [{"id": "kc", "label": "キルチェーン(直線的7段階=線)", "role": "段階モデル"}],
+          [{"id": "attack", "label": "攻撃事象", "role": "対象", "danger": true}],
+          [{"id": "attck", "label": "ATT&CK(網羅マトリクス=面)", "role": "手法辞書"}, {"id": "d3f", "label": "D3FEND(防御側)", "role": "対策マップ"}]
+        ],
+        "edges": [
+          {"from": "kc", "to": "attack", "label": "段階で俯瞰", "danger": false},
+          {"from": "attck", "to": "attack", "label": "手法で分解", "danger": false},
+          {"from": "attck", "to": "d3f", "label": "攻撃↔防御を対応", "danger": false}
+        ],
+        "caption": "同じ攻撃事象を、キルチェーンは段階の線で、ATT&CKは手法の面で捉える。防御の対はD3FEND。"
+      },
+      "freq": 2, "importance": "★★",
+      "trap": "エの『防御側マッピング』はD3FENDの説明。ATT&CKを防御フレームと誤認させる罠。",
+      "mnemonic": "Chainは鎖(線)、ATT&CKは表(面)。",
+      "related": "問1(ATT&CKのTTP)、午後問2(Navigatorで空白可視化)。",
+      "case": "経営層説明はキルチェーンの図で行い、SOCの検知台帳はATT&CK Navigatorで管理して両立させた。",
+      "reg_detail": [
+        {"reg": "Lockheed Martin Cyber Kill Chain", "point": "偵察・武器化・配送・攻撃・インストール・C2・目的実行の7段階を定義。"},
+        {"reg": "MITRE ATT&CK", "point": "順序を前提としない網羅的な手法マトリクス。D3FENDが防御側を担う。"}
+      ]
+    },
+    {
+      "id": 503, "no": 3, "tag": "ランサム対策バックアップ",
+      "q_jp": "ランサムウェアによる被害拡大を防ぐためのバックアップ運用として、最も効果が高いものはどれか。",
+      "choices_jp": [
+        "バックアップデータを本番サーバと同一のファイルサーバ上の別フォルダに毎時保存する。",
+        "バックアップ後に書き換え・削除ができないイミュータブル(改変不可)ストレージへ保存し、あわせてオフラインの複製を保持する。",
+        "バックアップ管理者と本番システム管理者に同一の特権アカウントを共有させ、復旧を迅速化する。",
+        "ネットワーク上で常時オンラインの単一の共有ストレージに世代を集約し、容量効率を最優先する。"
+      ],
+      "q_en": "Which backup practice is most effective in preventing the spread of ransomware damage?",
+      "choices_en": [
+        "Saving backup data hourly to a separate folder on the same file server as the production server.",
+        "Storing backups on immutable storage that cannot be altered or deleted after backup, and also keeping an offline copy.",
+        "Having the backup administrator and production system administrator share the same privileged account to speed recovery.",
+        "Consolidating generations on a single always-online shared storage on the network, prioritizing capacity efficiency."
+      ],
+      "intro_jp": "【導入】ランサムがバックアップ自体を狙う前提で、イミュータブル化とオフライン保管の要否を問う。",
+      "related_regs": ["3-2-1ルール", "NIST SP800-61", "IPA 情報セキュリティ10大脅威"],
+      "answer_letters": ["イ"],
+      "answer_jp": "バックアップ後に書き換え・削除ができないイミュータブル(改変不可)ストレージへ保存し、あわせてオフラインの複製を保持する。",
+      "explain_jp": "近年のランサムウェアはバックアップの探索・破壊を定石とするため、書き換え・削除不可のイミュータブルバックアップ、3-2-1ルール(3世代・2媒体・1拠点分離)、オフライン/エアギャップ保管が有効であり、イが正解。ア・エはバックアップが常時オンラインで本番と同一系統にあるため、暗号化被害が同時に波及する。ウは特権アカウント共有により、侵害時にバックアップも一括で破壊・暗号化されるリスクを高めるため誤り。",
+      "explain_en": "Modern ransomware routinely hunts and destroys backups, so immutable backups, the 3-2-1 rule, and offline/air-gapped copies are effective, making (イ) correct. Always-online backups on the same system (ア, エ) are encrypted simultaneously, and sharing a privileged account (ウ) lets an intruder destroy the backups too.",
+      "sky": ["ランサムはバックアップも探索・破壊する", "本番と同一系統のバックアップは同時被害する", "イミュータブル/オフラインという選択肢がある"],
+      "rain": ["改変不可+オフラインなら暗号化が及ばない", "常時オンライン・同一系統は同時波及", "特権共有は被害を拡大する"],
+      "umbrella": ["イミュータブル(WORM)化する", "オフライン/エアギャップ複製を保持", "3-2-1で世代・媒体・拠点を分散", "特権を分離する"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "本番と同一ファイルサーバ上ではランサムが同時に暗号化するため無効。"},
+        {"letter": "イ", "correct": true, "reason": "改変不可ストレージ+オフライン複製でバックアップへの波及を遮断。正解。"},
+        {"letter": "ウ", "correct": false, "reason": "特権アカウント共有は侵害時にバックアップの一括破壊リスクを高める。"},
+        {"letter": "エ", "correct": false, "reason": "常時オンラインの単一集約は暗号化被害が同時波及し、容量優先は本末転倒。"}
+      ],
+      "hint_jp": "💡守れるバックアップは『消せない(イミュータブル)+つながっていない(オフライン)』。",
+      "bank_notes": [
+        "① バックアップはイミュータブル/WORMで保持期間ロックをかけ、管理者でも消せない設定にする。",
+        "② 3-2-1(3世代・2媒体・1拠点分離)を最低基準とし、うち1つはオフライン/エアギャップにする。",
+        "③ バックアップ管理系のアカウント・ネットワークを本番から分離し、特権を共有しない。",
+        "④ 復旧演習(リストアテスト)を定期実施し、暗号化前の正常データへ確実に戻せるか検証する。",
+        "⑤ バックアップの完全性(ハッシュ)監視で、暗号化・改ざんの兆候を早期検知する。",
+        "⑥ 二重脅迫を想定し、バックアップ復旧だけでなく窃取データ暴露への対応計画も併せて用意する。",
+        "⑦ MFAと最小権限をバックアップ基盤にも適用し、横展開での到達を防ぐ。"
+      ],
+      "diagram": {
+        "title": "ランサムに耐えるバックアップ構成",
+        "layers": [
+          [{"id": "prod", "label": "本番システム", "role": "運用", "danger": true}],
+          [{"id": "online", "label": "同一系オンラインBK", "role": "危険(同時波及)", "danger": true}],
+          [{"id": "immut", "label": "イミュータブルBK(WORM)", "role": "安全"}, {"id": "offline", "label": "オフライン/エアギャップ複製", "role": "安全"}]
+        ],
+        "edges": [
+          {"from": "prod", "to": "online", "label": "暗号化が波及", "danger": true},
+          {"from": "prod", "to": "immut", "label": "改変不可で遮断", "danger": false},
+          {"from": "immut", "to": "offline", "label": "3-2-1で分散", "danger": false}
+        ],
+        "caption": "本番と同一系のオンラインBKは同時被害。改変不可+オフラインの複製が復旧を担保する。"
+      },
+      "freq": 3, "importance": "★★★",
+      "trap": "『毎時保存』『容量効率最優先』といった頻度・効率の言葉に釣られない。要点は改変不可+隔離。",
+      "mnemonic": "3-2-1+『消せない・つながらない』。",
+      "related": "午後問1設問3(本番同一NASのバックアップが同時暗号化された事例)。",
+      "case": "本番と同一NASのバックアップも暗号化され復旧不能。イミュータブル+オフライン化で再発防止した。",
+      "reg_detail": [
+        {"reg": "3-2-1ルール", "point": "3世代・2媒体・1拠点分離を基本とし、1つはオフライン保管とする。"},
+        {"reg": "NIST SP800-61", "point": "復旧フェーズで信頼できるバックアップからの復元を前提とする。"}
+      ]
+    },
+    {
+      "id": 504, "no": 4, "tag": "EDR/XDR/MDRの区別",
+      "q_jp": "EDR、XDR、MDR の説明の組合せとして、適切なものはどれか。",
+      "choices_jp": [
+        "EDR はネットワーク・クラウド・メール・ID まで横断的に相関分析する仕組みであり、XDR はエンドポイント単体に限定した監視である。",
+        "XDR は EDR の監視範囲をエンドポイント外へ拡張し横断的に相関分析する仕組みであり、MDR はそれらの監視・運用を外部が代行するサービスである。",
+        "MDR はログを収集・相関する製品(SIEM)そのものを指し、EDR/XDR とは無関係である。",
+        "EDR は対応を自動化するプレイブック実行基盤(SOAR)の別称であり、XDR はその上位互換である。"
+      ],
+      "q_en": "Which combination correctly describes EDR, XDR, and MDR?",
+      "choices_en": [
+        "EDR correlates across network, cloud, email, and identity, while XDR is monitoring limited to the endpoint alone.",
+        "XDR extends EDR's monitoring beyond endpoints for cross-domain correlation, and MDR is a service where an external party performs that monitoring and operation.",
+        "MDR is the log-collecting/correlating product (SIEM) itself and is unrelated to EDR/XDR.",
+        "EDR is another name for the response-automation playbook platform (SOAR), and XDR is its superior version."
+      ],
+      "intro_jp": "【導入】EDR/XDR/MDRの守備範囲と、SIEM・SOARとの役割の違いを切り分けられるかを問う。",
+      "related_regs": ["NIST SP800-137", "MITRE ATT&CK"],
+      "answer_letters": ["イ"],
+      "answer_jp": "XDR は EDR の監視範囲をエンドポイント外へ拡張し横断的に相関分析する仕組みであり、MDR はそれらの監視・運用を外部が代行するサービスである。",
+      "explain_jp": "EDR=エンドポイントの監視・検知・対応、XDR=EDRをエンドポイント外(NW/クラウド/メール/ID等)へ拡張し横断的に相関、MDR=これらの監視・運用を専門ベンダが代行するサービス、が正しい対応であり、イが正解。アはEDRとXDRの説明が逆。ウの『ログ収集・相関(SIEM)』、エの『対応自動化(SOAR)』はいずれも別概念であり、EDR/XDRとは異なるため誤り。",
+      "explain_en": "EDR monitors/detects/responds on endpoints, XDR extends this beyond endpoints (network, cloud, email, identity) for cross-domain correlation, and MDR is a managed service performing that operation, so (イ) is correct. Choice ア reverses EDR and XDR; SIEM (ウ) and SOAR (エ) are separate concepts.",
+      "sky": ["EDR/XDR/MDRは似た略語で守備範囲が異なる", "SIEMはログ収集・相関の製品", "SOARは対応自動化の基盤"],
+      "rain": ["XDRはEDRの範囲をエンドポイント外へ拡張", "MDRは監視運用の外部代行サービス", "SIEM/SOARはEDR/XDRとは別物"],
+      "umbrella": ["Endpoint(EDR)→eXtended(XDR)→Managed(MDR)で覚える", "SIEM=ログ相関、SOAR=自動対応と区別", "製品(EDR/XDR)とサービス(MDR)を分ける"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "EDRとXDRの説明が逆。横断相関はXDR、エンドポイント中心がEDR。"},
+        {"letter": "イ", "correct": true, "reason": "XDR=EDRの範囲拡張・横断相関、MDR=監視運用の外部代行。正しい組合せで正解。"},
+        {"letter": "ウ", "correct": false, "reason": "MDRはサービスであり、ログ収集・相関製品のSIEMそのものではない。"},
+        {"letter": "エ", "correct": false, "reason": "EDRはSOARの別称ではない。対応自動化(SOAR)は別概念。"}
+      ],
+      "hint_jp": "💡E=Endpoint、X=eXtended(拡張)、M=Managed(代行)。SIEM/SOARは別物。",
+      "bank_notes": [
+        "① EDRはまずエンドポイントの可視化・封じ込め(隔離)を担い、初動対応の要になる。",
+        "② XDR導入時はNW/クラウド/メール/IDのログソースを統合し、横断相関のシナリオを整える。",
+        "③ MDR委託時もインシデント判断・封じ込め承認など自社の意思決定範囲を契約で明確化する。",
+        "④ SIEMは相関基盤、SOARは対応自動化と役割を分け、EDR/XDRのアラートを連携させる。",
+        "⑤ 24時間監視が自社で困難な場合はMDRで補完しつつ、エスカレーションフローを定める。",
+        "⑥ 製品を増やすより、検知カバレッジ(ATT&CK)と運用体制の穴を優先的に埋める。",
+        "⑦ EDRの隔離機能は、揮発性情報の保全と両立するようライブ保全手順と併せて運用する。"
+      ],
+      "diagram": {
+        "title": "EDR/XDR/MDRと周辺の関係",
+        "layers": [
+          [{"id": "edr", "label": "EDR(エンドポイント監視・対応)", "role": "基点"}],
+          [{"id": "xdr", "label": "XDR(NW/クラウド/メール/IDへ拡張・横断相関)", "role": "拡張"}],
+          [{"id": "mdr", "label": "MDR(監視運用の外部代行サービス)", "role": "運用形態"}, {"id": "siem", "label": "SIEM/SOAR(相関/自動対応=別概念)", "role": "隣接", "danger": true}]
+        ],
+        "edges": [
+          {"from": "edr", "to": "xdr", "label": "範囲を拡張", "danger": false},
+          {"from": "xdr", "to": "mdr", "label": "運用を委託", "danger": false},
+          {"from": "xdr", "to": "siem", "label": "混同注意", "danger": true}
+        ],
+        "caption": "EDRを起点にXDRで範囲拡張、MDRで運用代行。SIEM/SOARは別概念として区別する。"
+      },
+      "freq": 2, "importance": "★★",
+      "trap": "アのEDR/XDR逆転、ウ・エのSIEM/SOARとの取り違えに注意。",
+      "mnemonic": "E→X→Mで範囲と運用が広がる。",
+      "related": "午後問2(MDRで24時間監視、EDRのプロセスツリー検知)。",
+      "case": "MDR委託先のEDRアラートで経理端末のC2通信を検知し、隔離とライブ保全に移行できた。",
+      "reg_detail": [
+        {"reg": "NIST SP800-137", "point": "継続的モニタリング(ISCM)の考え方が検知・運用体制の基盤。"},
+        {"reg": "MITRE ATT&CK", "point": "EDR/XDRの検知カバレッジをTechnique単位で評価する枠組み。"}
+      ]
+    },
+    {
+      "id": 505, "no": 5, "tag": "証拠保全の揮発性順序",
+      "q_jp": "インシデント対応におけるディジタルフォレンジックスで、揮発性の高い情報から順に証拠保全を行う原則(Order of Volatility)に従うとき、最も優先して取得すべきものはどれか。",
+      "choices_jp": [
+        "ハードディスク上のログファイル",
+        "CPU レジスタ・キャッシュおよびメモリ上の情報",
+        "定期バックアップ用の磁気テープ",
+        "監視カメラの録画データ"
+      ],
+      "q_en": "Following the Order of Volatility principle in digital forensics during incident response, which should be acquired with the highest priority?",
+      "choices_en": [
+        "Log files on the hard disk",
+        "Information in CPU registers, cache, and memory",
+        "Magnetic tapes for periodic backups",
+        "Surveillance camera footage"
+      ],
+      "intro_jp": "【導入】揮発性の高い情報ほど先に保全するという証拠保全の基本原則を問う。",
+      "related_regs": ["RFC 3227", "NIST SP800-86"],
+      "answer_letters": ["イ"],
+      "answer_jp": "CPU レジスタ・キャッシュおよびメモリ上の情報",
+      "explain_jp": "揮発性の高い順に保全するのが原則で、CPUレジスタ・キャッシュ・メモリ上の情報(実行中プロセス、ネットワーク接続状態、復号された暗号鍵などを含む)が最優先であり、イが正解。以降、ディスク上のログ、バックアップ媒体、物理記録媒体の順に揮発性が下がる。電源断でメモリ情報は失われるため、活性(ライブ)状態での採取が重要となる。ア・ウ・エはいずれもメモリより揮発性が低く、優先度は下がる。",
+      "explain_en": "By the Order of Volatility, the most volatile data—CPU registers, cache, and memory contents (running processes, network connections, decrypted keys)—must be captured first, so (イ) is correct. Disk logs, backup media, and physical records are progressively less volatile. Memory is lost on power-off, so live acquisition is essential.",
+      "sky": ["情報には揮発性の高低がある", "メモリは電源断で消える", "ディスクやテープ・映像は残りやすい"],
+      "rain": ["最も揮発性が高いのはレジスタ/キャッシュ/メモリ", "揮発性の高い順に取得するのが原則", "電源を切る前のライブ採取が鍵"],
+      "umbrella": ["メモリ→ディスク→バックアップ→物理媒体の順で保全", "電源を切らず活性状態で採取", "採取手順と完全性(ハッシュ)を記録"],
+      "options": [
+        {"letter": "ア", "correct": false, "reason": "ディスク上のログはメモリより揮発性が低く、優先度は次位。"},
+        {"letter": "イ", "correct": true, "reason": "CPUレジスタ・キャッシュ・メモリが最も揮発性が高く最優先。正解。"},
+        {"letter": "ウ", "correct": false, "reason": "磁気テープは揮発しにくく、優先度は低い。"},
+        {"letter": "エ", "correct": false, "reason": "監視カメラ映像は物理的に保存され揮発性が低い。"}
+      ],
+      "hint_jp": "💡消えやすいものから先に。まずメモリ(電源を切る前)。",
+      "bank_notes": [
+        "① 端末隔離時は電源を落とさず、メモリダンプ等の揮発性情報をライブで先に採取する。",
+        "② 採取物はハッシュ値を記録し、証拠の完全性と一貫性(Chain of Custody)を担保する。",
+        "③ メモリには復号鍵・稼働プロセス・C2接続状態が残るため、感染調査で価値が高い。",
+        "④ EDRの隔離(ネットワーク遮断)と電源維持を両立させる手順を平時に定めておく。",
+        "⑤ 取得順序(揮発性の高→低)を手順書化し、担当者ごとの判断ブレを防ぐ。",
+        "⑥ ディスクは後段でビットイメージ取得、原本は書込防止(ライトブロッカ)で保全する。",
+        "⑦ 記録媒体・監視映像など低揮発性の証拠は保全期限を管理し散逸を防ぐ。"
+      ],
+      "diagram": {
+        "title": "揮発性の順序(Order of Volatility)",
+        "layers": [
+          [{"id": "mem", "label": "レジスタ/キャッシュ/メモリ", "role": "最優先", "danger": true}],
+          [{"id": "disk", "label": "ディスク上のログ", "role": "次位"}],
+          [{"id": "tape", "label": "バックアップ媒体(テープ)", "role": "低"}],
+          [{"id": "cam", "label": "監視カメラ映像等の物理記録", "role": "最低"}]
+        ],
+        "edges": [
+          {"from": "mem", "to": "disk", "label": "揮発性が下がる", "danger": false},
+          {"from": "disk", "to": "tape", "label": "揮発性が下がる", "danger": false},
+          {"from": "tape", "to": "cam", "label": "揮発性が下がる", "danger": false}
+        ],
+        "caption": "上ほど揮発性が高く先に保全。電源断で失われるメモリが最優先。"
+      },
+      "freq": 3, "importance": "★★★",
+      "trap": "『ログ』を最優先と誤答しやすいが、ディスク上のログはメモリより揮発性が低い。",
+      "mnemonic": "消えやすい順=レジスタ→メモリ→ディスク→テープ→物理。",
+      "related": "午後問2設問2(隔離後に活性状態で揮発性情報を先に保全する理由)。",
+      "case": "電源を落とさずメモリを先に採取し、復号鍵とC2接続状態を証拠として確保できた。",
+      "reg_detail": [
+        {"reg": "RFC 3227", "point": "証拠収集・保管のガイドラインで揮発性の順序を明示。"},
+        {"reg": "NIST SP800-86", "point": "フォレンジック手順とライブ採取・完全性保持を規定。"}
+      ]
+    },
+    {
+      "id": 506, "no": 6, "tag": "Pass the Hashによる横展開",
+      "q_jp": "攻撃者が窃取済みの認証情報のハッシュ値を用い、平文パスワードを復元することなく他システムへ認証を通す横展開(Lateral Movement)の手法はどれか。",
+      "choices_jp": [
+        "Pass the Hash",
+        "DNS リフレクション攻撃",
+        "クリプトジャッキング",
+        "ディレクトリトラバーサル"
+      ],
+      "q_en": "Which technique lets an attacker authenticate to other systems for lateral movement using a stolen credential hash without recovering the plaintext password?",
+      "choices_en": [
+        "Pass the Hash",
+        "DNS reflection attack",
+        "Cryptojacking",
+        "Directory traversal"
+      ],
+      "intro_jp": "【導入】ハッシュを平文復元せず再利用して横展開する代表手法を、他の攻撃と区別できるかを問う。",
+      "related_regs": ["MITRE ATT&CK T1550.002"],
+      "answer_letters": ["ア"],
+      "answer_jp": "Pass the Hash",
+      "explain_jp": "Pass the HashはNTLMハッシュ等をそのまま認証に再利用し、平文復元なしで横展開する手法であり、アが正解。ATT&CKではUse Alternate Authentication Material(T1550.002)に対応し、戦術としてはLateral MovementおよびDefense Evasionに位置づけられる(ハッシュを取得するダンプ行為自体はCredential Access、取得済みハッシュの再利用がLateral Movement/Defense Evasionであり、両者を混同しない)。イはDNSを悪用したDRDoS(リフレクション/増幅)攻撃、ウは資源を無断でマイニングに悪用する攻撃、エはパストラバーサルによる想定外ファイルへの不正アクセスで、いずれも横展開の手法ではない。",
+      "explain_en": "Pass the Hash reuses an NTLM hash directly for authentication and moves laterally without recovering the plaintext, so (ア) is correct. In ATT&CK it maps to T1550.002 (Lateral Movement/Defense Evasion); dumping the hash is Credential Access. DNS reflection is DRDoS, cryptojacking abuses resources for mining, and directory traversal accesses unintended files—none is a lateral movement technique.",
+      "sky": ["窃取したハッシュを平文化せず認証に使う", "横展開(Lateral Movement)が論点", "他選択肢は別種の攻撃"],
+      "rain": ["ハッシュ再利用=Pass the Hash", "ダンプはCredential Access、再利用がLateral Movement", "DNSリフレクション/クリプトジャッキング/トラバーサルは横展開でない"],
+      "umbrella": ["Pass the Hashを横展開手法として押さえる", "取得(Credential Access)と再利用(Lateral Movement)を区別", "MFA・LAPS・NTLM制限で対策"],
+      "options": [
+        {"letter": "ア", "correct": true, "reason": "ハッシュを平文復元せず再利用して横展開するPass the Hash。ATT&CK T1550.002。正解。"},
+        {"letter": "イ", "correct": false, "reason": "DNSリフレクションはDRDoS(反射・増幅)によるDoS攻撃で横展開ではない。"},
+        {"letter": "ウ", "correct": false, "reason": "クリプトジャッキングは資源を無断でマイニングに悪用する攻撃で横展開ではない。"},
+        {"letter": "エ", "correct": false, "reason": "ディレクトリトラバーサルは想定外ファイルへの不正アクセスで横展開ではない。"}
+      ],
+      "hint_jp": "💡ハッシュを『そのまま渡して(Pass)』認証を通す=Pass the Hash。",
+      "bank_notes": [
+        "① LSASS等からの認証情報ダンプ(Credential Access)を検知・抑止し、ハッシュ窃取の起点を断つ。",
+        "② ローカル管理者パスワードをLAPSで一意・自動更新し、ハッシュ使い回しによる横展開を封じる。",
+        "③ 特権アカウントのログオン範囲を制限(Tiering)し、管理端末を分離する。",
+        "④ NTLMの利用制限・Kerberos優先や、可能な範囲でのMFA適用で再利用を難しくする。",
+        "⑤ EDRで異常なリモート認証・横方向のRDP/SMB接続を振る舞い検知する。",
+        "⑥ ダンプ(取得)と再利用(横展開)は別戦術。検知ルールを段階ごとに用意する。",
+        "⑦ 侵害端末はネットワーク隔離し、他サーバへの到達経路(RDP等)を即時遮断する。"
+      ],
+      "diagram": {
+        "title": "Pass the Hashによる横展開の流れ",
+        "layers": [
+          [{"id": "dump", "label": "LSASSからハッシュ窃取", "role": "Credential Access", "danger": true}],
+          [{"id": "pth", "label": "Pass the Hash(ハッシュ再利用)", "role": "Lateral Movement/Defense Evasion", "danger": true}],
+          [{"id": "target", "label": "他サーバへ認証成功", "role": "横展開", "danger": true}, {"id": "defense", "label": "対策:LAPS/NTLM制限/隔離", "role": "防御"}]
+        ],
+        "edges": [
+          {"from": "dump", "to": "pth", "label": "取得→再利用", "danger": true},
+          {"from": "pth", "to": "target", "label": "平文復元なしで認証", "danger": true},
+          {"from": "defense", "to": "pth", "label": "再利用を封じる", "danger": false}
+        ],
+        "caption": "ハッシュ取得(Credential Access)と再利用(Lateral Movement)は別戦術。対策で再利用経路を遮断する。"
+      },
+      "freq": 2, "importance": "★★★",
+      "trap": "ハッシュの『取得(Credential Access)』とハッシュの『再利用による横展開(Lateral Movement)』を混同しない。",
+      "mnemonic": "ハッシュを『渡す(Pass)』だけで入れる=Pass the Hash。",
+      "related": "午後問1設問4(LSASSダンプ=Credential Access、RDP接続=Lateral Movement)。",
+      "case": "VPN侵入後にLSASSからハッシュを窃取し、Pass the HashとRDPで複数サーバへ横展開された事例。",
+      "reg_detail": [
+        {"reg": "MITRE ATT&CK T1550.002", "point": "Use Alternate Authentication Material。ハッシュ再利用による横展開・防御回避。"},
+        {"reg": "MITRE ATT&CK T1003", "point": "OS Credential Dumping。ハッシュ取得はCredential Accessに位置づけ。"}
+      ]
+    }
+  ]
+}

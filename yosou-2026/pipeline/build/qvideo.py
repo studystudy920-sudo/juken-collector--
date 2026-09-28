@@ -151,8 +151,8 @@ async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ids", nargs="*"); ap.add_argument("--sc", nargs="*"); ap.add_argument("--all", action="store_true")
     ap.add_argument("--out", default=os.path.join(ROOT, "output", "SC_1問1動画"))
-    ap.add_argument("--voice", default="ja-JP-NanamiNeural"); ap.add_argument("--rate", default="+0%")
-    ap.add_argument("--think", type=float, default=4.0); ap.add_argument("--jobs", type=int, default=6)
+    ap.add_argument("--voice", default="ja-JP-NanamiNeural"); ap.add_argument("--rate", default="-8%")
+    ap.add_argument("--think", type=float, default=6.0); ap.add_argument("--jobs", type=int, default=6)
     a = ap.parse_args()
     tts_ssl(); os.makedirs(CACHE, exist_ok=True)
     targets = []
@@ -174,7 +174,7 @@ async def main():
         mp3s = [os.path.join(tmp, f"n{k}.mp3") for k in range(4)]
         await asyncio.gather(*(tts(t, m, a.voice, a.rate, sem) for t, m in zip(texts, mp3s)))
         pngs = slide_pngs(deck_pdf(f, d), idx, tmp)
-        make_video(pngs, mp3s, [a.think, 0.8, 0.8, 1.0], out, tmp)
+        make_video(pngs, mp3s, [a.think, 1.3, 1.3, 1.5], out, tmp)
         shutil.rmtree(tmp, ignore_errors=True); done += 1
         print(f"[{done}/{len(targets)}] {out}", flush=True)
 
